@@ -26,6 +26,10 @@ class CastelloRevUI extends WebUI {
             lpfreq:   document.getElementById('p-lpfreq')
         };
 
+        if (/linux/i.test(window.navigator.platform)) {
+            this._fixLinuxTouchSliders();
+        }
+        
         this.dom.feedback.addEventListener('input', (ev) => {
             this.setParameterValue(0, parseFloat(ev.target.value));
         });
@@ -48,6 +52,23 @@ class CastelloRevUI extends WebUI {
                 this.dom.lpfreq.value = value;
                 break;
         }
+    }
+
+    _fixLinuxTouchSliders() {
+        document.querySelectorAll('input[type=range]').forEach((el) => {
+            el.addEventListener('touchmove', (ev) => {
+                const x = ev.touches[0].clientX;
+                const x0 = ev.target.getBoundingClientRect().x;
+                const x1 = x0 + ev.target.offsetWidth;
+                if ((x < x0) || (x > x1)) return;
+                const normVal = (x - x0) / ev.target.offsetWidth;
+                const min = parseFloat(ev.target.min);
+                const max = parseFloat(ev.target.max);
+                const val = min + normVal * (max - min);
+                ev.target.value = val;
+                ev.target.dispatchEvent(new CustomEvent('input'));
+            });
+        });
     }
 
 }
