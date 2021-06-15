@@ -92,7 +92,8 @@ TARGETS += vst
 # --------------------------------------------------------------
 # Up to here follow almost intact example DPF plugin Makefile
 # Now add dpf-webui's own magic
-BASE_FLAGS += -Isrc -I$(DPF_CUSTOM_PATH) -DBIN_BASENAME=$(NAME) -DDEBUG_PRINT_TRAFFIC
+BASE_FLAGS += -Isrc -I$(DPF_CUSTOM_PATH) -DBIN_BASENAME=$(NAME) \
+              -DNO_LIBSNDFILE -DSNDFILE=FILE -DSF_INFO=char -DDEBUG_PRINT_TRAFFIC
 
 # Platform-specific build flags
 ifeq ($(LINUX),true)
