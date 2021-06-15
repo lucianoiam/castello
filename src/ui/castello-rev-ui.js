@@ -19,7 +19,33 @@ class CastelloRevUI extends WebUI {
     constructor() {
         super();
 
+        this.dom = {
+            feedback: document.getElementById('p-feedback'),
+            lpfreq:   document.getElementById('p-lpfreq')
+        };
+
+        this.dom.feedback.addEventListener('input', (ev) => {
+            this.setParameterValue(0, parseFloat(ev.target.value));
+        });
+
+        this.dom.lpfreq.addEventListener('input', (ev) => {
+            this.setParameterValue(1, parseFloat(ev.target.value));
+        });
+
+        this.flushInitMessageQueue();
+
         document.body.style.visibility = 'visible';
+    }
+
+    parameterChanged(index, value) {
+        switch (index) {
+            case 0:
+                this.dom.feedback.value = value;
+                break;
+            case 1:
+                this.dom.lpfreq.value = value;
+                break;
+        }
     }
 
 }

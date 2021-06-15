@@ -52,10 +52,13 @@ void CastelloRevPlugin::initParameter(uint32_t index, Parameter& parameter)
     case 1:
         parameter.name = "lpfreq";
         parameter.ranges.min = 0.f;    // TODO
-        parameter.ranges.max = 8000.f;  // TODO
+        parameter.ranges.max = 10000.f;  // TODO
         parameter.ranges.def = 4000.f;
         break;
     }
+
+    // TODO - are defaults set somewhere? can this be omitted by using programs?
+    setParameterValue(index, parameter.ranges.def);
 }
 
 float CastelloRevPlugin::getParameterValue(uint32_t index) const
