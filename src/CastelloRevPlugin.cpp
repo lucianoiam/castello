@@ -25,6 +25,10 @@ Plugin* DISTRHO::createPlugin()
     return new CastelloRevPlugin;
 }
 
+// FIXME - this is still a very naive implementation, turning on/off the plugin
+//         produces clicks, dry/wet control is lacking, lpfreq range is not
+//         very useful, parameters need better names, and so on...
+
 CastelloRevPlugin::CastelloRevPlugin()
     : Plugin(2 /* parameterCount */, 0 /* programCount */, 0 /* stateCount */)
 {
