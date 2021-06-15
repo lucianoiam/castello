@@ -26,15 +26,11 @@ Plugin* DISTRHO::createPlugin()
 }
 
 CastelloRevPlugin::CastelloRevPlugin()
-    : Plugin(0 /* parameterCount */, 0 /* programCount */, 0 /* stateCount */)
+    : Plugin(2 /* parameterCount */, 0 /* programCount */, 0 /* stateCount */)
 {
     sp_create(&fSoundpipe);
     sp_revsc_create(&fReverb);
     sp_revsc_init(fSoundpipe, fReverb);
-
-    // FIXME - for testing
-    fReverb->feedback = 0.9f;
-    fReverb->lpfreq = 4000.f;
 }
 
 CastelloRevPlugin::~CastelloRevPlugin()
@@ -45,24 +41,47 @@ CastelloRevPlugin::~CastelloRevPlugin()
 
 void CastelloRevPlugin::initParameter(uint32_t index, Parameter& parameter)
 {
-    // unused
-    (void)index;
-    (void)parameter;
+    parameter.hints = kParameterIsAutomable;
+
+    switch (index)
+    {
+    case 0:
+        parameter.name = "feedback";
+        parameter.ranges.min = 0.f;
+        parameter.ranges.max = 1.f;
+        parameter.ranges.def = 0.5f;
+        break;
+    case 1:
+        parameter.name = "lpfreq";
+        parameter.ranges.min = 0.f;    // TODO
+        parameter.ranges.max = 8000.f;  // TODO
+        parameter.ranges.def = 4000.f;
+        break;
+    }
 }
 
 float CastelloRevPlugin::getParameterValue(uint32_t index) const
 {
-    return 0;
-
-    // unused
-    (void)index;
+    switch (index)
+    {
+    case 0:
+        return fReverb->feedback;
+    case 1:
+        return fReverb->lpfreq;
+    }
 }
 
 void CastelloRevPlugin::setParameterValue(uint32_t index, float value)
 {
-    // unused
-    (void)index;
-    (void)value;
+    switch (index)
+    {
+    case 0:
+        fReverb->feedback = value;
+        break;
+    case 1:
+        fReverb->lpfreq = value;
+        break;
+    }
 }
 
 void CastelloRevPlugin::run(const float** inputs, float** outputs, uint32_t frames)
