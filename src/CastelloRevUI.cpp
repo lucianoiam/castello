@@ -31,14 +31,3 @@ UI* DISTRHO::createUI()
 CastelloRevUI::CastelloRevUI()
     : WebUI(INIT_WIDTH_PX, INIT_HEIGHT_PX, INIT_BACKGROUND_RGBA)
 {}
-
-void CastelloRevUI::webContentReady()
-{
-    // empty
-}
-
-void CastelloRevUI::webMessageReceived(const ScriptValueVector& args)
-{
-    // empty
-    (void)args;
-}
