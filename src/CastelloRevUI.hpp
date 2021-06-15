@@ -29,10 +29,6 @@ public:
     CastelloRevUI();
     ~CastelloRevUI() {};
 
-protected:
-    void webContentReady() override;
-    void webMessageReceived(const ScriptValueVector& args) override;
-
 };
 
 END_NAMESPACE_DISTRHO
