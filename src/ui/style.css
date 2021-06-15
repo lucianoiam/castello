@@ -10,7 +10,7 @@ body {
     height: 100%;
     padding: 20px;
     margin: 0;
-    background-color: #000;
+    background-color: #fff;
 }
 
 pre {
@@ -28,4 +28,13 @@ pre {
     text-align: center;
     border: solid 1px #000;
     overflow: hidden;
+}
+
+.param-holder {
+    padding: 20px;
+}
+
+.param {
+    width: 100%;
+    margin-top: 1em;
 }

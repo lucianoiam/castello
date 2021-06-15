@@ -7,6 +7,16 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body style="visibility: hidden;" onload="new CastelloRevUI">
+    <!-- Match values in Plugin::initParameter() -->
+    <!-- TODO: a way to pull parameters type/min/max fom Plugin -->
+    <div class="param-holder">
+        <label>Feedback</label>
+        <input type="range" min="0" max="1" step="0.001" class="param" id="p-feedback">
+    </div>
+    <div class="param-holder">
+        <label>LPF frequency</label>
+        <input type="range" min="0" max="10000" step="0.001" class="param" id="p-lpfreq">
+    </div>
     <script src="castello-rev-ui.js"></script>
   </body>
 </html>
