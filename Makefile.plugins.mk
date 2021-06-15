@@ -1,0 +1,44 @@
+# Filename: Makefile.plugins.mk
+# Author:   oss@lucianoiam.com
+
+# Note this is not the DPF version of Makefile.base.mk
+USE_DPF_DEVELOP_BRANCH=true
+include Makefile.base.mk
+
+# Add WebUI files
+ifeq ($(LINUX),true)
+SRC_FILES_UI += arch/linux/ExternalGtkWebView.cpp \
+                arch/linux/PlatformLinux.cpp \
+                arch/linux/extra/ipc.c
+endif
+ifeq ($(MACOS),true)
+SRC_FILES_UI += arch/macos/CocoaWebView.mm \
+                arch/macos/PlatformMac.mm
+endif
+ifeq ($(WINDOWS),true)
+SRC_FILES_UI += arch/windows/EdgeWebView.cpp \
+                arch/windows/PlatformWindows.cpp \
+                arch/windows/extra/WebView2EventHandler.cpp \
+                arch/windows/extra/WinApiStub.cpp \
+                arch/windows/extra/cJSON.c \
+                arch/windows/res/plugin.rc
+endif
+
+FILES_DSP = $(SRC_FILES_DSP:%=src/%)
+FILES_UI = $(SRC_FILES_UI:%=src/%)
+
+ifneq ($(WINDOWS),true)
+UI_TYPE = cairo
+endif
+
+# Allow placing DPF in a custom directory while including its Makefiles
+DPF_CUSTOM_PATH = ./lib/DPF
+DPF_CUSTOM_TARGET_DIR = ./bin
+DPF_CUSTOM_BUILD_DIR = ./build
+
+# Keep debug symbols and print full compiler output
+SKIP_STRIPPING = true
+VERBOSE = true
+
+# Now the magic
+include $(DPF_CUSTOM_PATH)/Makefile.plugins.mk

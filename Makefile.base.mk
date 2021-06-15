@@ -1,4 +1,6 @@
-# Created by lucianoiam
+# Filename: Makefile.base.mk
+# Author:   oss@lucianoiam.com
+
 WINNUGET_DOWNLOAD_URL=https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
 
 TARGET_MACHINE := $(shell gcc -dumpmachine)
