@@ -26,6 +26,8 @@ SRC_FILES_UI  = \
 # --------------------------------------------------------------
 # Note this is not the DPF version of Makefile.plugins.mk
 
+SKIP_STRIPPING = true
+VERBOSE = true
 include Makefile.plugins.mk
 
 # --------------------------------------------------------------
