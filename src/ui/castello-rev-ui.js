@@ -14,7 +14,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-class CastelloRevUI extends WebUI {
+class CastelloRevUI extends DISTRHO_WebUI {
 
     constructor() {
         super();
