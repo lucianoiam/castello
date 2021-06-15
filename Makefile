@@ -53,6 +53,9 @@ endif
 
 TARGETS += vst
 
+# Required for soundpipe.h
+BASE_FLAGS = -DNO_LIBSNDFILE -DSNDFILE=FILE -DSF_INFO=char
+
 include Makefile.support.mk
 
 all: $(DEP_TARGETS) $(TARGETS)
