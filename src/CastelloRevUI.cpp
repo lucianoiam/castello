@@ -18,8 +18,8 @@
 
 #include "CastelloRevUI.hpp"
 
-#define INIT_WIDTH_PX  600
-#define INIT_HEIGHT_PX 300
+#define BASE_WIDTH_PX  600
+#define BASE_HEIGHT_PX 300
 
 #define INIT_BACKGROUND_RGBA 0xffffffff
 
@@ -31,5 +31,5 @@ UI* DISTRHO::createUI()
 }
 
 CastelloRevUI::CastelloRevUI()
-    : WebUI(INIT_WIDTH_PX, INIT_HEIGHT_PX, INIT_BACKGROUND_RGBA)
+    : WebUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA)
 {}
