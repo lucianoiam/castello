@@ -18,23 +18,23 @@
 #import <AppKit/AppKit.h>
 #import <WebKit/WebKit.h>
 
-#include "CocoaWebView.hpp"
+#include "CocoaWebWidget.hpp"
 
 #define fWebView         ((WKWebView*)fView)
 #define fWebViewDelegate ((WebViewDelegate*)fDelegate)
 
 #define JS_POST_MESSAGE_SHIM "window.webviewHost.postMessage = (args) => window.webkit.messageHandlers.host.postMessage(args);"
 
-// NOTE: ARC is not available here
+// ☢️ ARC is not available here
 
 USE_NAMESPACE_DISTRHO
 
 @interface WebViewDelegate: NSObject<WKNavigationDelegate, WKScriptMessageHandler>
-@property (assign, nonatomic) CocoaWebView *cppView;
+@property (assign, nonatomic) CocoaWebWidget *cppView;
 @end
 
-CocoaWebView::CocoaWebView(WebViewEventHandler& handler)
-    : BaseWebView(handler)
+CocoaWebWidget::CocoaWebWidget(Window& windowToMapTo)
+    : BaseWebWidget(windowToMapTo)
 {
     // Create web view
     fView = [[WKWebView alloc] initWithFrame:CGRectZero];
@@ -45,18 +45,19 @@ CocoaWebView::CocoaWebView(WebViewEventHandler& handler)
     fWebViewDelegate.cppView = this;
     fWebView.navigationDelegate = fWebViewDelegate;
     [fWebView.configuration.userContentController addScriptMessageHandler:fWebViewDelegate name:@"host"];
+    reparent(windowToMapTo);
     String js = String(JS_POST_MESSAGE_SHIM);
     injectDefaultScripts(js);
 }
 
-CocoaWebView::~CocoaWebView()
+CocoaWebWidget::~CocoaWebWidget()
 {
     [fWebView removeFromSuperview];
     [fWebView release];
     [fWebViewDelegate release];
 }
 
-void CocoaWebView::setBackgroundColor(uint32_t rgba)
+void CocoaWebWidget::setBackgroundColor(uint32_t rgba)
 {
     // macOS WKWebView apparently does not offer a method for setting a background color, so the
     // background is removed altogether to reveal the underneath window paint. Do it safely.
@@ -73,24 +74,18 @@ void CocoaWebView::setBackgroundColor(uint32_t rgba)
     }
 }
 
-void CocoaWebView::reparent(uintptr_t windowId)
+void CocoaWebWidget::reparent(Window& windowToMapTo)
 {
     // windowId is either a PuglCairoView* or PuglOpenGLViewDGL* depending
     // on the value of UI_TYPE in the Makefile. Both are NSView subclasses.
-    NSView *parentView = (NSView *)windowId;
+    NSView *parentView = (NSView *)windowToMapTo.getNativeWindowHandle();
     CGSize parentSize = parentView.frame.size;
     [fWebView removeFromSuperview];
     fWebView.frame = CGRectMake(0, 0, parentSize.width, parentSize.height);
     [parentView addSubview:fWebView];
 }
 
-void CocoaWebView::resize(const DGL::Size<uint>& size)
-{
-    // The WKWebView automatically resizes to match its parent dimensions
-    (void)size;
-}
-
-void CocoaWebView::navigate(String& url)
+void CocoaWebWidget::navigate(String& url)
 {
     NSString *urlStr = [[NSString alloc] initWithCString:url encoding:NSUTF8StringEncoding];
     NSURL *urlObj = [[NSURL alloc] initWithString:urlStr];
@@ -99,14 +94,14 @@ void CocoaWebView::navigate(String& url)
     [urlStr release];
 }
 
-void CocoaWebView::runScript(String& source)
+void CocoaWebWidget::runScript(String& source)
 {
     NSString *js = [[NSString alloc] initWithCString:source encoding:NSUTF8StringEncoding];
     [fWebView evaluateJavaScript:js completionHandler: nil];
     [js release];
 }
 
-void CocoaWebView::injectScript(String& source)
+void CocoaWebWidget::injectScript(String& source)
 {
     NSString *js = [[NSString alloc] initWithCString:source encoding:NSUTF8StringEncoding];
     WKUserScript *script = [[WKUserScript alloc] initWithSource:js

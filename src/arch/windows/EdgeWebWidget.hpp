@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef EDGEWEBVIEW_HPP
-#define EDGEWEBVIEW_HPP
+#ifndef EDGEWEBWIDGET_HPP
+#define EDGEWEBWIDGET_HPP
 
 #define UNICODE
 #define CINTERFACE
@@ -27,7 +27,7 @@
 
 #include "WebView2.h"
 
-#include "base/BaseWebView.hpp"
+#include "base/BaseWebWidget.hpp"
 #include "extra/WebView2EventHandler.hpp"
 
 /*
@@ -40,25 +40,24 @@
   https://www.codeproject.com/Articles/13601/COM-in-plain-C
 */
 
-#define DISTRHO_WEBVIEW_CLASS EdgeWebView
-
 START_NAMESPACE_DISTRHO
 
-class EdgeWebViewInternalEventHandler;
+class InternalWebView2EventHandler;
 
-class EdgeWebView : public BaseWebView, edge::WebView2EventHandler
+class EdgeWebWidget : public BaseWebWidget, edge::WebView2EventHandler
 {
 public:
-    EdgeWebView(WebViewEventHandler& handler);
-    ~EdgeWebView();
+    EdgeWebWidget(Window& windowToMapTo);
+    ~EdgeWebWidget();
+
+    void onDisplay() override;
+    void onResize(const ResizeEvent& ev) override;
 
     void setBackgroundColor(uint32_t rgba) override;
-    void reparent(uintptr_t windowId) override;
-    void resize(const Size<uint>& size) override;
+    void reparent(Window& windowToMapTo) override;
     void navigate(String& url) override;
     void runScript(String& source) override;
     void injectScript(String& source) override;
-    void start() override;
 
     // WebView2EventHandler
 
@@ -72,23 +71,24 @@ public:
                                     ICoreWebView2WebMessageReceivedEventArgs *eventArgs) override;
 
 private:
+    void initWebView2();
+
     void webViewLoaderErrorMessageBox(HRESULT result);
 
-    WNDCLASS fHelperClass;
-    HWND     fHelperHwnd;
-
-    EdgeWebViewInternalEventHandler* fHandler;
-    ICoreWebView2Controller*         fController;
-    ICoreWebView2*                   fView;
-
-    // P means pending
-    uint32_t            fPBackgroundColor;
-    uintptr_t           fPWindowId;
-    Size<uint>          fPSize;
-    String              fPUrl;
-    std::vector<String> fPInjectedScripts;
+    WNDCLASS            fHelperClass;
+    HWND                fHelperHwnd;
+    bool                fDisplayed;
+    uint32_t            fBackgroundColor;
+    std::vector<String> fInjectedScripts;
+    String              fUrl;
+    
+    InternalWebView2EventHandler* fHandler;
+    ICoreWebView2Controller*      fController;
+    ICoreWebView2*                fView;
 
 };
+
+typedef EdgeWebWidget PlatformWebWidget;
 
 
 // The event handler lifetime cannot be bound to its owner lifetime, otherwise
@@ -96,9 +96,9 @@ private:
 // example if the plugin UI is opened and suddenly closed before web content
 // finishes loading, or before WebView2 has fully initialized itself.
 
-class EdgeWebViewInternalEventHandler : public edge::WebView2EventHandler {
+class InternalWebView2EventHandler : public edge::WebView2EventHandler {
 public:
-    EdgeWebViewInternalEventHandler(edge::WebView2EventHandler* ownerRef)
+    InternalWebView2EventHandler(edge::WebView2EventHandler* ownerRef)
         : fOwnerWeakRef(ownerRef)
     {
         incRefCount();
@@ -159,4 +159,4 @@ private:
 
 END_NAMESPACE_DISTRHO
 
-#endif  // EDGEWEBVIEW_HPP
+#endif  // EDGEWEBWIDGET_HPP

@@ -16,28 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef COCOAWEBVIEW_HPP
-#define COCOAWEBVIEW_HPP
+#ifndef COCOAWEBWIDGET_HPP
+#define COCOAWEBWIDGET_HPP
 
-#include "base/BaseWebView.hpp"
+#include "base/BaseWebWidget.hpp"
 
 // While it is possible to #import Obj-C headers here, that would force all
-// source files importing CocoaWebView.hpp to do so before any other project
+// source files importing CocoaWebWidget.hpp to do so before any other project
 // headers to avoid symbol name collisions. Do not make any assumption.
-
-#define DISTRHO_WEBVIEW_CLASS CocoaWebView
 
 START_NAMESPACE_DISTRHO
 
-class CocoaWebView : public BaseWebView
+class CocoaWebWidget : public BaseWebWidget
 {
 public:
-    CocoaWebView(WebViewEventHandler& handler);
-    ~CocoaWebView();
+    CocoaWebWidget(Window& windowToMapTo);
+    ~CocoaWebWidget();
 
     void setBackgroundColor(uint32_t rgba) override;
-    void reparent(uintptr_t windowId) override;
-    void resize(const DGL::Size<uint>& size) override;
+    void reparent(Window& windowToMapTo) override;
     void navigate(String& url) override;
     void runScript(String& source) override;
     void injectScript(String& source) override;
@@ -53,6 +50,8 @@ private:
 
 };
 
+typedef CocoaWebWidget PlatformWebWidget;
+
 END_NAMESPACE_DISTRHO
 
-#endif  // COCOAWEBVIEW_HPP
+#endif  // COCOAWEBWIDGET_HPP

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "BaseWebView.hpp"
+#include "BaseWebWidget.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -32,12 +32,12 @@
 #define CSS_DISABLE_PINCH_ZOOM   "body { touch-action: pan-x pan-y; }"
 
 /**
-   Keep this class generic, DPF specific functionality belongs to WebUI.
+   Keep this class generic, DPF specific functionality belongs to ProxyWebUI.
  */
 
 USE_NAMESPACE_DISTRHO
 
-void BaseWebView::injectDefaultScripts(String& platformSpecificScript)
+void BaseWebWidget::injectDefaultScripts(String& platformSpecificScript)
 {
     String js = String()
         + String(JS_DISABLE_CONTEXT_MENU)
@@ -48,7 +48,7 @@ void BaseWebView::injectDefaultScripts(String& platformSpecificScript)
     injectScript(js);
 }
 
-void BaseWebView::handleLoadFinished()
+void BaseWebWidget::handleLoadFinished()
 {
     String css = String()
         + String(CSS_DISABLE_IMAGE_DRAG)
@@ -56,15 +56,17 @@ void BaseWebView::handleLoadFinished()
         + String(CSS_DISABLE_PINCH_ZOOM)
     ;
     addStylesheet(css);
-    fHandler.handleWebViewLoadFinished();
+    if (fHandler != 0) {
+        fHandler->handleWebWidgetContentLoadFinished();
+    }
 }
 
-void BaseWebView::postMessage(const ScriptValueVector& args)
+void BaseWebWidget::postMessage(const ScriptValueVector& args)
 {
     // WebKit-based webviews implement a standard mechanism for transferring messages from JS to the
     // native side, carrying a payload of JavaScript values that can be accessed through jsc_value_*
     // calls in WebKitGTK or automatically bridged to Objective-C objects in WKWebView. On Edge
-    // WebView2 only JSON is available, see EdgeWebView::handleWebView2WebMessageReceived().
+    // WebView2 only JSON is available, see EdgeWebWidget::handleWebView2WebMessageReceived().
     // There is no equivalent inverse mechanism for passing messages from native to JS, other than
     // calling custom JavaScript using a function provided by webviews on all platforms.
     // This method implements something like a "reverse postMessage()" aiming to keep the bridge
@@ -77,7 +79,7 @@ void BaseWebView::postMessage(const ScriptValueVector& args)
     runScript(js);
 }
 
-void BaseWebView::handleScriptMessage(const ScriptValueVector& args)
+void BaseWebWidget::handleScriptMessage(const ScriptValueVector& args)
 {
     if ((args.size() > 1) && (args[0].getString() == "console.log")) {
         std::cerr << args[1].getString().buffer() << std::endl;
@@ -85,11 +87,13 @@ void BaseWebView::handleScriptMessage(const ScriptValueVector& args)
 #ifdef DEBUG_PRINT_TRAFFIC
     std::cerr << "n <- js : " << serializeScriptValues(args).buffer() << std::endl;
 #endif
-        fHandler.handleWebViewScriptMessageReceived(args);
+        if (fHandler != 0) {
+            fHandler->handleWebWidgetScriptMessageReceived(args);
+        }
     }
 }
 
-String BaseWebView::serializeScriptValues(const ScriptValueVector& args)
+String BaseWebWidget::serializeScriptValues(const ScriptValueVector& args)
 {
     std::stringstream ss;
     ss << '[';
@@ -103,7 +107,7 @@ String BaseWebView::serializeScriptValues(const ScriptValueVector& args)
     return String(ss.str().c_str());
 }
 
-void BaseWebView::addStylesheet(String& source)
+void BaseWebWidget::addStylesheet(String& source)
 {
     String js = "document.head.insertAdjacentHTML('beforeend', '<style>" + source + "</style>');";
     runScript(js);
