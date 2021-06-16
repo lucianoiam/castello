@@ -18,10 +18,7 @@ SRC_FILES_DSP = \
     dsp/revsc.c
 
 SRC_FILES_UI  = \
-    CastelloRevUI.cpp \
-    base/WebUI.cpp \
-    base/BaseWebView.cpp \
-    base/ScriptValue.cpp
+    CastelloRevUI.cpp
 
 # --------------------------------------------------------------
 # Note this is not the DPF version of Makefile.plugins.mk

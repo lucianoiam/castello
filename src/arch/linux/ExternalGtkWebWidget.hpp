@@ -14,34 +14,33 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef EXTERNALGTKWEBVIEW_HPP
-#define EXTERNALGTKWEBVIEW_HPP
+#ifndef EXTERNALGTKWEBWIDGET_HPP
+#define EXTERNALGTKWEBWIDGET_HPP
 
 #include <cstdint>
 #include <sys/types.h>
 
 #include "extra/Thread.hpp"
 
-#include "base/BaseWebView.hpp"
+#include "base/BaseWebWidget.hpp"
 
 #include "extra/ipc.h"
 #include "helper.h"
 
-#define DISTRHO_WEBVIEW_CLASS ExternalGtkWebView
-
 START_NAMESPACE_DISTRHO
 
-class ExternalGtkWebView : public BaseWebView
+class ExternalGtkWebWidget : public BaseWebWidget
 {
 friend class IpcReadThread;
 
 public:
-    ExternalGtkWebView(WebViewEventHandler& handler);
-    ~ExternalGtkWebView();
+    ExternalGtkWebWidget(Window& windowToMapTo);
+    ~ExternalGtkWebWidget();
+
+    void onResize(const ResizeEvent& ev) override;
 
     void setBackgroundColor(uint32_t rgba) override;
-    void reparent(uintptr_t windowId) override;
-    void resize(const Size<uint>& size) override;
+    void reparent(Window& windowToMapTo) override;
     void navigate(String& url) override;
     void runScript(String& source) override;
     void injectScript(String& source) override;
@@ -64,15 +63,17 @@ private:
 class IpcReadThread : public Thread
 {
 public:
-    IpcReadThread(ExternalGtkWebView& view);
+    IpcReadThread(ExternalGtkWebWidget& view);
     
     void run() override;
 
 private:
-    ExternalGtkWebView& fView;
+    ExternalGtkWebWidget& fView;
 
 };
 
+typedef ExternalGtkWebWidget PlatformWebWidget;
+
 END_NAMESPACE_DISTRHO
 
-#endif  // EXTERNALGTKWEBVIEW_HPP
+#endif  // EXTERNALGTKWEBWIDGET_HPP

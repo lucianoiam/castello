@@ -10,18 +10,22 @@ DPF_CUSTOM_BUILD_DIR = ./build
 DPF_GIT_BRANCH=develop
 include Makefile.base.mk
 
-# Add WebUI files
+SRC_FILES_UI += base/ProxyWebUI.cpp \
+                base/BaseWebWidget.cpp \
+                base/ScriptValue.cpp
+
+# Add ProxyWebUI files
 ifeq ($(LINUX),true)
-SRC_FILES_UI += arch/linux/ExternalGtkWebView.cpp \
+SRC_FILES_UI += arch/linux/ExternalGtkWebWidget.cpp \
                 arch/linux/PlatformLinux.cpp \
                 arch/linux/extra/ipc.c
 endif
 ifeq ($(MACOS),true)
-SRC_FILES_UI += arch/macos/CocoaWebView.mm \
+SRC_FILES_UI += arch/macos/CocoaWebWidget.mm \
                 arch/macos/PlatformMac.mm
 endif
 ifeq ($(WINDOWS),true)
-SRC_FILES_UI += arch/windows/EdgeWebView.cpp \
+SRC_FILES_UI += arch/windows/EdgeWebWidget.cpp \
                 arch/windows/PlatformWindows.cpp \
                 arch/windows/extra/WebView2EventHandler.cpp \
                 arch/windows/extra/WinApiStub.cpp \

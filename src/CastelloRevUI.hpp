@@ -17,11 +17,11 @@
 #ifndef CASTELLOREVUI_HPP
 #define CASTELLOREVUI_HPP
 
-#include "base/WebUI.hpp"
+#include "base/ProxyWebUI.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class CastelloRevUI : public WebUI
+class CastelloRevUI : public ProxyWebUI
 {
 public:
     CastelloRevUI();

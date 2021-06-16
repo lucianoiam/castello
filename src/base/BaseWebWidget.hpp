@@ -14,14 +14,16 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef BASEWEBVIEW_HPP
-#define BASEWEBVIEW_HPP
+#ifndef BASEWEBWIDGET_HPP
+#define BASEWEBWIDGET_HPP
 
 #include <cstdint>
 #include <vector>
 
+#include "dgl/TopLevelWidget.hpp"
 #include "dgl/Geometry.hpp"
 #include "extra/String.hpp"
+#include "Window.hpp"
 
 #include "ScriptValue.hpp"
 
@@ -29,28 +31,29 @@ START_NAMESPACE_DISTRHO
 
 typedef std::vector<ScriptValue> ScriptValueVector;
 
-class WebViewEventHandler
+class WebWidgetEventHandler
 {
 public:
-    virtual void handleWebViewLoadFinished() = 0;
-    virtual void handleWebViewScriptMessageReceived(const ScriptValueVector& args) = 0;
+    virtual void handleWebWidgetContentLoadFinished() = 0;
+    virtual void handleWebWidgetScriptMessageReceived(const ScriptValueVector& args) = 0;
 
 };
 
-class BaseWebView
+class BaseWebWidget : public TopLevelWidget
 {
 public:
-    BaseWebView(WebViewEventHandler& handler) : fHandler(handler) {}
-    virtual ~BaseWebView() {};
+    BaseWebWidget(Window& windowToMapTo) : TopLevelWidget(windowToMapTo) {}
+    virtual ~BaseWebWidget() {};
 
     virtual void setBackgroundColor(uint32_t rgba) = 0;
-    virtual void reparent(uintptr_t windowId) = 0;
-    virtual void resize(const DGL::Size<uint>& size) = 0;
+    virtual void reparent(Window& windowToMapTo) = 0;
     virtual void navigate(String& url) = 0;
     virtual void runScript(String& source) = 0;
     virtual void injectScript(String& source) = 0;
-    virtual void start() {};
-    
+
+    void onDisplay() override {};
+
+    void setEventHandler(WebWidgetEventHandler* handler) { fHandler = handler; }
     void postMessage(const ScriptValueVector& args);
 
 protected:
@@ -64,10 +67,10 @@ private:
 
     void addStylesheet(String& source);
 
-    WebViewEventHandler& fHandler;
+    WebWidgetEventHandler* fHandler;
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif // BASEWEBVIEW_HPP
+#endif // BASEWEBWIDGET_HPP

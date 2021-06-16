@@ -14,42 +14,41 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef WEBUI_HPP
-#define WEBUI_HPP
+#ifndef PROXYWEBUI_HPP
+#define PROXYWEBUI_HPP
 
 #include "DistrhoUI.hpp"
 
 #include <vector>
 
 #ifdef DISTRHO_OS_LINUX
-#include "arch/linux/ExternalGtkWebView.hpp"
+#include "arch/linux/ExternalGtkWebWidget.hpp"
 #endif
 #ifdef DISTRHO_OS_MAC
-#include "arch/macos/CocoaWebView.hpp"
+#include "arch/macos/CocoaWebWidget.hpp"
 #endif
 #ifdef DISTRHO_OS_WINDOWS
-#include "arch/windows/EdgeWebView.hpp"
+#include "arch/windows/EdgeWebWidget.hpp"
 #endif
 
 START_NAMESPACE_DISTRHO
 
-class WebUI : public UI, private WebViewEventHandler
+class ProxyWebUI : public UI, private WebWidgetEventHandler
 {
 public:
-    WebUI(uint baseWidth = 0, uint baseHeight = 0, uint32_t backgroundColor = 0xffffffff);
-    virtual ~WebUI() {};
+    ProxyWebUI(uint baseWidth = 0, uint baseHeight = 0, uint32_t backgroundColor = 0xffffffff);
+    virtual ~ProxyWebUI() {};
 
 protected:
 
     void onDisplay() override;
-    void onResize(const ResizeEvent& ev) override;
 
     void parameterChanged(uint32_t index, float value) override;
 #if (DISTRHO_PLUGIN_WANT_STATE == 1)
     void stateChanged(const char* key, const char* value) override;
 #endif
 
-    DISTRHO_WEBVIEW_CLASS& webView() { return fWebView; }
+    PlatformWebWidget& webWidget() { return fWebWidget; }
 
     void webPostMessage(const ScriptValueVector& args);
 
@@ -59,21 +58,21 @@ protected:
     virtual void webMessageReceived(const ScriptValueVector& args) { (void)args; };
 
 private:
-    // WebViewEventHandler
+    // WebWidgetEventHandler
 
-    virtual void handleWebViewLoadFinished() override;
-    virtual void handleWebViewScriptMessageReceived(const ScriptValueVector& args) override;
+    virtual void handleWebWidgetContentLoadFinished() override;
+    virtual void handleWebWidgetScriptMessageReceived(const ScriptValueVector& args) override;
 
     typedef std::vector<ScriptValueVector> InitMessageQueue;
 
-    DISTRHO_WEBVIEW_CLASS fWebView;
-    uint32_t              fBackgroundColor;
-    bool                  fDisplayed;
-    bool                  fInitContentReady;
-    InitMessageQueue      fInitMsgQueue;
+    PlatformWebWidget fWebWidget;
+    uint32_t          fBackgroundColor;
+    bool              fDisplayed;
+    bool              fInitContentReady;
+    InitMessageQueue  fInitMsgQueue;
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // WEBUI_HPP
+#endif  // PROXYWEBUI_HPP
