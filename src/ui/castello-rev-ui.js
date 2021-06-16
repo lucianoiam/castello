@@ -55,16 +55,20 @@ class CastelloRevUI extends DISTRHO_WebUI {
     }
 
     _fixLinuxTouchSliders() {
+        // Is this a bug or by design of WebKitGTK ? input[type=range] sliders
+        // are not reacting to touches on that web view. It does not seem to be
+        // a dpf-webui bug as touch works as expected elsewhere.
         document.querySelectorAll('input[type=range]').forEach((el) => {
             el.addEventListener('touchmove', (ev) => {
-                const x = ev.touches[0].clientX;
-                const x0 = ev.target.getBoundingClientRect().x;
-                const x1 = x0 + ev.target.offsetWidth;
-                if ((x < x0) || (x > x1)) return;
-                const normVal = (x - x0) / ev.target.offsetWidth;
-                const min = parseFloat(ev.target.min);
-                const max = parseFloat(ev.target.max);
-                const val = min + normVal * (max - min);
+                const minVal = parseFloat(ev.target.min);
+                const maxVal = parseFloat(ev.target.max);
+                const width = ev.target.offsetWidth;
+                const x = ev.touches[0].clientX;                
+                const minX = ev.target.getBoundingClientRect().x;
+                const maxX = minX + width;
+                if ((x < minX) || (x > maxX)) return;
+                const normVal = (x - minX) / width;
+                const val = minVal + normVal * (maxVal - minVal);
                 ev.target.value = val;
                 ev.target.dispatchEvent(new CustomEvent('input'));
             });
