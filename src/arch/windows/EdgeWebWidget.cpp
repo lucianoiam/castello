@@ -68,13 +68,6 @@ EdgeWebWidget::EdgeWebWidget(Window& windowToMapTo)
     // This request is queued until Edge WebView2 initializes itself
     String js = String(JS_POST_MESSAGE_SHIM);
     injectDefaultScripts(js);
-    
-    // Initialization does not complete right away
-    HRESULT result = ::CreateCoreWebView2EnvironmentWithOptions(0,
-        TO_LPCWSTR(platform::getTemporaryPath()), 0, fHandler);
-    if (FAILED(result)) {
-        webViewLoaderErrorMessageBox(result);
-    }
 }
 
 EdgeWebWidget::~EdgeWebWidget()
@@ -89,6 +82,17 @@ EdgeWebWidget::~EdgeWebWidget()
     ::DestroyWindow(fHelperHwnd);
     ::UnregisterClass(fHelperClass.lpszClassName, 0);
     ::free((void*)fHelperClass.lpszClassName);
+}
+
+void EdgeWebWidget::onDisplay()
+{
+    if (fDisplayed) {
+        return;
+    }
+    fDisplayed = true;
+    
+    // Edge WebView2 initialization does not complete right away
+    initWebView();
 }
 
 void EdgeWebWidget::onResize(const ResizeEvent& ev)
@@ -153,6 +157,15 @@ void EdgeWebWidget::updateWebViewSize(Size<uint> size)
     bounds.right = size.getWidth();
     bounds.bottom = size.getHeight();
     ICoreWebView2Controller2_put_Bounds(fController, bounds);
+}
+
+void EdgeWebWidget::initWebView()
+{    
+    HRESULT result = ::CreateCoreWebView2EnvironmentWithOptions(0,
+        TO_LPCWSTR(platform::getTemporaryPath()), 0, fHandler);
+    if (FAILED(result)) {
+        webViewLoaderErrorMessageBox(result);
+    }
 }
 
 HRESULT EdgeWebWidget::handleWebView2EnvironmentCompleted(HRESULT result,
