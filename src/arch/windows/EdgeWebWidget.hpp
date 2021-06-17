@@ -25,7 +25,7 @@
 
 #include "WebView2.h"
 
-#include "base/BaseWebWidget.hpp"
+#include "base/AbstractWebWidget.hpp"
 #include "extra/WebView2EventHandler.hpp"
 
 /*
@@ -45,13 +45,12 @@ START_NAMESPACE_DISTRHO
 
 class InternalWebView2EventHandler;
 
-class EdgeWebWidget : public BaseWebWidget, edge::WebView2EventHandler
+class EdgeWebWidget : public AbstractWebWidget, edge::WebView2EventHandler
 {
 public:
     EdgeWebWidget(Window& windowToMapTo);
     ~EdgeWebWidget();
 
-    void onDisplay() override;
     void onResize(const ResizeEvent& ev) override;
 
     void setBackgroundColor(uint32_t rgba) override;
@@ -73,8 +72,6 @@ public:
 
 private:
     inline void updateWebViewSize(Size<uint> size);
-
-    void startWebViewInit();
 
     void webViewLoaderErrorMessageBox(HRESULT result);
 
