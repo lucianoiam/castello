@@ -36,7 +36,7 @@
   created to make life easier for developers on Windows through readable
   type-safe C++ interfaces for common Windows coding patterns."
   Unfortunately WIL is not compatible with the MinGW GCC. But because Edge
-  WebView2 is a COM component, it can still be called using its C interface.
+  WebView2 is a COM component, it can still be integrated using its C interface.
 
   https://github.com/microsoft/wil/issues/117
   https://github.com/jchv/webview2-in-mingw
@@ -98,8 +98,16 @@ typedef EdgeWebWidget PlatformWebWidget;
 
 // The event handler lifetime cannot be bound to its owner lifetime, otherwise
 // the Edge WebView2 could callback a deleted object. That would happen for
-// example if the plugin UI is opened and suddenly closed before web content
+// example if the widget is created and suddenly destroyed before web content
 // finishes loading, or before WebView2 has fully initialized itself.
+// In the case of ProxyWebUI the scenario is easily reproducible by opening the
+// plugin window on Carla and immediately closing it before the web UI shows up.
+// Note that InternalWebView2EventHandler is not fully COM compliant, it is
+// lacking the query interface method. It would also need to be registered for
+// allowing instantiation with CoCreateInstance() but we do not need all that
+// boilerplate, just the bare minimum to make Edge WebView2 happy and get
+// notified of events in return. The handler class is expected to be init'd
+// using the C++ new operator and disposed of by calling its release() method.
 
 class InternalWebView2EventHandler : public edge::WebView2EventHandler {
 public:
