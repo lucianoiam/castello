@@ -105,7 +105,7 @@ float platform::getSystemDisplayScaleFactor()
     if (SUCCEEDED(stub::GetProcessDpiAwareness(0, &dpiAware))) {
         if (dpiAware != PROCESS_DPI_UNAWARE) {
             HMONITOR hMon = ::MonitorFromWindow(::GetConsoleWindow(), MONITOR_DEFAULTTOPRIMARY);
-            DEVICE_SCALE_FACTOR scaleFactor;
+            DEVICE_SCALE_FACTOR scaleFactor = DEVICE_SCALE_FACTOR_INVALID;
 
             if (SUCCEEDED(stub::GetScaleFactorForMonitor(hMon, &scaleFactor))) {
                 if (scaleFactor != DEVICE_SCALE_FACTOR_INVALID) {
