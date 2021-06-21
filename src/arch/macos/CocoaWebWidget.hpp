@@ -34,6 +34,7 @@ public:
     ~CocoaWebWidget();
 
     void onResize(const ResizeEvent& ev) override;
+    void onPositionChanged(const PositionChangedEvent&) override;
 
     void setBackgroundColor(uint32_t rgba) override;
     void navigate(String& url) override;
@@ -46,12 +47,12 @@ public:
     void didReceiveScriptMessage(const ScriptValueVector& args) { handleScriptMessage(args); }
 
 private:
+    void updateWebViewFrame();
+
     void *fView;
     void *fDelegate;
 
 };
-
-typedef CocoaWebWidget PlatformWebWidget;
 
 END_NAMESPACE_DISTRHO
 
