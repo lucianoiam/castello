@@ -28,7 +28,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
         const options = {maxScale: 2, keepAspect: true};
         const handle = new ResizeHandle((w, h) => this.setSize(w, h), options);
-        document.body.appendChild(handle);
+        document.body.appendChild(handle.element);
 
         this._setupView();
         
