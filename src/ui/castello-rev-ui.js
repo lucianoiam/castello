@@ -26,12 +26,9 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
         Platform.fixLinuxInputTypeRangeTouch();
 
-        const options = {maxScale: 2, keepAspect: true};
-        const handle = new ResizeHandle((w, h) => this.setSize(w, h), options);
-        document.body.appendChild(handle.element);
-
         this._setupView();
-        
+        this._addResizeHandle();
+
         this.flushInitMessageQueue();
 
         document.body.style.visibility = 'visible';
@@ -57,4 +54,16 @@ class CastelloRevUI extends DISTRHO_WebUI {
             this.setParameterValue(1, parseFloat(ev.target.value));
         });
     }
+
+    async _addResizeHandle() {
+        const options = {
+            minWidth: await this.getWidth() / window.devicePixelRatio,
+            minHeight: await this.getHeight() / window.devicePixelRatio,
+            maxScale: 2,
+            keepAspectRatio: true
+        };
+        const handle = new ResizeHandle((w, h) => this.setSize(w, h), options);
+        document.body.appendChild(handle.element);
+    }
+
 }
