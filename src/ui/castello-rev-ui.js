@@ -24,18 +24,16 @@ class CastelloRevUI extends DISTRHO_WebUI {
             lpfreq:   document.getElementById('p-lpfreq')
         };
 
-        if (/linux/i.test(window.navigator.platform)) {
-            this._fixLinuxTouchSliders();
-        }
+        Platform.fixLinuxInputTypeRangeTouch();
+
+        this.isResizable().then((result) => {
+            const options = {maxScale: 2, keepAspect: true};
+            const handle = new ResizeHandle((w, h) => this.setSize(w, h), options);
+            document.body.appendChild(handle);
+        });
+
+        this._setupView();
         
-        this.dom.feedback.addEventListener('input', (ev) => {
-            this.setParameterValue(0, parseFloat(ev.target.value));
-        });
-
-        this.dom.lpfreq.addEventListener('input', (ev) => {
-            this.setParameterValue(1, parseFloat(ev.target.value));
-        });
-
         this.flushInitMessageQueue();
 
         document.body.style.visibility = 'visible';
@@ -52,25 +50,13 @@ class CastelloRevUI extends DISTRHO_WebUI {
         }
     }
 
-    _fixLinuxTouchSliders() {
-        // Is this a bug or by design of WebKitGTK ? input[type=range] sliders
-        // are not reacting to touches on that web view. It does not seem to be
-        // a dpf-webui bug as touch works as expected elsewhere.
-        document.querySelectorAll('input[type=range]').forEach((el) => {
-            el.addEventListener('touchmove', (ev) => {
-                const minVal = parseFloat(ev.target.min);
-                const maxVal = parseFloat(ev.target.max);
-                const width = ev.target.offsetWidth;
-                const x = ev.touches[0].clientX;                
-                const minX = ev.target.getBoundingClientRect().x;
-                const maxX = minX + width;
-                if ((x < minX) || (x > maxX)) return;
-                const normVal = (x - minX) / width;
-                const val = minVal + normVal * (maxVal - minVal);
-                ev.target.value = val;
-                ev.target.dispatchEvent(new CustomEvent('input'));
-            });
+    _setupView() {
+        this.dom.feedback.addEventListener('input', (ev) => {
+            this.setParameterValue(0, parseFloat(ev.target.value));
+        });
+
+        this.dom.lpfreq.addEventListener('input', (ev) => {
+            this.setParameterValue(1, parseFloat(ev.target.value));
         });
     }
-
 }
