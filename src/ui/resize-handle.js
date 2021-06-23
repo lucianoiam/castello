@@ -52,81 +52,113 @@ class ResizeHandle {
         }
 
         // Keep aspect ratio while resizing, default to yes
-        this.keepAspect = options.keepAspect || true;
+        this.keepAspectRatio = options.keepAspectRatio === false ? false : true;
+        this.aspectRatio = this.minWidth / this.minHeight;
 
         this.width = 0;
         this.height = 0;
-        
         this.resizing = false;
+        this.mac = /mac/i.test(window.navigator.platform);
 
-        this.linux = /linux/i.test(window.navigator.platform);
-        this.mac = /macintosh/i.test(window.navigator.platform);
+        this.handle = this._createElement();
 
-        this.handle = document.createElement('div');
-        this.handle.innerHTML = ResizeHandle_SVG;
-        this.handle.style.position = 'fixed';
-        this.handle.style.zIndex = '1000';
-        this.handle.style.right = '0px';
-        this.handle.style.bottom = '0px';
-        this.handle.style.width = '24px';
-        this.handle.style.height = '24px';
-
-        this.handle.addEventListener('mousedown', (ev) => {
-            this.resizing = true;
-
-            this.width = document.body.clientWidth;
-            this.height = document.body.clientHeight;
-
-            if (this.linux) {
-                this.x = ev.clientX;
-                this.y = ev.clientY;
-            }
-        });
-
-        window.addEventListener('mouseup', (ev) => {
-            this.resizing = false;
-        });
-
-        window.addEventListener('mousemove', (ev) => {
-            if (!this.resizing) {
-                return
-            }
-
-            let dx, dy;
-
-            if (this.linux) {
-                // Is WebKitGTK returning absolute values for ev.movementX/Y ?
-                dx = ev.clientX - this.x;
-                this.x = ev.clientX;
-                dy = ev.clientY - this.y;
-                this.y = ev.clientY;
-            } else {
-                dx = ev.movementX;
-                dy = ev.movementY;
-            }
-
-            const accel = this.mac && ev.shiftKey ? ResizeHandle_SHIFT_ACCELERATION : 1;
-
-            let newWidth = this.width + accel * dx;
-            newWidth = Math.max(this.minWidth, Math.min(this.maxWidth, newWidth));
-
-            let newHeight = this.height + accel * dy;
-            newHeight = Math.max(this.minHeight, Math.min(this.maxHeight, newHeight));
-
-            // FIXME - aspect ratio lock
-
-            if ((this.width != newWidth) || (this.height != newHeight)) {
-                this.width = newWidth;
-                this.height = newHeight;
-                const k = window.devicePixelRatio;
-                this.callback(k * this.width, k * this.height);
-                //console.log(`${this.width}x${this.height}`);
-            }
-        });
+        this._addEventListeners();
     }
 
     get element() {
-    	return this.handle;
+        return this.handle;
+    }
+
+    _createElement() {
+        const handle = document.createElement('div');
+        handle.innerHTML = ResizeHandle_SVG;
+        handle.style.position = 'fixed';
+        handle.style.zIndex = '1000';
+        handle.style.right = '0px';
+        handle.style.bottom = '0px';
+        handle.style.width = '24px';
+        handle.style.height = '24px';
+        return handle;
+    }
+
+    _addEventListeners() {
+        const evOptions = {passive: false};
+
+        ['touchstart', 'mousedown'].forEach((evName) => {
+            this.handle.addEventListener(evName, (ev) => {
+                this._onDragStart(ev);
+                if (ev.cancelable) {
+                    ev.preventDefault(); // first handled event wins
+                }
+            }, evOptions);
+        });
+
+        ['touchmove', 'mousemove'].forEach((evName) => {
+            window.addEventListener(evName, (ev) => {
+                // FIXME: On Windows, touchmove events stop triggering after calling callback,
+                //        which in turn calls DistrhoUI::setSize(). Mouse resizing works OK.
+                this._onDragContinue(ev);
+                if (ev.cancelable) {
+                    ev.preventDefault();
+                }
+            }, evOptions);
+        });
+
+        ['touchend', 'mouseup'].forEach((evName) => {
+            window.addEventListener(evName, (ev) => {
+                this._onDragEnd(ev);
+                if (ev.cancelable) {
+                    ev.preventDefault();
+                }
+            }, evOptions);
+        });
+    }
+
+    _onDragStart(ev) {
+        this.resizing = true;
+
+        this.width = document.body.clientWidth;
+        this.height = document.body.clientHeight;
+
+        this.x = ev.clientX /* mouse */ || ev.touches[0].clientX;
+        this.y = ev.clientY /* mouse */ || ev.touches[0].clientY;
+    }
+
+    _onDragContinue(ev) {
+        if (!this.resizing) {
+            return
+        }
+
+        const accel = this.mac && ev.shiftKey ? ResizeHandle_SHIFT_ACCELERATION : 1;
+
+        const clientX = ev.clientX || ev.touches[0].clientX;
+        const dx = clientX - this.x;
+        this.x = clientX;
+        let newWidth = Math.max(this.minWidth, Math.min(this.maxWidth, this.width + accel * dx));
+
+        const clientY = ev.clientY || ev.touches[0].clientY;
+        const dy = clientY - this.y;
+        this.y = clientY;
+        let newHeight = Math.max(this.minHeight, Math.min(this.maxHeight, this.height + accel * dy));
+
+        if (this.keepAspectRatio) {
+            if (dx > dy) {
+                newHeight = newWidth / this.aspectRatio;
+            } else {
+                newWidth = newHeight * this.aspectRatio;
+            }
+        }
+
+        if ((this.width != newWidth) || (this.height != newHeight)) {
+            this.width = newWidth;
+            this.height = newHeight;
+            const k = window.devicePixelRatio;
+            this.callback(k * this.width, k * this.height);
+        }
+    }
+
+    _onDragEnd(ev) {
+        this.resizing = false;
     }
 
 }
