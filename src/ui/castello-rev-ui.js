@@ -28,11 +28,9 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
         Platform.fixLinuxInputTypeRangeTouch();
 
-        this.isResizable().then((result) => {
-            const options = {maxScale: 2, keepAspect: true};
-            const handle = new ResizeHandle((w, h) => this.setSize(w, h), options);
-            document.body.appendChild(handle);
-        });
+        const options = {maxScale: 2, keepAspect: true};
+        const handle = new ResizeHandle((w, h) => this.setSize(w, h), options);
+        document.body.appendChild(handle);
 
         this._setupView();
         
