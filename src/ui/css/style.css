@@ -11,6 +11,9 @@ body {
     padding: 20px;
     margin: 0;
     background-color: #fff;
+
+    /* Broken on WebKitGTK, but used to work in the past? */
+    touch-action: none;
 }
 
 pre {
