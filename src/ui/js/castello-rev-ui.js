@@ -19,14 +19,21 @@ class CastelloRevUI extends DISTRHO_WebUI {
     constructor() {
         super();
 
-        this.dom = {
-            feedback: document.getElementById('p-feedback'),
-            lpfreq:   document.getElementById('p-lpfreq')
-        };
+        const feedback = new Knob({minValue: 0, maxValue: 1});
+        feedback.style.width = '100px';
+        feedback.style.height = '100px';
+        feedback.style.backgroundColor = '#0f0';
+        feedback.control.replaceElementById('p-feedback');
 
-        Platform.fixLinuxInputTypeRangeTouch();
+        const lpfreq  = new Knob({minValue: 0, maxValue: 10000});
+        lpfreq.style.width = '100px';
+        lpfreq.style.height = '100px';
+        lpfreq.style.backgroundColor = '#0f0';
+        lpfreq.control.replaceElementById('p-lpfreq');
 
-        this._setupView();
+        AwwwUtil.fixLinuxInputTypeRangeTouch();
+
+        this._addEventListeners();
         this._addResizeHandle();
 
         this.flushInitMessageQueue();
@@ -37,22 +44,27 @@ class CastelloRevUI extends DISTRHO_WebUI {
     parameterChanged(index, value) {
         switch (index) {
             case 0:
-                this.dom.feedback.value = value;
+                this._control('p-feedback').value = value;
                 break;
+                
             case 1:
-                this.dom.lpfreq.value = value;
+                this._control('p-lpfreq').value = value;
                 break;
         }
     }
 
-    _setupView() {
-        this.dom.feedback.addEventListener('input', (ev) => {
+    _addEventListeners() {
+        this._control('p-feedback').addEventListener('input', (ev) => {
             this.setParameterValue(0, parseFloat(ev.target.value));
         });
 
-        this.dom.lpfreq.addEventListener('input', (ev) => {
+        this._control('p-lpfreq').addEventListener('input', (ev) => {
             this.setParameterValue(1, parseFloat(ev.target.value));
         });
+    }
+
+    _control(id) {
+        return document.getElementById(id).control;
     }
 
     async _addResizeHandle() {

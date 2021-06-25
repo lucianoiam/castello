@@ -14,89 +14,16 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// This is a collection of bad practices for creating audio oriented widgets.
-// Widgets are implemented as tiny controllers for DOM elements. Awww aims to
-// achieve minimalism by bending things without breaking them. In practice it
+// Awww is a collection of bad practices for creating audio oriented widgets.
+// It aims to achieve minimalism by bending things without breaking them.
+// Widgets are implemented as tiny controllers for DOM elements. It deliberately
 // skips a custom implementation of the traditional UI widget hierarchy, and
 // instead expects the developer to leverage standard DOM methods for building
 // such. The only rule is to keep bad practices documented for any eventuality.
 
-class Widget {
 
-    constructor(options) {
-        if (new.target === Widget) {
-            throw new TypeError("Cannot instantiate an abstract class");
-        }
-
-        this._options = options;
-
-        // Callers do not get a Widget instance but a DOM element instead.
-        // The Widget instance is made available in a custom property.
-        // Compliant subclasses must follow this convention:
-        
-        // return this._constructorEnd( Element ); -- XXX not returning this
-    }
-
-    dispose() {
-        delete this.el.widget;
-        delete this.el;
-    }
-
-    _constructorEnd(el) {
-        // XXX cyclic reference
-        this.el = el;
-        this.el.widget = this;
-        return this.el;
-    }
-
-    _createElement(name) {
-        return Awww.createControlEventSources(document.createElement(name));
-    }
-
-}
-
-class InputWidget extends Widget {
-
-    constructor(options) {
-        if (new.target === InputWidget) {
-            throw new TypeError("Cannot instantiate an abstract class");
-        }
-
-        super(options);
-
-        this._value = 0;
-    }
-
-    get value() {
-        return this._value;
-    }
-
-    set value(val) {
-        this._value = val;
-        this._onSetValueExternal(val);
-    }
-
-    _onSetValueExternal(val) {
-        throw new TypeError("_onSetValueExternal() not defined");
-    }
-
-    _setValueInternal(val) {
-        // XXX firing built-in events
-        this._value = val;
-        const ev = new InputEvent('input');
-        ev.value = this._value;
-        this.el.dispatchEvent(ev);
-    }
-
-}
-
-// XXX extending built-in browser classes
+// XXX extending built-in classes
 class ControlEvent extends UIEvent {
-
-    constructor(name, originalEvent) {
-        super(name);
-        this.originalEvent = originalEvent;
-    }
 
     get normalX() {
         return (this.clientX - this.target.getBoundingClientRect().left) / this.target.clientWidth;
@@ -108,135 +35,250 @@ class ControlEvent extends UIEvent {
 
 }
 
-class Awww {
 
-    // Add support for some events that abstract mouse and touch input.
+// XXX
+class AwwwControlledElement extends EventTarget {
 
-    static createControlEventSources(el) {
-        el.addEventListener('touchstart', (srcEv) => {
-            const ev = new ControlEvent('controlstart', srcEv);
+    constructor(options) {
+        if (new.target === AwwwControlledElement) {
+            throw new TypeError("Cannot instantiate an abstract class");
+        }
 
-            ev.clientX = srcEv.touches[0].clientX;
-            ev.clientY = srcEv.touches[0].clientY;
+        super();
 
-            if (srcEv.cancelable) {
-                srcEv.preventDefault(); // prevent mousedown
+        this._opt = options || {};
+        this._opt.minValue = this._opt.minValue || 0.0;
+        this._opt.maxValue = this._opt.maxValue || 1.0;
+        this._opt.range = this._opt.maxValue - this._opt.minValue;
+
+        this._value = 0;
+
+        // Callers do not get a Awww instance but a DOM element instead.
+        // The Awww instance is made available in a custom property.
+        // Compliant subclasses must follow this convention:
+        
+        // XXX not returning 'this'
+        // return this._constructorEnd( Element );
+    }
+
+    dispose() {
+        delete this.el.control;
+        delete this.el;
+    }
+
+    replaceElementById(id) {
+        const old = document.getElementById(id);
+        old.parentNode.insertBefore(this.el, old);
+        old.parentNode.removeChild(old);
+        this.el.id = id;
+        return this.el;
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    set value(value) {
+        this._value = value;
+        this._onSetValueExternal(value);
+    }
+
+    _constructorEnd(el) {
+        this.el = this._createControlEventSources(el);
+
+        // XXX cyclic reference
+        // XXX custom properties in DOM Node
+        this.el.control = this;
+
+        return this.el;
+    }
+
+    _onSetValueExternal(value) {
+        // no-op
+    }
+
+    _setValueInternal(value) {
+        // XXX firing built-in events
+        if (this._value == value) {
+            return;
+        }
+        this._value = value;
+        const ev = new InputEvent('input');
+        ev.value = this._value;
+        this.dispatchEvent(ev);
+    }
+
+    _normalize(value) {
+        return (value - this._opt.minValue) / this._opt.range;
+    }
+
+    _denormalize(value) {
+        return this._opt.minValue + value * this._opt.range;
+    }
+
+    _clamp(value) {
+        return Math.max(this._opt.minValue, Math.min(this._opt.maxValue, value));
+    }
+
+    // Merge touch and mouse events into a basic single set of custom events
+    _createControlEventSources(el) {
+
+        // Handle touch events preventing subsequent simulated mouse events
+
+        el.addEventListener('touchstart', (ev) => {
+            this._handleControlStart(el, ev, ev.touches[0].clientX, ev.touches[0].clientY);
+
+            if (ev.cancelable) {
+                ev.preventDefault();
             }
-
-            el.dispatchEvent(ev); // XXX firing events other than CustomEvent
         });
 
-        el.addEventListener('touchmove', (srcEv) => {
-            const ev = new ControlEvent('controlmove', srcEv);
+        el.addEventListener('touchmove', (ev) => {
+            this._handleControlMove(el, ev, ev.touches[0].clientX, ev.touches[0].clientY);
 
-            ev.clientX = srcEv.touches[0].clientX;
-            ev.clientY = srcEv.touches[0].clientY;
-
-            if (srcEv.cancelable) {
-                srcEv.preventDefault(); // prevent mousemove
+            if (ev.cancelable) {
+                ev.preventDefault();
             }
-
-            el.dispatchEvent(ev); // XXX
         });
         
-        el.addEventListener('touchend', (srcEv) => {
-            const ev = new ControlEvent('controlend', srcEv);
+        el.addEventListener('touchend', (ev) => {
+            this._handleControlEnd(el, ev);
 
-            if (srcEv.cancelable) {
-                srcEv.preventDefault(); // prevent mouseup
+            if (ev.cancelable) {
+                ev.preventDefault();
             }
-
-            el.dispatchEvent(ev); // XXX
         });
 
-        // Simulate touch behavior, for example react to move events outside element
+        // Simulate touch behavior for mouse, for example react to move events outside element
 
-        const mouseMoveListener = (srcEv) => {
-            const ev = new ControlEvent('controlmove', srcEv);
-
-            ev.clientX = srcEv.clientX;
-            ev.clientY = srcEv.clientY;
-
-            el.dispatchEvent(ev); // XXX
+        const mouseMoveListener = (ev) => {
+            this._handleControlMove(el, ev, ev.clientX, ev.clientY);
         };
 
-        const mouseUpListener = (srcEv) => {
+        const mouseUpListener = (ev) => {
             window.removeEventListener('mouseup', mouseUpListener);
             window.removeEventListener('mousemove', mouseMoveListener);
 
-            const ev = new ControlEvent('controlend', srcEv);
-
-            el.dispatchEvent(ev); // XXX
+            this._handleControlEnd(el, ev);
         }
     
-        el.addEventListener('mousedown', (srcEv) => {
+        el.addEventListener('mousedown', (ev) => {
             window.addEventListener('mousemove', mouseMoveListener);
             window.addEventListener('mouseup', mouseUpListener);
 
-            const ev = new ControlEvent('controlstart', srcEv);
-
-            ev.clientX = srcEv.clientX;
-            ev.clientY = srcEv.clientY;
-
-            el.dispatchEvent(ev); // XXX
+            this._handleControlStart(el, ev, ev.clientX, ev.clientY);
         });
 
         return el;
     }
 
+    _handleControlStart(el, originalEvent, clientX, clientY) {
+        const ev = this._createControlEvent('controlstart', originalEvent);
+
+        ev.clientX = clientX;
+        ev.clientY = clientY;
+
+        this._prevClientX = clientX;
+        this._prevClientY = clientY;
+
+        el.dispatchEvent(ev); // XXX firing events other than CustomEvent
+    }
+
+    _handleControlMove(el, originalEvent, clientX, clientY) {
+        const ev = this._createControlEvent('controlmove', originalEvent);
+
+        // movementX/Y is not available in TouchEvent instances
+
+        ev.clientX = clientX;
+        ev.movementX = clientX - this._prevClientX;
+        this._prevClientX = clientX;
+
+        ev.clientY = clientY;
+        ev.movementY = clientY - this._prevClientY;
+        this._prevClientY = clientY;
+
+        el.dispatchEvent(ev); // XXX
+    }
+
+    _handleControlEnd(el, originalEvent) {
+        el.dispatchEvent(this._createControlEvent('controlend', originalEvent)); // XXX
+    }
+
+    _createControlEvent(name, originalEvent) {
+        const ev = new ControlEvent(name);
+        ev.originalEvent = originalEvent;
+
+        // Copy some standard properties
+
+        ev.shiftKey = originalEvent.shiftKey;
+        ev.ctrlKey = originalEvent.ctrlKey;
+
+        return ev;
+    }
+
 }
 
-class Knob extends InputWidget {
+
+class AwwwUtil {
+
+    static fixLinuxInputTypeRangeTouch() {
+        // Is this a bug or by design of WebKitGTK ? input[type=range] sliders
+        // are not reacting to touches on that web view. It does not seem to be
+        // a dpf-webui bug as touch works as expected for every other element.
+
+        if (!/linux/i.test(window.navigator.platform)) {
+            return;
+        }
+
+        document.querySelectorAll('input[type=range]').forEach((el) => {
+            el.addEventListener('touchmove', (ev) => {
+                const minVal = parseFloat(ev.target.min);
+                const maxVal = parseFloat(ev.target.max);
+                const width = ev.target.offsetWidth;
+                const x = ev.touches[0].clientX;                
+                const minX = ev.target.getBoundingClientRect().x;
+                const maxX = minX + width;
+                if ((x < minX) || (x > maxX)) return;
+                const normVal = (x - minX) / width;
+                const val = minVal + normVal * (maxVal - minVal);
+                ev.target.value = val;
+                ev.target.dispatchEvent(new CustomEvent('input'));
+            });
+        });
+    }
+
+}
+
+
+class Knob extends AwwwControlledElement {
 
     constructor(options) {
         super(options);
 
-        const div = this._createElement('div');
+        const div = document.createElement('div');
+        div.style.userSelect = 'none';
 
-        div.addEventListener('controlstart', (ev) => {
-            console.log(`${ev.clientX} ${ev.clientY}`);
-        });
+        div.appendChild(document.createElement('label'));
 
         div.addEventListener('controlmove', (ev) => {
-            console.log(`${ev.normalX} ${ev.normalY}`);
-        });
 
-        div.addEventListener('controlend', (ev) => {
-            console.log('end');
+            const val = this._clamp(this._denormalize(ev.normalX));
+
+            this._updateLabel(val);
+
+            this._setValueInternal(val);
+
         });
 
         return this._constructorEnd(div);
     }
 
-    _onSetValueExternal(val) {
-        // TODO
+    _onSetValueExternal(value) {
+        this._updateLabel(value);
+    }
+
+    _updateLabel(value) {
+        this.el.children[0].innerText = Math.floor(10 * value) / 10;
     }
 
 }
-
-
-{ if (typeof(DISTRHO_WebUI) == 'undefined') {
-
-    const el1 = new Knob();
-
-    el1.style.position = 'relative';
-    el1.style.width = '100px';
-    el1.style.height = '100px';
-    el1.style.backgroundColor = '#0f0';
-
-    document.body.appendChild(el1);
-
-    const el2 = new Knob();
-
-    el2.style.position = 'absolute';
-    el2.style.top = '10px';
-    el2.style.left = '10px';
-    el2.style.width = '80px';
-    el2.style.height = '80px';
-    el2.style.backgroundColor = '#f00';
-
-    el1.appendChild(el2);
-
-    document.body.style.visibility = 'visible';
-
-} }

@@ -7,17 +7,17 @@
     <link rel="stylesheet" href="css/style.css">
   </head>
   <body style="visibility: hidden;" onload="new CastelloRevUI">
-    <div class="param-holder">
+    <div class="parameter">
         <label>Feedback</label>
-        <input type="range" min="0" max="1" step="0.001" class="param" id="p-feedback">
+        <template id="p-feedback"></template>
     </div>
-    <div class="param-holder">
+    <div class="parameter">
         <label>LPF frequency</label>
-        <input type="range" min="0" max="10000" step="0.001" class="param" id="p-lpfreq">
+        <template id="p-lpfreq"></template>
     </div>
-    <script src="js/platform.js"></script>
     <script src="js/awww.js"></script>
     <script src="js/resize-handle.js"></script>
+    <script src="js/stub-webui.js"></script>
     <script src="js/castello-rev-ui.js"></script>
   </body>
 </html>
