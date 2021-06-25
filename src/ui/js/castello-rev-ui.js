@@ -23,7 +23,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
         // Disable pinch zoom, CSS touch-action:none appears to be broken on WebKitGTK.
         if (/linux/i.test(window.navigator.platform)) {
-            _elem('main').addEventListener('touchstart', (ev) => {
+             document.getElementById('main').addEventListener('touchstart', (ev) => {
                 ev.preventDefault();
             });
         }
