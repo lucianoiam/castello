@@ -18,20 +18,24 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
     constructor() {
         super();
+        
+        Awww.init();
 
-        const feedback = new Knob({minValue: 0, maxValue: 1});
+        const feedback = document.createElement('awww-knob');
+        feedback.options.minValue = 0;
+        feedback.options.maxValue = 1;
         feedback.style.width = '100px';
         feedback.style.height = '100px';
         feedback.style.backgroundColor = '#0f0';
-        feedback.control.replaceElementById('p-feedback');
+        feedback.replaceTemplateById('p-feedback');
 
-        const lpfreq  = new Knob({minValue: 0, maxValue: 10000});
+        const lpfreq = document.createElement('awww-knob');
+        lpfreq.options.minValue = 10;
+        lpfreq.options.maxValue = 10000;
         lpfreq.style.width = '100px';
         lpfreq.style.height = '100px';
         lpfreq.style.backgroundColor = '#0f0';
-        lpfreq.control.replaceElementById('p-lpfreq');
-
-        AwwwUtil.fixLinuxInputTypeRangeTouch();
+        lpfreq.replaceTemplateById('p-lpfreq');
 
         this._addEventListeners();
         this._addResizeHandle();
@@ -44,27 +48,27 @@ class CastelloRevUI extends DISTRHO_WebUI {
     parameterChanged(index, value) {
         switch (index) {
             case 0:
-                this._control('p-feedback').value = value;
+                this._elem('p-feedback').value = value;
                 break;
-                
+
             case 1:
-                this._control('p-lpfreq').value = value;
+                this._elem('p-lpfreq').value = value;
                 break;
         }
     }
 
     _addEventListeners() {
-        this._control('p-feedback').addEventListener('input', (ev) => {
+        this._elem('p-feedback').addEventListener('input', (ev) => {
             this.setParameterValue(0, parseFloat(ev.target.value));
         });
 
-        this._control('p-lpfreq').addEventListener('input', (ev) => {
+        this._elem('p-lpfreq').addEventListener('input', (ev) => {
             this.setParameterValue(1, parseFloat(ev.target.value));
         });
     }
 
-    _control(id) {
-        return document.getElementById(id).control;
+    _elem(id) {
+        return document.getElementById(id);
     }
 
     async _addResizeHandle() {
