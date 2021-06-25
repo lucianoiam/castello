@@ -14,6 +14,8 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+const _elem = (id) => document.getElementById(id);
+
 class CastelloRevUI extends DISTRHO_WebUI {
 
     constructor() {
@@ -22,22 +24,16 @@ class CastelloRevUI extends DISTRHO_WebUI {
         const feedback = document.createElement('awww-knob');
         feedback.control.minValue = 0;
         feedback.control.maxValue = 1;
-        feedback.style.width = '100px';
-        feedback.style.height = '100px';
-        feedback.style.backgroundColor = '#0f0';
         feedback.replaceTemplateById('p-feedback');
 
         const lpfreq = document.createElement('awww-knob');
         lpfreq.control.minValue = 100;
         lpfreq.control.maxValue = 10000;
-        lpfreq.style.width = '100px';
-        lpfreq.style.height = '100px';
-        lpfreq.style.backgroundColor = '#0f0';
         lpfreq.replaceTemplateById('p-lpfreq');
 
         if (/linux/i.test(window.navigator.platform)) {
             // Avoid pinch zoom, CSS touch-action:none appears to be broken on WebKitGTK.
-            document.getElementById('main').addEventListener('touchstart', (ev) => {
+            _elem('main').addEventListener('touchstart', (ev) => {
                 ev.preventDefault();
             });
         }
@@ -53,31 +49,28 @@ class CastelloRevUI extends DISTRHO_WebUI {
     parameterChanged(index, value) {
         switch (index) {
             case 0:
-                this._elem('p-feedback').value = value;
+                _elem('p-feedback').value = value;
                 break;
 
             case 1:
-                this._elem('p-lpfreq').value = value;
+                _elem('p-lpfreq').value = value;
                 break;
         }
     }
 
     _addEventListeners() {
-        this._elem('p-feedback').addEventListener('input', (ev) => {
-            this.setParameterValue(0, parseFloat(ev.target.value));
+        _elem('p-feedback').addEventListener('input', (ev) => {
+            this.setParameterValue(0, ev.target.value);
         });
 
-        this._elem('p-lpfreq').addEventListener('input', (ev) => {
-            this.setParameterValue(1, parseFloat(ev.target.value));
+        _elem('p-lpfreq').addEventListener('input', (ev) => {
+            this.setParameterValue(1, ev.target.value);
         });
-    }
-
-    _elem(id) {
-        return document.getElementById(id);
     }
 
     async _addResizeHandle() {
         const options = {
+        	id: 'resize-handle',
             minWidth: await this.getWidth() / window.devicePixelRatio,
             minHeight: await this.getHeight() / window.devicePixelRatio,
             maxScale: 2,

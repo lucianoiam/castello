@@ -10,7 +10,9 @@ body {
     height: 100%;
     padding: 20px;
     margin: 0;
-    background-color: #fff;
+    background-color: #000;
+    color: #fff;
+    font-family: sans-serif;
 
     /* Broken on WebKitGTK, but used to work in the past? */
     touch-action: none;
@@ -25,6 +27,20 @@ body {
     align-items: center;
 }
 
-.parameter {
+#resize-handle > svg > path {
+    fill: #fff;
+    opacity: 0.5;
+}
 
+awww-knob {
+    width: 100px;
+    height: 100px;
+    background-color: #FF6DAF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+awww-knob > label {
+    color: #000;
 }
