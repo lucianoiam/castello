@@ -82,9 +82,8 @@ class AwwwElement extends HTMLElement {
     _init() {   
         this._opt.minValue = this._opt.minValue || 0.0;
         this._opt.maxValue = this._opt.maxValue || 1.0;
-        this._value = 0;
 
-        this.style.display = 'block';
+        this._value = 0;
 
         this._createControlEventSources();
     }
@@ -244,8 +243,8 @@ class AwwwKnob extends AwwwElement {
     _init() {
         super._init();
 
-        this.style.userSelect = 'none';
-
+		//this.style.display = 'block';
+        
         this.appendChild(document.createElement('label'));
     }
 

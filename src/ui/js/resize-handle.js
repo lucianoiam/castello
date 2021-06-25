@@ -45,7 +45,7 @@ class ResizeHandle {
         this.height = 0;
         this.resizing = false;
 
-        this.handle = this._createHandle(options.theme || 'dots');
+        this.handle = this._createHandle(options.id, options.theme || 'dots');
 
         this._addEventListeners();
     }
@@ -54,7 +54,7 @@ class ResizeHandle {
         return this.handle;
     }
 
-    _createHandle(theme) {
+    _createHandle(id, theme) {
         const handle = document.createElement('div');
         
         switch (theme) {
@@ -66,6 +66,10 @@ class ResizeHandle {
                 break;
             default:
                 break;
+        }
+
+        if (id) {
+        	handle.id = id;
         }
 
         handle.style.position = 'fixed';
