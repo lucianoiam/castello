@@ -30,11 +30,7 @@ pre {
     overflow: hidden;
 }
 
-.param-holder {
+.parameter {
     padding: 20px;
-}
-
-.param {
-    width: 100%;
-    margin-top: 1em;
+    float: left;
 }
