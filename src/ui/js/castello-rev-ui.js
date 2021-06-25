@@ -19,9 +19,6 @@ class CastelloRevUI extends DISTRHO_WebUI {
     constructor() {
         super();
 
-        // Convenience function
-        window._elem = (id) => document.getElementById(id);
-
         // Disable pinch zoom, CSS touch-action:none appears to be broken on WebKitGTK.
         if (/linux/i.test(window.navigator.platform)) {
             _elem('main').addEventListener('touchstart', (ev) => {
@@ -29,16 +26,8 @@ class CastelloRevUI extends DISTRHO_WebUI {
             });
         }
 
-        // Create widgets and insert them at the places specified in the HTML
-        const feedback = document.createElement('a-knob');
-        feedback.opt.minValue = 0;
-        feedback.opt.maxValue = 1;
-        feedback.replaceTemplateById('p-feedback');
-
-        const lpfreq = document.createElement('a-knob');
-        lpfreq.opt.minValue = 100;
-        lpfreq.opt.maxValue = 10000;
-        lpfreq.replaceTemplateById('p-lpfreq');
+        // Create widgets inserting them at the places specified in the HTML
+        this._createInputWidgets();
 
         // Flush queue after creating widgets to set their initial values,
         // and before calling any async methods otherwise reply never arrives.
@@ -47,11 +36,22 @@ class CastelloRevUI extends DISTRHO_WebUI {
         // Setting up the resize handle requires calling async getWidth/Height()
         this._createResizeHandle();
 
-        // Listen to widget input changes
-        this._addWidgetListeners();
-
         // Showtime
         document.body.style.visibility = 'visible';
+    }
+
+    _createInputWidgets() {
+        const feedback = document.createElement('a-knob');
+        feedback.opt.minValue = 0;
+        feedback.opt.maxValue = 1;
+        feedback.addEventListener('input', (ev) => { this.setParameterValue(0, ev.target.value); });
+        feedback.replaceTemplateById('p-feedback');
+
+        const lpfreq = document.createElement('a-knob');
+        lpfreq.opt.minValue = 100;
+        lpfreq.opt.maxValue = 10000;
+        lpfreq.addEventListener('input', (ev) => { this.setParameterValue(1, ev.target.value); });
+        lpfreq.replaceTemplateById('p-lpfreq');
     }
 
     async _createResizeHandle() {
@@ -60,32 +60,20 @@ class CastelloRevUI extends DISTRHO_WebUI {
         handle.opt.minHeight = await this.getHeight() / window.devicePixelRatio;
         handle.opt.keepAspectRatio = true;
         handle.opt.maxScale = 2;
-
-        handle.addEventListener('input', (ev) => {
-            this.setSize(ev.value.width, ev.value.height);
-        });
-
-        document.body.appendChild(handle);
-    }
-
-    _addWidgetListeners() {
-        _elem('p-feedback').addEventListener('input', (ev) => {
-            this.setParameterValue(0, ev.target.value);
-        });
-
-        _elem('p-lpfreq').addEventListener('input', (ev) => {
-            this.setParameterValue(1, ev.target.value);
-        });
+        handle.addEventListener('input', (ev) => { this.setSize(ev.value.width, ev.value.height); });
+        handle.appendToBody();
     }
 
     parameterChanged(index, value) {
+        const widget = (id) => document.getElementById(id);
+
         switch (index) {
             case 0:
-                _elem('p-feedback').value = value;
+                widget('p-feedback').value = value;
                 break;
 
             case 1:
-                _elem('p-lpfreq').value = value;
+                widget('p-lpfreq').value = value;
                 break;
         }
     }
