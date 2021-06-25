@@ -244,6 +244,10 @@ class AwwwElement extends HTMLElement {
 
 class ResizeHandle extends AwwwElement {
 
+    appendToBody() {
+        document.body.appendChild(this);
+    }
+
     _init() {
         super._init();
 
