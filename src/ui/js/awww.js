@@ -357,8 +357,9 @@ class Knob extends AwwwElement {
     _onControlEventContinue(ev) {
         let dv;
 
-        if (this._axis == 0) {
-            this._axis = Math.abs(ev.movementX) - Math.abs(ev.movementY);
+        if (Math.abs(this._axis) < 3) {
+            this._axis += Math.abs(ev.movementX) - Math.abs(ev.movementY);
+            return; // wait to lock axis
         }
 
         if (this._axis > 0) {
