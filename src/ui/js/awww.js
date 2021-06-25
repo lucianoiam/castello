@@ -16,17 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-class ControlEvent extends UIEvent {
-
-    get normalX() {
-        return (this.clientX - this.target.getBoundingClientRect().left) / this.target.clientWidth;
-    }
-
-    get normalY() {
-        return (this.clientY - this.target.getBoundingClientRect().top) / this.target.clientHeight;
-    }
-
-}
+class ControlEvent extends UIEvent {}
 
 class AwwwElement extends HTMLElement {
 
@@ -124,16 +114,16 @@ class AwwwElement extends HTMLElement {
         return this._opt.maxValue - this._opt.minValue;
     }
 
+    _clamp(value) {
+        return Math.max(this._opt.minValue, Math.min(this._opt.maxValue, value));
+    }
+
     _normalize(value) {
         return (value - this._opt.minValue) / this._range();
     }
 
     _denormalize(value) {
         return this._opt.minValue + value * this._range();
-    }
-
-    _clamp(value) {
-        return Math.max(this._opt.minValue, Math.min(this._opt.maxValue, value));
     }
 
     // Merge touch and mouse events into a basic single set of custom events
@@ -360,18 +350,35 @@ class Knob extends AwwwElement {
         this.appendChild(document.createElement('label'));
     }
 
+    _onControlEventStart(ev) {
+        this._startValue = this._value;
+        this._axis = 0;
+        this._dxy = 0;
+    }
+
     _onControlEventContinue(ev) {
-        // WIP 
-        
-        const val = this._clamp(this._denormalize(ev.normalX));
-        this._setValue(val);
+        let dv;
+
+        if (this._axis == 0) {
+            this._axis = Math.abs(ev.movementX) - Math.abs(ev.movementY);
+        }
+
+        if (this._axis > 0) {
+            this._dxy += ev.movementX;
+            dv = this._range() * this._dxy / this.clientWidth;
+        } else {
+            this._dxy -= ev.movementY;
+            dv = this._range() * this._dxy / this.clientHeight;
+        }
+
+        this._setValue(this._clamp(this._startValue + dv));
     }
 
     _onSetValue(value) {
         this.children[0].innerText = Math.floor(10 * value) / 10;
     }
 
-    static _staticInit() {
+    static _staticInit() {                                                                   
         window.customElements.define('a-knob', this);
     }
 
