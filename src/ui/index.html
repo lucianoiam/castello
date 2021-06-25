@@ -4,11 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Castello Reverb</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
   </head>
   <body style="visibility: hidden;" onload="new CastelloRevUI">
-    <!-- Match values in Plugin::initParameter() -->
-    <!-- TODO: a way to pull parameters type/min/max fom Plugin -->
     <div class="param-holder">
         <label>Feedback</label>
         <input type="range" min="0" max="1" step="0.001" class="param" id="p-feedback">
@@ -17,8 +15,9 @@
         <label>LPF frequency</label>
         <input type="range" min="0" max="10000" step="0.001" class="param" id="p-lpfreq">
     </div>
-    <script src="platform.js"></script>
-    <script src="resize-handle.js"></script>
-    <script src="castello-rev-ui.js"></script>
+    <script src="js/platform.js"></script>
+    <script src="js/awww.js"></script>
+    <script src="js/resize-handle.js"></script>
+    <script src="js/castello-rev-ui.js"></script>
   </body>
 </html>
