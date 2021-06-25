@@ -59,6 +59,7 @@ class AwwwElement extends HTMLElement {
         // Also allow to set options using an object, like this:
         //   const elem = document.createElement('awww-elem');
         //   elem.options = {minValue: 1};
+
         for (const key in opt) {
             this.control[key] = opt[key];
         }
@@ -91,7 +92,9 @@ class AwwwElement extends HTMLElement {
         if (this._value == value) {
             return;
         }
+
         this._value = value;
+
         const ev = new InputEvent('input');
         ev.value = this._value;
         this.dispatchEvent(ev);
@@ -233,6 +236,8 @@ class AwwwKnob extends AwwwElement {
 
         this.addEventListener('controlmove', (ev) => {
 
+            // WIP 
+            
             const val = this._clamp(this._denormalize(ev.normalX));
             this._updateLabel(val);
             this._setValueInternal(val);
