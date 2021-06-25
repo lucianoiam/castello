@@ -22,16 +22,16 @@ class CastelloRevUI extends DISTRHO_WebUI {
         Awww.init();
 
         const feedback = document.createElement('awww-knob');
-        feedback.options.minValue = 0;
-        feedback.options.maxValue = 1;
+        feedback.control.minValue = 0;
+        feedback.control.maxValue = 1;
         feedback.style.width = '100px';
         feedback.style.height = '100px';
         feedback.style.backgroundColor = '#0f0';
         feedback.replaceTemplateById('p-feedback');
 
         const lpfreq = document.createElement('awww-knob');
-        lpfreq.options.minValue = 10;
-        lpfreq.options.maxValue = 10000;
+        lpfreq.control.minValue = 10;
+        lpfreq.control.maxValue = 10000;
         lpfreq.style.width = '100px';
         lpfreq.style.height = '100px';
         lpfreq.style.backgroundColor = '#0f0';

@@ -41,7 +41,7 @@ class AwwwElement extends HTMLElement {
         return this;
     }
 
-    get options() {
+    get control() {
         // Allow to set options without requiring to first create the options
         // object itself, like this:
         //   const elem = document.createElement('awww-elem');
@@ -55,12 +55,12 @@ class AwwwElement extends HTMLElement {
         return this._opt;
     }
 
-    set options(opt) {
+    set control(opt) {
         // Also allow to set options using an object, like this:
         //   const elem = document.createElement('awww-elem');
         //   elem.options = {minValue: 1};
         for (const key in opt) {
-            this.options[key] = opt[key];
+            this.control[key] = opt[key];
         }
     }
 
