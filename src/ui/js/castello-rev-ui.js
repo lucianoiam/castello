@@ -19,8 +19,6 @@ class CastelloRevUI extends DISTRHO_WebUI {
     constructor() {
         super();
         
-        Awww.init();
-
         const feedback = document.createElement('awww-knob');
         feedback.control.minValue = 0;
         feedback.control.maxValue = 1;
@@ -36,6 +34,13 @@ class CastelloRevUI extends DISTRHO_WebUI {
         lpfreq.style.height = '100px';
         lpfreq.style.backgroundColor = '#0f0';
         lpfreq.replaceTemplateById('p-lpfreq');
+
+        if (/linux/i.test(window.navigator.platform)) {
+            // Avoid pinch zoom, CSS touch-action:none appears to be broken on WebKitGTK.
+            document.getElementById('main').addEventListener('touchstart', (ev) => {
+                ev.preventDefault();
+            });
+        }
 
         this._addEventListeners();
         this._addResizeHandle();

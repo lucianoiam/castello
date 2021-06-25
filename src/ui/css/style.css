@@ -16,24 +16,15 @@ body {
     touch-action: none;
 }
 
-pre {
-    white-space: pre-line;
-}
-
 #main {
     height: 100%;
     width: 100%;
-    padding: 10px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: row;
+    justify-content: space-evenly;
     align-items: center;
-    text-align: center;
-    border: solid 1px #000;
-    overflow: hidden;
 }
 
 .parameter {
-    padding: 20px;
-    float: left;
+
 }
