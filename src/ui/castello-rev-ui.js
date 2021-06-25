@@ -43,12 +43,14 @@ class CastelloRevUI extends DISTRHO_WebUI {
     }
 
     _createInputWidgets() {
+        // Feedback knob
         const feedback = document.createElement('a-knob');
         feedback.opt.minValue = 0;
         feedback.opt.maxValue = 1;
         feedback.addEventListener('input', (ev) => { this.setParameterValue(0, ev.target.value); });
         feedback.replaceTemplateById('p-feedback');
 
+        // LPF cutoff frequency knob
         const lpfreq = document.createElement('a-knob');
         lpfreq.opt.minValue = 100;
         lpfreq.opt.maxValue = 10000;
@@ -57,6 +59,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
     }
 
     async _createResizeHandle() {
+        // Like any other widget the resize handle can be styled using CSS.
         const handle = document.createElement('a-resize-handle');
         handle.opt.minWidth = await this.getWidth() / window.devicePixelRatio;
         handle.opt.minHeight = await this.getHeight() / window.devicePixelRatio;
@@ -67,6 +70,8 @@ class CastelloRevUI extends DISTRHO_WebUI {
     }
 
     parameterChanged(index, value) {
+        // Host informs a parameter has changed, update the matching control.
+
         const widget = (id) => document.getElementById(id);
 
         switch (index) {
