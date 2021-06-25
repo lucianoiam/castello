@@ -269,7 +269,15 @@ class ResizeHandle extends AwwwElement {
         this._width = 0;
         this._height = 0;
         
-        // Configure element
+        // No point in allowing CSS customizations for these
+        this.style.position = 'fixed';
+        this.style.zIndex = '1000';
+        this.style.right = '0px';
+        this.style.bottom = '0px';
+        this.style.width = '24px';
+        this.style.height = '24px';
+
+        // Configure graphic
         switch (this._opt.theme || 'dots') {
             case 'dots':
                 this.innerHTML = ResizeHandle._themeSvgData.DOTS;
@@ -280,13 +288,6 @@ class ResizeHandle extends AwwwElement {
             default:
                 break;
         }
-
-        this.style.position = 'fixed';
-        this.style.zIndex = '1000';
-        this.style.right = '0px';
-        this.style.bottom = '0px';
-        this.style.width = '24px';
-        this.style.height = '24px';
     }
 
     _onControlEventStart(ev) {
@@ -297,8 +298,11 @@ class ResizeHandle extends AwwwElement {
     _onControlEventContinue(ev) {
         // FIXME: On Windows, touchmove events stop triggering after calling callback,
         //        which in turn calls DistrhoUI::setSize(). Mouse resizing works OK.
-        let newWidth = Math.max(this._opt.minWidth, Math.min(this._opt.maxWidth, this._width + ev.movementX));
-        let newHeight = Math.max(this._opt.minHeight, Math.min(this._opt.maxHeight, this._height + ev.movementY));
+        let newWidth = this._width + ev.movementX;
+        newWidth = Math.max(this._opt.minWidth, Math.min(this._opt.maxWidth, newWidth));
+
+        let newHeight = this._height + ev.movementY;
+        newHeight = Math.max(this._opt.minHeight, Math.min(this._opt.maxHeight, newHeight));
 
         if (this._opt.keepAspectRatio) {
             if (ev.movementX > ev.movementY) {
@@ -318,22 +322,22 @@ class ResizeHandle extends AwwwElement {
 
     static _staticInit() {
         ResizeHandle._themeSvgData = Object.freeze({
-            DOTS: `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                    <path opacity="0.25" d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+            DOTS:
+               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <path d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
                         C78.262,70.5,80.5,72.74,80.5,75.499z"/>
-                    <path opacity="0.25" d="M50.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                    <path d="M50.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
                         C48.262,70.5,50.5,72.74,50.5,75.499z"/>
-                    <path opacity="0.25" d="M80.5,45.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                    <path d="M80.5,45.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
                         C78.262,40.5,80.5,42.74,80.5,45.499z"/>
                 </svg>`
             ,
-            LINES: `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                    <line stroke="#000000" opacity="0.5" x1="0" y1="100" x2="100" y2="0"/>
-                    <line stroke="#000000" opacity="0.5" x1="100" y1="25" x2="25" y2="100"/>
-                    <line stroke="#000000" opacity="0.5" x1="50" y1="100" x2="100" y2="50"/>
-                    <line stroke="#000000" opacity="0.5" x1="75" y1="100" x2="100" y2="75"/>
+            LINES:
+               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <line x1="0" y1="100" x2="100" y2="0"/>
+                    <line x1="100" y1="25" x2="25" y2="100"/>
+                    <line x1="50" y1="100" x2="100" y2="50"/>
+                    <line x1="75" y1="100" x2="100" y2="75"/>
                 </svg>`
         });
 

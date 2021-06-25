@@ -16,21 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const _elem = (id) => document.getElementById(id);
-
 class CastelloRevUI extends DISTRHO_WebUI {
 
     constructor() {
         super();
 
-        // Avoid pinch zoom, CSS touch-action:none appears to be broken on WebKitGTK.
+        // Convenience function
+        window._elem = (id) => document.getElementById(id);
+
+        // Disable pinch zoom, CSS touch-action:none appears to be broken on WebKitGTK.
         if (/linux/i.test(window.navigator.platform)) {
             _elem('main').addEventListener('touchstart', (ev) => {
                 ev.preventDefault();
             });
         }
 
-        // Create widgets and insert them at the places specified in the html
+        // Create widgets and insert them at the places specified in the HTML
         const feedback = document.createElement('a-knob');
         feedback.opt.minValue = 0;
         feedback.opt.maxValue = 1;
@@ -41,11 +42,11 @@ class CastelloRevUI extends DISTRHO_WebUI {
         lpfreq.opt.maxValue = 10000;
         lpfreq.replaceTemplateById('p-lpfreq');
 
-        // Need to flush queue before calling async methods and after creating
-        // parameter widgets so they can be updated from parameterChanged()
+        // Flush queue after creating widgets to set their initial values,
+        // and before calling any async methods otherwise reply never arrives.
         this.flushInitMessageQueue();
 
-        // Setting up the resize handle requires calling async methods
+        // Setting up the resize handle requires calling async getWidth/Height()
         this._createResizeHandle();
 
         // Listen to widget input changes
@@ -59,8 +60,8 @@ class CastelloRevUI extends DISTRHO_WebUI {
         const handle = document.createElement('a-resize-handle');
         handle.opt.minWidth = await this.getWidth() / window.devicePixelRatio;
         handle.opt.minHeight = await this.getHeight() / window.devicePixelRatio;
-        handle.opt.maxScale = 2;
         handle.opt.keepAspectRatio = true;
+        handle.opt.maxScale = 2;
 
         handle.addEventListener('input', (ev) => {
             this.setSize(ev.value.width, ev.value.height);

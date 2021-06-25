@@ -13,9 +13,7 @@ body {
     background-color: #000;
     color: #fff;
     font-family: sans-serif;
-
-    /* Broken on WebKitGTK, but used to work in the past? */
-    touch-action: none;
+    touch-action: none; /* Broken on WebKitGTK, but used to work in the past? */
 }
 
 #main {
@@ -29,7 +27,7 @@ body {
 
 a-resize-handle > svg > path {
     fill: #fff;
-    opacity: 0.5;
+    opacity: 0.25;
 }
 
 a-knob {
