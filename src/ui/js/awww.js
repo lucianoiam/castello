@@ -24,23 +24,6 @@ class Awww {
 
 class AwwwElement extends HTMLElement {
 
-    connectedCallback() {
-        if (!this.awwwInitialized) {
-            this._init();
-            this.awwwInitialized = true;
-        }
-    }
-
-    replaceTemplateById(id) {
-        const old = document.querySelector(`template[id=${id}]`);
-        old.parentNode.insertBefore(this, old);
-        old.parentNode.removeChild(old);
-        
-        this.id = id;
-        
-        return this;
-    }
-
     get control() {
         // Allow to set options without requiring to first create the options
         // object itself, like this:
@@ -70,8 +53,24 @@ class AwwwElement extends HTMLElement {
     }
 
     set value(value) {
-        this._value = value;
-        this._onSetValueExternal(value);
+        this._setValue(value);
+    }
+
+    connectedCallback() {
+        if (!this.awwwInitialized) {
+            this._init();
+            this.awwwInitialized = true;
+        }
+    }
+
+    replaceTemplateById(id) {
+        const old = document.querySelector(`template[id=${id}]`);
+        old.parentNode.insertBefore(this, old);
+        old.parentNode.removeChild(old);
+        
+        this.id = id;
+        
+        return this;
     }
 
     _init() {   
@@ -84,16 +83,32 @@ class AwwwElement extends HTMLElement {
         this._createControlEventSources();
     }
 
-    _onSetValueExternal(value) {
+    _onControlEventStart(ev) {
         // no-op
     }
 
-    _setValueInternal(value) {
+    _onControlEventContinue(ev) {
+        // no-op
+    }
+
+    _onControlEventEnd(ev) {
+        // no-op
+    }
+
+    _onSetValue(value) {
+        // no-op
+    }
+
+    _setValue(value, runCallback) {
         if (this._value == value) {
             return;
         }
 
         this._value = value;
+
+        if (runCallback !== false) {
+            this._onSetValue(this._value);
+        }
 
         const ev = new InputEvent('input');
         ev.value = this._value;
@@ -123,7 +138,7 @@ class AwwwElement extends HTMLElement {
         // Handle touch events preventing subsequent simulated mouse events
 
         this.addEventListener('touchstart', (ev) => {
-            this._handleControlStart(ev, ev.touches[0].clientX, ev.touches[0].clientY);
+            this._handleInputStart(ev, ev.touches[0].clientX, ev.touches[0].clientY);
 
             if (ev.cancelable) {
                 ev.preventDefault();
@@ -131,7 +146,7 @@ class AwwwElement extends HTMLElement {
         });
 
         this.addEventListener('touchmove', (ev) => {
-            this._handleControlMove(ev, ev.touches[0].clientX, ev.touches[0].clientY);
+            this._handleInputContinue(ev, ev.touches[0].clientX, ev.touches[0].clientY);
 
             if (ev.cancelable) {
                 ev.preventDefault();
@@ -139,7 +154,7 @@ class AwwwElement extends HTMLElement {
         });
         
         this.addEventListener('touchend', (ev) => {
-            this._handleControlEnd(ev);
+            this._handleInputEnd(ev);
 
             if (ev.cancelable) {
                 ev.preventDefault();
@@ -149,25 +164,25 @@ class AwwwElement extends HTMLElement {
         // Simulate touch behavior for mouse, for example react to move events outside element
 
         const mouseMoveListener = (ev) => {
-            this._handleControlMove(ev, ev.clientX, ev.clientY);
+            this._handleInputContinue(ev, ev.clientX, ev.clientY);
         };
 
         const mouseUpListener = (ev) => {
             window.removeEventListener('mouseup', mouseUpListener);
             window.removeEventListener('mousemove', mouseMoveListener);
 
-            this._handleControlEnd(ev);
+            this._handleInputEnd(ev);
         }
     
         this.addEventListener('mousedown', (ev) => {
             window.addEventListener('mousemove', mouseMoveListener);
             window.addEventListener('mouseup', mouseUpListener);
 
-            this._handleControlStart(ev, ev.clientX, ev.clientY);
+            this._handleInputStart(ev, ev.clientX, ev.clientY);
         });
     }
 
-    _handleControlStart(originalEvent, clientX, clientY) {
+    _handleInputStart(originalEvent, clientX, clientY) {
         const ev = this._createControlEvent('controlstart', originalEvent);
 
         ev.clientX = clientX;
@@ -177,10 +192,12 @@ class AwwwElement extends HTMLElement {
         this._prevClientY = clientY;
 
         this.dispatchEvent(ev);
+
+        this._onControlEventStart(ev);
     }
 
-    _handleControlMove(originalEvent, clientX, clientY) {
-        const ev = this._createControlEvent('controlmove', originalEvent);
+    _handleInputContinue(originalEvent, clientX, clientY) {
+        const ev = this._createControlEvent('controlcontinue', originalEvent);
 
         // movementX/Y is not available in TouchEvent instances
 
@@ -193,10 +210,14 @@ class AwwwElement extends HTMLElement {
         this._prevClientY = clientY;
 
         this.dispatchEvent(ev);
+
+        this._onControlEventContinue(ev);
     }
 
-    _handleControlEnd(originalEvent) {
-        this.dispatchEvent(this._createControlEvent('controlend', originalEvent));
+    _handleInputEnd(originalEvent) {
+        const ev = this._createControlEvent('controlend', originalEvent);
+        this.dispatchEvent(ev);
+        this._onControlEventEnd(ev);
     }
 
     _createControlEvent(name, originalEvent) {
@@ -233,23 +254,16 @@ class AwwwKnob extends AwwwElement {
         this.style.userSelect = 'none';
 
         this.appendChild(document.createElement('label'));
-
-        this.addEventListener('controlmove', (ev) => {
-
-            // WIP 
-            
-            const val = this._clamp(this._denormalize(ev.normalX));
-            this._updateLabel(val);
-            this._setValueInternal(val);
-
-        });
     }
 
-    _onSetValueExternal(value) {
-        this._updateLabel(value);
+    _onControlEventContinue(ev) {
+        // WIP 
+        
+        const val = this._clamp(this._denormalize(ev.normalX));
+        this._setValue(val, true);
     }
 
-    _updateLabel(value) {
+    _onSetValue(value) {
         this.children[0].innerText = Math.floor(10 * value) / 10;
     }
 

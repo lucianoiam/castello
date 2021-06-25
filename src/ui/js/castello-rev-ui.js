@@ -30,7 +30,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
         feedback.replaceTemplateById('p-feedback');
 
         const lpfreq = document.createElement('awww-knob');
-        lpfreq.control.minValue = 10;
+        lpfreq.control.minValue = 100;
         lpfreq.control.maxValue = 10000;
         lpfreq.style.width = '100px';
         lpfreq.style.height = '100px';
