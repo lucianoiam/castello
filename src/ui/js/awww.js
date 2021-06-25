@@ -16,10 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-class Awww {
+class ControlEvent extends UIEvent {
 
-    static init() {
-        window.customElements.define('awww-knob', AwwwKnob);
+    get normalX() {
+        return (this.clientX - this.target.getBoundingClientRect().left) / this.target.clientWidth;
+    }
+
+    get normalY() {
+        return (this.clientY - this.target.getBoundingClientRect().top) / this.target.clientHeight;
     }
 
 }
@@ -101,14 +105,14 @@ class AwwwElement extends HTMLElement {
         // no-op
     }
 
-    _setValue(value, runCallback) {
+    _setValue(value, runInternalCallback) {
         if (this._value == value) {
             return;
         }
 
         this._value = value;
 
-        if (runCallback !== false) {
+        if (runInternalCallback !== false) {
             this._onSetValue(this._value);
         }
 
@@ -227,23 +231,10 @@ class AwwwElement extends HTMLElement {
         ev.originalEvent = originalEvent;
 
         // Copy some standard properties
-
         ev.shiftKey = originalEvent.shiftKey;
         ev.ctrlKey = originalEvent.ctrlKey;
 
         return ev;
-    }
-
-}
-
-class ControlEvent extends UIEvent {
-
-    get normalX() {
-        return (this.clientX - this.target.getBoundingClientRect().left) / this.target.clientWidth;
-    }
-
-    get normalY() {
-        return (this.clientY - this.target.getBoundingClientRect().top) / this.target.clientHeight;
     }
 
 }
@@ -262,11 +253,15 @@ class AwwwKnob extends AwwwElement {
         // WIP 
         
         const val = this._clamp(this._denormalize(ev.normalX));
-        this._setValue(val, true);
+        this._setValue(val);
     }
 
     _onSetValue(value) {
         this.children[0].innerText = Math.floor(10 * value) / 10;
     }
 
+}
+
+{
+    window.customElements.define('awww-knob', AwwwKnob);
 }
