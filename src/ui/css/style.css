@@ -27,12 +27,12 @@ body {
     align-items: center;
 }
 
-#resize-handle > svg > path {
+a-resize-handle > svg > path {
     fill: #fff;
     opacity: 0.5;
 }
 
-awww-knob {
+a-knob {
     width: 100px;
     height: 100px;
     background-color: #FF6DAF;
@@ -41,6 +41,6 @@ awww-knob {
     align-items: center;
 }
 
-awww-knob > label {
+a-knob > label {
     color: #000;
 }
