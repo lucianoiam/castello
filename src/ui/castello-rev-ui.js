@@ -32,10 +32,10 @@ class CastelloRevUI extends DISTRHO_WebUI {
         this._createInputWidgets();
 
         // Flush queue after creating widgets to set their initial values,
-        // and before calling any async methods otherwise reply never arrives.
+        // and before calling any async methods otherwise those never complete.
         this.flushInitMessageQueue();
 
-        // Setting up the resize handle requires calling async getWidth/Height()
+        // Setting up resize handle needs calling async getWidth()/getHeight()
         this._createResizeHandle();
 
         // Showtime
@@ -70,7 +70,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
     }
 
     parameterChanged(index, value) {
-        // Host informs a parameter has changed, update the matching control.
+        // Host informs a parameter has changed, update its associated widget.
 
         const widget = (id) => document.getElementById(id);
 
