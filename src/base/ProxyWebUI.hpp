@@ -32,7 +32,7 @@ public:
     virtual ~ProxyWebUI() {};
 
 protected:
-    
+
     void onDisplay() override;
     void uiReshape(uint width, uint height) override;
 
@@ -40,6 +40,9 @@ protected:
 #if (DISTRHO_PLUGIN_WANT_STATE == 1)
     void stateChanged(const char* key, const char* value) override;
 #endif
+    
+    uint getInitWidth() const;
+    uint getInitHeight() const;
 
     platform::WebWidget& webWidget() { return fWebWidget; }
 
@@ -57,11 +60,13 @@ private:
     virtual void handleWebWidgetScriptMessageReceived(const ScriptValueVector& args) override;
 
     typedef std::vector<ScriptValueVector> InitMessageQueue;
-
-    platform::WebWidget fWebWidget;
-    InitMessageQueue    fInitMsgQueue;
-    bool                fFlushedInitMsgQueue;
+    
     uint32_t            fBackgroundColor;
+    platform::WebWidget fWebWidget;
+    bool                fFlushedInitMsgQueue;
+    InitMessageQueue    fInitMsgQueue;
+    uint                fInitWidth;
+    uint                fInitHeight;
 
 };
 

@@ -59,8 +59,8 @@ class CastelloRevUI extends DISTRHO_WebUI {
     async _createResizeHandle() {
         // Like any other widget the resize handle can be styled using CSS.
         const handle = document.createElement('a-resize-handle');
-        handle.opt.minWidth = await this.getWidth() / window.devicePixelRatio;
-        handle.opt.minHeight = await this.getHeight() / window.devicePixelRatio;
+        handle.opt.minWidth = await this.getInitWidth() / window.devicePixelRatio;
+        handle.opt.minHeight = await this.getInitHeight() / window.devicePixelRatio;
         handle.opt.keepAspectRatio = true;
         handle.opt.maxScale = 2;
         handle.addEventListener('input', (ev) => { this.setSize(ev.value.width, ev.value.height); });

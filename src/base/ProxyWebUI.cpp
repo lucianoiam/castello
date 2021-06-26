@@ -26,7 +26,7 @@ USE_NAMESPACE_DISTRHO
 // showing an excessively large canvas that does not tightly wrap the plugin UI,
 // or Live showing a floating window with plenty of empty space. Likely the host
 // is expecting unscaled values, ie. those specified by NSView frames. The issue
-// does not affect the standalone version of the plugin. 17 Jun 2021.
+// does not affect the standalone version of the plugin. Jun '21.
 #ifdef DISTRHO_OS_MAC
 namespace DISTRHO {
     // Support for patched DistrhoUI.cpp
@@ -36,20 +36,23 @@ namespace DISTRHO {
 }
 #endif
 
-// Automatically scale up the plugin UI so its contents do not look small
-// on high pixel density displays, known as HiDPI, Retina...
-#define INIT_SCALE_FACTOR platform::getSystemDisplayScaleFactor()
-
-// Dimensions passed to the UI constructor determine the initial plugin size
 ProxyWebUI::ProxyWebUI(uint baseWidth, uint baseHeight, uint32_t backgroundColor)
-    : UI(INIT_SCALE_FACTOR * baseWidth, INIT_SCALE_FACTOR * baseHeight)
+    : UI(baseWidth, baseHeight)
+    , fBackgroundColor(backgroundColor)
     , fWebWidget(this)
     , fFlushedInitMsgQueue(false)
-    , fBackgroundColor(backgroundColor)
 {
-    setGeometryConstraints(getWidth(), getHeight(), false, false);
+    // Automatically scale up the plugin UI so its contents do not look small
+    // on high pixel density displays, known as HiDPI, Retina...
+    float k = platform::getSystemDisplayScaleFactor();
 
-    fWebWidget.setSize(getWidth(), getHeight());
+    fInitWidth = k * baseWidth;
+    setWidth(fInitWidth);
+
+    fInitHeight = k * baseHeight;
+    setHeight(fInitHeight);
+
+    fWebWidget.setSize(fInitWidth, fInitHeight);
     fWebWidget.setBackgroundColor(fBackgroundColor);
     fWebWidget.setEventHandler(this);
 
@@ -95,6 +98,16 @@ void ProxyWebUI::stateChanged(const char* key, const char* value)
 }
 
 #endif // DISTRHO_PLUGIN_WANT_STATE == 1
+
+uint ProxyWebUI::getInitWidth() const
+{
+    return fInitWidth;
+}
+
+uint ProxyWebUI::getInitHeight() const
+{
+    return fInitHeight;
+}
 
 void ProxyWebUI::webPostMessage(const ScriptValueVector& args) {
     if (fFlushedInitMsgQueue) {
@@ -142,6 +155,12 @@ void ProxyWebUI::handleWebWidgetScriptMessageReceived(const ScriptValueVector& a
 
     if (method == "flushInitMessageQueue") {
         flushInitMessageQueue();
+
+    } else if (method == "getInitWidth") {
+        webPostMessage({"WebUI", "getInitWidth", static_cast<double>(getInitWidth())});
+
+    } else if (method == "getInitHeight") {
+        webPostMessage({"WebUI", "getInitHeight", static_cast<double>(getInitHeight())});
 
     } else if (method == "getWidth") {
         webPostMessage({"WebUI", "getWidth", static_cast<double>(getWidth())});

@@ -32,7 +32,9 @@ UI* DISTRHO::createUI()
 
 CastelloRevUI::CastelloRevUI()
     : ProxyWebUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA)
-{}
+{
+    setGeometryConstraints(getWidth(), getHeight(), true, false);
+}
 
 void CastelloRevUI::uiReshape(uint width, uint height)
 {
