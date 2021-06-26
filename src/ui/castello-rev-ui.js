@@ -45,8 +45,18 @@ class CastelloRevUI extends DISTRHO_WebUI {
     stateChanged(key, value) {
         if (key == 'ui_width') {
             this.setWidth(parseInt(value));
+
+             // DPF issue on Windows? see also ProxyWebUI constructor
+            if (/win/i.test(window.navigator.platform)) {
+                this.setWidth(parseInt(value));
+            }
         } else if (key == 'ui_height') {
             this.setHeight(parseInt(value));
+
+            // 2x again
+            if (/win/i.test(window.navigator.platform)) {
+                this.setHeight(parseInt(value));
+            }
         }
     }
 
