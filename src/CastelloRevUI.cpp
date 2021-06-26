@@ -34,21 +34,6 @@ UI* DISTRHO::createUI()
 
 CastelloRevUI::CastelloRevUI()
     : ProxyWebUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA)
-{}
-
-void CastelloRevUI::uiReshape(uint width, uint height)
 {
-    ProxyWebUI::uiReshape(width, height);
-
-    setState("ui_width", std::to_string(width).c_str());
-    setState("ui_height", std::to_string(height).c_str());
-}
-
-void CastelloRevUI::stateChanged(const char* key, const char* value)
-{
-    if ((std::strcmp(key, "ui_width") == 0) && (value[0] != '\0')) {
-        setWidth(static_cast<uint>(std::stoi(value)));
-    } else if ((std::strcmp(key, "ui_height") == 0) && (value[0] != '\0')) {
-        setHeight(static_cast<uint>(std::stoi(value)));
-    }
+    webWidget().setPrintTraffic(true);
 }
