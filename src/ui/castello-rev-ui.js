@@ -43,19 +43,19 @@ class CastelloRevUI extends DISTRHO_WebUI {
     }
 
     stateChanged(key, value) {
-        if (key == 'ui_width') {
-            this.setWidth(parseInt(value));
+        if (key == 'ui_size') {
+            const wh = value.split('x');
 
-             // DPF issue on Windows? see also ProxyWebUI constructor
-            if (/win/i.test(window.navigator.platform)) {
-                this.setWidth(parseInt(value));
-            }
-        } else if (key == 'ui_height') {
-            this.setHeight(parseInt(value));
+            if (wh.length == 2) {
+                const width = parseInt(wh[0]);
+                const height = parseInt(wh[1]);
 
-            // 2x again
-            if (/win/i.test(window.navigator.platform)) {
-                this.setHeight(parseInt(value));
+                this.setSize(width, height);
+
+                 // DPF issue on Windows? see also ProxyWebUI constructor
+                if (/win/i.test(window.navigator.platform)) {
+                    this.setSize(width, height);
+                }
             }
         }
     }
@@ -104,8 +104,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
         handle.addEventListener('input', (ev) => {
             this.setSize(ev.value.width, ev.value.height);
-            this.setState('ui_width', ev.value.width.toString());
-            this.setState('ui_height', ev.value.height.toString());
+            this.setState('ui_size', `${ev.value.width}x${ev.value.height}`);
         });
     }
 

@@ -30,7 +30,7 @@ Plugin* DISTRHO::createPlugin()
 //         very useful, parameters need better names, and so on...
 
 CastelloRevPlugin::CastelloRevPlugin()
-    : Plugin(2 /* parameterCount */, 0 /* programCount */, 2 /* stateCount */)
+    : Plugin(2 /* parameterCount */, 0 /* programCount */, 1 /* stateCount */)
 {
     sp_create(&fSoundpipe);
     sp_revsc_create(&fReverb);
@@ -98,10 +98,7 @@ void CastelloRevPlugin::initState(uint32_t index, String& stateKey, String& defa
     switch (index)
     {
     case 0:
-        stateKey = "ui_width";
-        break;
-    case 1:
-        stateKey = "ui_height";
+        stateKey = "ui_size";
         break;
     }
 
