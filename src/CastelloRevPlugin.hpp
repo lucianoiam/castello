@@ -63,6 +63,10 @@ public:
     float getParameterValue(uint32_t index) const override;
     void  setParameterValue(uint32_t index, float value) override;
 
+    void   initState(uint32_t index, String& stateKey, String& defaultStateValue) override;
+    void   setState(const char* key, const char* value) override;
+    String getState(const char* key) const override;
+
     void  run(const float** inputs, float** outputs, uint32_t frames) override;
 
 private:

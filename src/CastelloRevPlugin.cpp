@@ -91,6 +91,28 @@ void CastelloRevPlugin::setParameterValue(uint32_t index, float value)
     }
 }
 
+void CastelloRevPlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
+{
+    // unused
+    (void)index;
+    (void)stateKey;
+    (void)defaultStateValue;
+}
+
+void CastelloRevPlugin::setState(const char* key, const char* value)
+{
+    // unused
+    (void)key;
+    (void)value;
+}
+
+String CastelloRevPlugin::getState(const char* key) const
+{
+    // unused
+    (void)key;
+    return String();
+}
+
 void CastelloRevPlugin::run(const float** inputs, float** outputs, uint32_t frames)
 {
     float* inpL = (float *)inputs[0];
