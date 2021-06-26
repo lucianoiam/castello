@@ -17,6 +17,9 @@
 #ifndef CASTELLOREVPLUGIN_HPP
 #define CASTELLOREVPLUGIN_HPP
 
+#include <string>
+#include <unordered_map>
+
 #include "DistrhoPlugin.hpp"
 #include "DistrhoPluginInfo.h"
 
@@ -68,8 +71,12 @@ public:
     void  run(const float** inputs, float** outputs, uint32_t frames) override;
 
 private:
-    sp_data  *fSoundpipe;
-    sp_revsc *fReverb;
+    sp_data*  fSoundpipe;
+    sp_revsc* fReverb;
+
+    typedef std::unordered_map<std::string,std::string> StateMap;
+
+    StateMap fState;
 
 };
 

@@ -28,7 +28,7 @@ Plugin* DISTRHO::createPlugin()
 //         very useful, parameters need better names, and so on...
 
 CastelloRevPlugin::CastelloRevPlugin()
-    : Plugin(2 /* parameterCount */, 0 /* programCount */, 0 /* stateCount */)
+    : Plugin(2 /* parameterCount */, 0 /* programCount */, 2 /* stateCount */)
 {
     sp_create(&fSoundpipe);
     sp_revsc_create(&fReverb);
@@ -74,6 +74,8 @@ float CastelloRevPlugin::getParameterValue(uint32_t index) const
     case 1:
         return fReverb->lpfreq;
     }
+
+    return 0;
 }
 
 void CastelloRevPlugin::setParameterValue(uint32_t index, float value)
@@ -91,24 +93,32 @@ void CastelloRevPlugin::setParameterValue(uint32_t index, float value)
 
 void CastelloRevPlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
 {
-    // unused
-    (void)index;
-    (void)stateKey;
-    (void)defaultStateValue;
+    switch (index)
+    {
+    case 0:
+        stateKey = "ui_width";
+        break;
+    case 1:
+        stateKey = "ui_height";
+        break;
+    }
+
+    defaultStateValue = "";
 }
 
 void CastelloRevPlugin::setState(const char* key, const char* value)
 {
-    // unused
-    (void)key;
-    (void)value;
+    fState[key] = value;
 }
 
 String CastelloRevPlugin::getState(const char* key) const
 {
-    // unused
-    (void)key;
-    return String();
+    StateMap::const_iterator it = fState.find(key);
+    if (it == fState.end()) {
+        return String();
+    }
+    
+    return String(it->second.c_str());
 }
 
 void CastelloRevPlugin::run(const float** inputs, float** outputs, uint32_t frames)
