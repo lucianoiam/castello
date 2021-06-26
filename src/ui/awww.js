@@ -14,14 +14,20 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-class ControlEvent extends UIEvent {}
+ /**
+  *  Base class for all widgets
+  */
 
-class AwwwElement extends HTMLElement {
+class Widget extends HTMLElement {
+
+    /**
+     *  Public
+     */
 
     get opt() {
         // Allow to set options without requiring to first create the options
         // object itself, like this:
-        //   const elem = document.createElement('awww-elem');
+        //   const elem = document.createElement('a-elem');
         //   elem.opt.minValue = 1;
 
         if (!this._opt) {
@@ -34,26 +40,11 @@ class AwwwElement extends HTMLElement {
 
     set opt(optObj) {
         // Also allow to set options using an object, like this:
-        //   const elem = document.createElement('awww-elem');
+        //   const elem = document.createElement('a-elem');
         //   elem.opt = {minValue: 1};
 
         for (const key in optObj) {
-            this.control[key] = optObj[key];
-        }
-    }
-
-    get value() {
-        return this._value;
-    }
-
-    set value(value) {
-        this._setValue(value);
-    }
-
-    connectedCallback() {
-        if (!this.awwwInitialized) {
-            this._init();
-            this.awwwInitialized = true;
+            this.opt[key] = optObj[key];
         }
     }
 
@@ -67,66 +58,45 @@ class AwwwElement extends HTMLElement {
         return this;
     }
 
-    _init() {   
-        this._opt.minValue = this._opt.minValue || 0.0;
-        this._opt.maxValue = this._opt.maxValue || 1.0;
-
-        this._value = 0;
-
-        this._createControlEventSources();
+    /**
+     *  Internal
+     */
+    
+    static get _unqualifiedNodeName() {
+        throw new TypeError(`_unqualifiedNodeName not implemented for ${this.name}`);
     }
 
-    _onControlEventStart(ev) {
+    static _staticInit() {
+        window.customElements.define(`a-${this._unqualifiedNodeName}`, this);
+    }
+    
+    _instanceInit() {
         // no-op
     }
 
-    _onControlEventContinue(ev) {
-        // no-op
-    }
-
-    _onControlEventEnd(ev) {
-        // no-op
-    }
-
-    _onSetValue(value) {
-        // no-op
-    }
-
-    _setValue(value, runInternalCallback) {
-        if (this._value == value) {
-            return;
+    connectedCallback() {
+        if (!this._instanceInitialized) {
+            this._instanceInit();
+            this._instanceInitialized = true;
         }
-
-        this._value = value;
-
-        if (runInternalCallback !== false) {
-            this._onSetValue(this._value);
-        }
-
-        const ev = new InputEvent('input');
-        ev.value = this._value;
-        this.dispatchEvent(ev);
     }
 
-    _range() {
-        return this._opt.maxValue - this._opt.minValue;
-    }
+}
 
-    _clamp(value) {
-        return Math.max(this._opt.minValue, Math.min(this._opt.maxValue, value));
-    }
+/**
+ *  Base class for widgets supporting unified mouse and touch control
+ */
 
-    _normalize(value) {
-        return (value - this._opt.minValue) / this._range();
-    }
+class ControlEvent extends UIEvent {}
 
-    _denormalize(value) {
-        return this._opt.minValue + value * this._range();
-    }
+class TouchAndMouseControllableWidget extends Widget {
 
-    // Merge touch and mouse events into a basic single set of custom events
+    /**
+     *  Internal
+     */
 
-    _createControlEventSources() {
+    _instanceInit() {
+        super._instanceInit();
 
         // Handle touch events preventing subsequent simulated mouse events
 
@@ -224,20 +194,152 @@ class AwwwElement extends HTMLElement {
         return ev;
     }
 
-    static _staticInit() {
-        throw new TypeError('_staticInit() not implemented');
+    _onControlEventStart(ev) {
+        // no-op
+    }
+
+    _onControlEventContinue(ev) {
+        // no-op
+    }
+
+    _onControlEventEnd(ev) {
+        // no-op
     }
 
 }
 
-class ResizeHandle extends AwwwElement {
+/**
+ *  Base class for stateful input widgets
+ */
+
+class InputWidget extends TouchAndMouseControllableWidget {
+
+    /**
+     *  Public
+     */
+
+    get value() {
+        return this._value;
+    }
+
+    set value(value) {
+        this._setValue(value);
+    }
+
+    /**
+     *  Internal
+     */
+
+    _instanceInit() {
+        super._instanceInit();
+        this._value = 0;
+    }
+
+    _setValue(value, runInternalCallback) {
+        if (this._value == value) {
+            return;
+        }
+
+        this._value = value;
+
+        if (runInternalCallback !== false) {
+            this._onSetValue(this._value);
+        }
+
+        const ev = new InputEvent('input');
+        ev.value = this._value;
+        this.dispatchEvent(ev);
+    }
+
+    _onSetValue(value) {
+        // no-op
+    }
+
+}
+
+/**
+ *  Base class for widgets that hold a value within a range
+ */
+
+class RangeInputWidget extends InputWidget {
+
+    /**
+     *  Internal
+     */
+
+    _instanceInit() {
+        super._instanceInit();
+
+        this._opt.minValue = this._opt.minValue || 0.0;
+        this._opt.maxValue = this._opt.maxValue || 1.0;
+    }
+
+    _range() {
+        return this._opt.maxValue - this._opt.minValue;
+    }
+
+    _clamp(value) {
+        return Math.max(this._opt.minValue, Math.min(this._opt.maxValue, value));
+    }
+
+    _normalize(value) {
+        return (value - this._opt.minValue) / this._range();
+    }
+
+    _denormalize(value) {
+        return this._opt.minValue + value * this._range();
+    }
+
+}
+
+/**
+ *  Widget implementations
+ */
+
+class ResizeHandle extends InputWidget {
+
+    /**
+     *  Public
+     */
 
     appendToBody() {
         document.body.appendChild(this);
     }
+    
+    /**
+     *  Internal
+     */
 
-    _init() {
-        super._init();
+    static get _unqualifiedNodeName() {
+        return 'resize-handle';
+    }
+
+    static _staticInit() {
+        super._staticInit();
+
+        ResizeHandle._themeSvgData = Object.freeze({
+            DOTS:
+               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <path d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                        C78.262,70.5,80.5,72.74,80.5,75.499z"/>
+                    <path d="M50.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                        C48.262,70.5,50.5,72.74,50.5,75.499z"/>
+                    <path d="M80.5,45.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                        C78.262,40.5,80.5,42.74,80.5,45.499z"/>
+                </svg>`
+            ,
+            LINES:
+               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <line x1="0" y1="100" x2="100" y2="0"/>
+                    <line x1="100" y1="25" x2="25" y2="100"/>
+                    <line x1="50" y1="100" x2="100" y2="50"/>
+                    <line x1="75" y1="100" x2="100" y2="75"/>
+                </svg>`
+        });
+    }
+
+    _instanceInit() {
+        super._instanceInit();
 
         // Default minimum size is the current document size
         this._opt.minWidth = this._opt.minWidth || document.body.clientWidth;
@@ -312,46 +414,34 @@ class ResizeHandle extends AwwwElement {
         }
     }
 
-    static _staticInit() {
-        ResizeHandle._themeSvgData = Object.freeze({
-            DOTS:
-               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                    <path d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
-                        C78.262,70.5,80.5,72.74,80.5,75.499z"/>
-                    <path d="M50.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
-                        C48.262,70.5,50.5,72.74,50.5,75.499z"/>
-                    <path d="M80.5,45.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
-                        C78.262,40.5,80.5,42.74,80.5,45.499z"/>
-                </svg>`
-            ,
-            LINES:
-               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                    <line x1="0" y1="100" x2="100" y2="0"/>
-                    <line x1="100" y1="25" x2="25" y2="100"/>
-                    <line x1="50" y1="100" x2="100" y2="50"/>
-                    <line x1="75" y1="100" x2="100" y2="75"/>
-                </svg>`
-        });
-
-        window.customElements.define('a-resize-handle', this);
-    }
-
 }
 
-class Knob extends AwwwElement {
+class Knob extends RangeInputWidget {
 
-    _init() {
-        super._init();
+    /**
+     *  Internal
+     */
+    
+    static get _unqualifiedNodeName() {
+        return 'knob';
+    }
+
+    _instanceInit() {
+        super._instanceInit();
 
         //this.style.display = 'block';
         
         this.appendChild(document.createElement('label'));
     }
 
+    _onSetValue(value) {
+        this.children[0].innerText = Math.floor(10 * value) / 10;
+    }
+
     _onControlEventStart(ev) {
         this._startValue = this._value;
         this._axis = 0;
-        this._dxy = 0;
+        this._drag_d = 0;
     }
 
     _onControlEventContinue(ev) {
@@ -363,28 +453,18 @@ class Knob extends AwwwElement {
         }
 
         if (this._axis > 0) {
-            this._dxy += ev.movementX;
-            dv = this._range() * this._dxy / this.clientWidth;
+            this._drag_d += ev.movementX;
+            dv = this._range() * this._drag_d / this.clientWidth;
         } else {
-            this._dxy -= ev.movementY;
-            dv = this._range() * this._dxy / this.clientHeight;
+            this._drag_d -= ev.movementY;
+            dv = this._range() * this._drag_d / this.clientHeight;
         }
 
         this._setValue(this._clamp(this._startValue + dv));
     }
 
-    _onSetValue(value) {
-        this.children[0].innerText = Math.floor(10 * value) / 10;
-    }
-
-    static _staticInit() {                                                                   
-        window.customElements.define('a-knob', this);
-    }
-
 }
 
 {
-    for (const clazz of [ResizeHandle, Knob]) {
-        clazz._staticInit();
-    }
+    [ResizeHandle, Knob].forEach((cls) => cls._staticInit());
 }
