@@ -40,6 +40,30 @@ class CastelloRevUI extends DISTRHO_WebUI {
         document.body.style.visibility = 'visible';
     }
 
+    stateChanged(key, value) {
+        if (key == 'ui_width') {
+            this.setWidth(parseInt(value));
+        } else if (key == 'ui_height') {
+            this.setHeight(parseInt(value));
+        }
+    }
+
+    parameterChanged(index, value) {
+        // Host informs a parameter has changed, update its associated widget.
+
+        const widget = (id) => document.getElementById(id);
+
+        switch (index) {
+            case 0:
+                widget('p-feedback').value = value;
+                break;
+
+            case 1:
+                widget('p-lpfreq').value = value;
+                break;
+        }
+    }
+
     _createInputWidgets() {
         // Feedback knob
         const feedback = document.createElement('a-knob');
@@ -59,28 +83,18 @@ class CastelloRevUI extends DISTRHO_WebUI {
     async _createResizeHandle() {
         // Like any other widget the resize handle can be styled using CSS.
         const handle = document.createElement('a-resize-handle');
+
         handle.opt.minWidth = await this.getInitWidth() / window.devicePixelRatio;
         handle.opt.minHeight = await this.getInitHeight() / window.devicePixelRatio;
         handle.opt.keepAspectRatio = true;
         handle.opt.maxScale = 2;
-        handle.addEventListener('input', (ev) => { this.setSize(ev.value.width, ev.value.height); });
         handle.appendToBody();
-    }
 
-    parameterChanged(index, value) {
-        // Host informs a parameter has changed, update its associated widget.
-
-        const widget = (id) => document.getElementById(id);
-
-        switch (index) {
-            case 0:
-                widget('p-feedback').value = value;
-                break;
-
-            case 1:
-                widget('p-lpfreq').value = value;
-                break;
-        }
+        handle.addEventListener('input', (ev) => {
+            this.setSize(ev.value.width, ev.value.height);
+            this.setState('ui_width', ev.value.width.toString());
+            this.setState('ui_height', ev.value.height.toString());
+        });
     }
 
 }

@@ -27,9 +27,6 @@ public:
     CastelloRevUI();
     ~CastelloRevUI() {};
 
-    void uiReshape(uint width, uint height) override;
-    void stateChanged(const char* key, const char* value) override;
-
 };
 
 END_NAMESPACE_DISTRHO
