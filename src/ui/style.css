@@ -19,14 +19,6 @@ body {
 a-knob {
     width: 100px;
     height: 100px;
-    background-color: #FF6DAF;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-a-knob > label {
-    color: #000;
 }
 
 a-resize-handle > svg > path {
