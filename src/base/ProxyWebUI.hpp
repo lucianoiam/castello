@@ -63,12 +63,12 @@ private:
 
     typedef std::vector<ScriptValueVector> InitMessageQueue;
     
-    uint32_t            fBackgroundColor;
     platform::WebWidget fWebWidget;
-    bool                fFlushedInitMsgQueue;
     InitMessageQueue    fInitMsgQueue;
+    bool                fFlushedInitMsgQueue;
     uint                fInitWidth;
     uint                fInitHeight;
+    uint32_t            fBackgroundColor;
 
 };
 
