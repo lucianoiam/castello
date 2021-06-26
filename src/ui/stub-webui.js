@@ -18,7 +18,7 @@ class StubWebUI {
 
     static installIfNeeded() {
         if (typeof(DISTRHO_WebUI) == 'undefined') {
-            console.log('DISTRHO_WebUI is not present, installing stub')
+            console.info('DISTRHO_WebUI is not present, installing stub')
             window.DISTRHO_WebUI = StubWebUI;
         }
     }
