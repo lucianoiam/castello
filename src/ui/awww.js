@@ -495,24 +495,31 @@ class Knob extends RangeInputWidget {
 
     _onControlEventStart(ev) {
         this._startValue = this._value;
-        this._axis = 0;
-        this._drag_d = 0;
+        this._axis_track = [];
+        this._drag_dist = 0;
     }
 
     _onControlEventContinue(ev) {
-        let dv;
+        const dir = Math.abs(ev.movementX) - Math.abs(ev.movementY);
 
-        if (Math.abs(this._axis) < 3) {
-            this._axis += Math.abs(ev.movementX) - Math.abs(ev.movementY);
-            return; // wait to lock axis
+        if (this._axis_track.length < 3) {
+            this._axis_track.push(dir);
+            return;
         }
 
-        if (this._axis > 0) {
-            this._drag_d += ev.movementX;
-            dv = this._range() * this._drag_d / this.clientWidth;
+        this._axis_track.shift();
+        this._axis_track.push(dir);
+
+        const axis = this._axis_track.reduce((n0, n1) => n0 + n1);
+
+        let dv;
+
+        if (axis > 0) {
+            this._drag_dist += ev.movementX;
+            dv = this._range() * this._drag_dist / this.clientWidth;
         } else {
-            this._drag_d -= ev.movementY;
-            dv = this._range() * this._drag_d / this.clientHeight;
+            this._drag_dist -= ev.movementY;
+            dv = this._range() * this._drag_dist / this.clientHeight;
         }
 
         this._setValue(this._clamp(this._startValue + dv));
