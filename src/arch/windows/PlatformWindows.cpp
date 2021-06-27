@@ -119,9 +119,9 @@ float platform::getSystemDisplayScaleFactor()
     return k;
 }
 
-void platform::sendKeyboardEventToHost(void* arg0, void* arg1)
+void platform::sendKeyboardEventToHost(int arg0, int arg1, void* data)
 {
-    (void)arg0;
-    (void)arg1;
-    // TODO
+    (void)data;
+    
+    printf("FIXME sendKeyboardEventToHost %d %d\n", arg0, arg1);
 }

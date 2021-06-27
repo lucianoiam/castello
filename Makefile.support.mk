@@ -1,14 +1,14 @@
 # Filename: Makefile.support.mk
 # Author:   oss@lucianoiam.com
 
-BASE_FLAGS += -Isrc -I$(DPF_CUSTOM_PATH) -DBIN_BASENAME=$(NAME)
+BASE_FLAGS += -Isrc -I$(DPF_CUSTOM_PATH) -DBIN_BASENAME=$(NAME) \
+              -DPROJECT_ID_HASH=$(shell echo $(NAME):$(PROJECT_VERSION) | shasum -a 256 | head -c 8)
 
 # Platform-specific build flags
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread -ldl
 endif
 ifeq ($(MACOS),true)
-BASE_FLAGS += -DDPF_OBJC_INTERFACE_SUFFIX=$(shell hexdump -n 4 -e '"%08x" "\n"' /dev/random)
 LINK_FLAGS += -framework WebKit 
 endif
 ifeq ($(WINDOWS),true)
