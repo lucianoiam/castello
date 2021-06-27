@@ -23,7 +23,7 @@
 // Avoid symbol name collisions
 #define OBJC_INTERFACE_NAME_HELPER_1(INAME, SEP, SUFFIX) INAME ## SEP ## SUFFIX
 #define OBJC_INTERFACE_NAME_HELPER_2(INAME, SUFFIX) OBJC_INTERFACE_NAME_HELPER_1(INAME, _, SUFFIX)
-#define OBJC_INTERFACE_NAME(INAME) OBJC_INTERFACE_NAME_HELPER_2(INAME, DPF_OBJC_INTERFACE_SUFFIX)
+#define OBJC_INTERFACE_NAME(INAME) OBJC_INTERFACE_NAME_HELPER_2(INAME, PROJECT_ID_HASH)
 
 #define DistrhoWebView         OBJC_INTERFACE_NAME(DistrhoWebView)
 #define DistrhoWebViewDelegate OBJC_INTERFACE_NAME(DistrhoWebViewDelegate)
@@ -38,8 +38,6 @@
 USE_NAMESPACE_DISTRHO
 
 @interface DistrhoWebView: WKWebView
-@property (readonly, nonatomic) CocoaWebWidget* cppWidget;
-@property (readonly, nonatomic) NSView *hostView;
 @end
 
 @interface DistrhoWebViewDelegate: NSObject<WKNavigationDelegate, WKScriptMessageHandler>
@@ -135,23 +133,12 @@ void CocoaWebWidget::injectScript(String& source)
 
 @implementation DistrhoWebView
 
-- (CocoaWebWidget *)cppWidget
-{
-    return ((DistrhoWebViewDelegate *)self.navigationDelegate).cppWidget;
-}
-
-- (NSView *)hostView
-{
-    NSView *dpfView = self.superview;
-    return dpfView.superview;
-}
-
 - (void)keyDown:(NSEvent *)event {
-    self.cppWidget->didReceiveKeyboardEvent(event, self.hostView);
+    ((DistrhoWebViewDelegate *)self.navigationDelegate).cppWidget->didReceiveKeyboardEvent(0, 0, event);
 }
 
 - (void)keyUp:(NSEvent *)event {
-    self.cppWidget->didReceiveKeyboardEvent(event, self.hostView);
+    ((DistrhoWebViewDelegate *)self.navigationDelegate).cppWidget->didReceiveKeyboardEvent(0, 0, event);
 }
 
 - (BOOL)acceptsFirstMouse:(NSEvent *)event {
