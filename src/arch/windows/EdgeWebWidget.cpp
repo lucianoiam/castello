@@ -38,30 +38,33 @@
 
 USE_NAMESPACE_DISTRHO
 
-EdgeWebWidget::EdgeWebWidget(Widget *parentWidget)
-    : AbstractWebWidget(parentWidget)
-    , fHelperHwnd(0)
+EdgeWebWidget::EdgeWebWidget(Window& windowToMapTo)
+    : AbstractWebWidget(windowToMapTo)
+    , fInitHelperHwnd(0)
     , fDisplayed(false)
     , fBackgroundColor(0)
     , fHandler(0)
     , fController(0)
     , fView(0)
 {
+    // Pass a hidden orphan window handle to CreateCoreWebView2Controller
+    // for initializing Edge WebView2, instead of the plugin window handle that
+    // causes some hosts to hang when opening the UI, e.g. Carla.
     WCHAR className[256];
-    ::swprintf(className, sizeof(className), L"DPF_Class_%d", std::rand());
-    ::ZeroMemory(&fHelperClass, sizeof(fHelperClass));
-    fHelperClass.lpszClassName = wcsdup(className);
-    fHelperClass.lpfnWndProc = DefWindowProc;
-    ::RegisterClass(&fHelperClass);
-    fHelperHwnd = ::CreateWindowEx(
+    swprintf(className, sizeof(className), L"DPF_Class_%d", std::rand());
+    ZeroMemory(&fInitHelperClass, sizeof(fInitHelperClass));
+    fInitHelperClass.lpszClassName = wcsdup(className);
+    fInitHelperClass.lpfnWndProc = DefWindowProc;
+    RegisterClass(&fInitHelperClass);
+    fInitHelperHwnd = CreateWindowEx(
         WS_EX_TOOLWINDOW,
-        fHelperClass.lpszClassName,
+        fInitHelperClass.lpszClassName,
         L"WebView2 Init Helper",
         WS_POPUPWINDOW | WS_CAPTION,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         0, 0, 0, 0
     );
-    ::ShowWindow(fHelperHwnd, SW_SHOWNOACTIVATE);
+    ShowWindow(fInitHelperHwnd, SW_SHOWNOACTIVATE);
 
     fHandler = new InternalWebView2EventHandler(this);
 
@@ -78,10 +81,10 @@ EdgeWebWidget::~EdgeWebWidget()
         ICoreWebView2Controller2_Close(fController);
         ICoreWebView2Controller2_Release(fController);
     }
-    
-    ::DestroyWindow(fHelperHwnd);
-    ::UnregisterClass(fHelperClass.lpszClassName, 0);
-    ::free((void*)fHelperClass.lpszClassName);
+
+    DestroyWindow(fInitHelperHwnd);
+    UnregisterClass(fInitHelperClass.lpszClassName, 0);
+    free((void*)fInitHelperClass.lpszClassName);
 }
 
 void EdgeWebWidget::onDisplay()
@@ -96,16 +99,6 @@ void EdgeWebWidget::onDisplay()
 }
 
 void EdgeWebWidget::onResize(const ResizeEvent& ev)
-{
-    (void)ev;
-    if (fController == 0) {
-        return; // does not make sense now, ignore
-    }
-
-    updateWebViewBounds();
-}
-
-void EdgeWebWidget::onPositionChanged(const PositionChangedEvent& ev)
 {
     (void)ev;
     if (fController == 0) {
@@ -163,17 +156,18 @@ void EdgeWebWidget::injectScript(String& source)
 
 void EdgeWebWidget::updateWebViewBounds()
 {
+    // WINSIZEBUG: this->getWidth() and this->getHeight() returning 0
     RECT bounds;
-    bounds.left = (LONG)getAbsoluteX();
-    bounds.top = (LONG)getAbsoluteY();
-    bounds.right = bounds.left + (LONG)getWidth();
-    bounds.bottom = bounds.top + (LONG)getHeight();
+    bounds.left = 0;
+    bounds.top = 0;
+    bounds.right = bounds.left + (LONG)getWindow().getWidth();
+    bounds.bottom = bounds.top + (LONG)getWindow().getHeight();
     ICoreWebView2Controller2_put_Bounds(fController, bounds);
 }
 
 void EdgeWebWidget::initWebView()
 {    
-    HRESULT result = ::CreateCoreWebView2EnvironmentWithOptions(0,
+    HRESULT result = CreateCoreWebView2EnvironmentWithOptions(0,
         TO_LPCWSTR(platform::getTemporaryPath()), 0, fHandler);
     if (FAILED(result)) {
         webViewLoaderErrorMessageBox(result);
@@ -188,12 +182,12 @@ HRESULT EdgeWebWidget::handleWebView2EnvironmentCompleted(HRESULT result,
         return result;
     }
 
-    ICoreWebView2Environment_CreateCoreWebView2Controller(environment, fHelperHwnd, fHandler);
+    ICoreWebView2Environment_CreateCoreWebView2Controller(environment, fInitHelperHwnd, fHandler);
     
     // FIXME: handleWebView2ControllerCompleted() is never called when running
     //        standalone unless the app window border is clicked. Looks like
     //        window messages get stuck somewhere and does not seem related to
-    //        the usage of the fHelperHwnd.
+    //        the usage of the fInitHelperHwnd.
     
     return S_OK;
 }
@@ -212,7 +206,7 @@ HRESULT EdgeWebWidget::handleWebView2ControllerCompleted(HRESULT result,
     ICoreWebView2Controller2_get_CoreWebView2(fController, &fView);
     ICoreWebView2_add_NavigationCompleted(fView, fHandler, 0);
     ICoreWebView2_add_WebMessageReceived(fView, fHandler, 0);
-    
+
     // Run pending requests
 
     setBackgroundColor(fBackgroundColor);
@@ -238,9 +232,12 @@ HRESULT EdgeWebWidget::handleWebView2NavigationCompleted(ICoreWebView2 *sender,
     (void)eventArgs;
 
     if (fController != 0) {
-        handleLoadFinished();
-        HWND hWnd = reinterpret_cast<HWND>(getParentWidget()->getWindow().getNativeWindowHandle());
+        // Reparent here instead of handleWebView2ControllerCompleted() to avoid
+        // flicker as much as possible. At this point the web contents are ready.
+        HWND hWnd = reinterpret_cast<HWND>(getWindow().getNativeWindowHandle());
         ICoreWebView2Controller2_put_ParentWindow(fController, hWnd);
+
+        handleLoadFinished();
     }
     
     return S_OK;
@@ -254,26 +251,26 @@ HRESULT EdgeWebWidget::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
 
     LPWSTR jsonStr;
     ICoreWebView2WebMessageReceivedEventArgs_get_WebMessageAsJson(eventArgs, &jsonStr);
-    cJSON* jArgs = ::cJSON_Parse(TO_LPCSTR(jsonStr));
-    ::CoTaskMemFree(jsonStr);
+    cJSON* jArgs = cJSON_Parse(TO_LPCSTR(jsonStr));
+    CoTaskMemFree(jsonStr);
 
     ScriptValueVector args;
     
-    if (::cJSON_IsArray(jArgs)) {
-        int numArgs = ::cJSON_GetArraySize(jArgs);
+    if (cJSON_IsArray(jArgs)) {
+        int numArgs = cJSON_GetArraySize(jArgs);
 
         if (numArgs > 0) {
             for (int i = 0; i < numArgs; i++) {
-                cJSON* jArg = ::cJSON_GetArrayItem(jArgs, i);
+                cJSON* jArg = cJSON_GetArrayItem(jArgs, i);
 
-                if (::cJSON_IsFalse(jArg)) {
+                if (cJSON_IsFalse(jArg)) {
                     args.push_back(ScriptValue(false));
-                } else if (::cJSON_IsTrue(jArg)) {
+                } else if (cJSON_IsTrue(jArg)) {
                     args.push_back(ScriptValue(true));
-                } else if (::cJSON_IsNumber(jArg)) {
-                    args.push_back(ScriptValue(::cJSON_GetNumberValue(jArg)));
-                } else if (::cJSON_IsString(jArg)) {
-                    args.push_back(ScriptValue(String(::cJSON_GetStringValue(jArg))));
+                } else if (cJSON_IsNumber(jArg)) {
+                    args.push_back(ScriptValue(cJSON_GetNumberValue(jArg)));
+                } else if (cJSON_IsString(jArg)) {
+                    args.push_back(ScriptValue(String(cJSON_GetStringValue(jArg))));
                 } else {
                     args.push_back(ScriptValue()); // null
                 }
@@ -281,7 +278,7 @@ HRESULT EdgeWebWidget::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
         }
     }
 
-    ::cJSON_free(jArgs);
+    cJSON_free(jArgs);
 
     handleScriptMessage(args);
     
@@ -299,5 +296,5 @@ void EdgeWebWidget::webViewLoaderErrorMessageBox(HRESULT result)
     
     DISTRHO_LOG_STDERR_COLOR(TO_LPCSTR(ws));
 
-    ::MessageBox(0, ws.c_str(), TEXT(DISTRHO_PLUGIN_NAME), MB_OK | MB_ICONSTOP);
+    MessageBox(0, ws.c_str(), TEXT(DISTRHO_PLUGIN_NAME), MB_OK | MB_ICONSTOP);
 }

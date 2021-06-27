@@ -50,12 +50,11 @@ class InternalWebView2EventHandler;
 class EdgeWebWidget : public AbstractWebWidget, edge::WebView2EventHandler
 {
 public:
-    EdgeWebWidget(Widget *parentWidget);
+    EdgeWebWidget(Window& windowToMapTo);
     ~EdgeWebWidget();
 
     void onDisplay() override;
     void onResize(const ResizeEvent& ev) override;
-    void onPositionChanged(const PositionChangedEvent& ev) override;
 
     void setBackgroundColor(uint32_t rgba) override;
     void navigate(String& url) override;
@@ -79,8 +78,8 @@ private:
     
     void webViewLoaderErrorMessageBox(HRESULT result);
 
-    WNDCLASS            fHelperClass;
-    HWND                fHelperHwnd;
+    WNDCLASS            fInitHelperClass;
+    HWND                fInitHelperHwnd;
     bool                fDisplayed;
     uint32_t            fBackgroundColor;
     std::vector<String> fInjectedScripts;
