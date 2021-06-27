@@ -41,7 +41,7 @@ ProxyWebUI::ProxyWebUI(uint baseWidth, uint baseHeight, uint32_t backgroundColor
     , fWebWidget(getWindow())
     , fFlushedInitMsgQueue(false)
     , fBackgroundColor(backgroundColor)
-    , fForwardKbdInput(true) // FIXME - default false
+    , fForwardKbdInput(false)
 {
     // Automatically scale up the plugin UI so its contents do not look small
     // on high pixel density displays, known as HiDPI or Retina.
@@ -217,9 +217,9 @@ void ProxyWebUI::handleWebWidgetScriptMessageReceived(const ScriptValueVector& a
     }
 }
 
-void ProxyWebUI::handleWebWidgetKeyboardEvent(int arg0, int arg1, void* data)
+void ProxyWebUI::handleWebWidgetKeyboardEvent(void* event)
 {
     if (fForwardKbdInput) {
-        platform::sendKeyboardEventToHost(arg0, arg1, data);
+        platform::sendKeyboardEventToHost(event);
     }
 }

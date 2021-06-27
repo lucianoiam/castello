@@ -31,19 +31,21 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 USE_NAMESPACE_DISTRHO
 
+static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
+
 String platform::getBinaryDirectoryPath()
 {
     char path[MAX_PATH];
-    ::strcpy(path, getBinaryPath());
-    ::PathRemoveFileSpec(path);
+    strcpy(path, getBinaryPath());
+    PathRemoveFileSpec(path);
     return String(path);
 }
 
 String platform::getBinaryPath()
 {
     char path[MAX_PATH];
-    if (::GetModuleFileName((HINSTANCE)&__ImageBase, path, sizeof(path)) == 0) {
-        DISTRHO_LOG_STDERR_INT("Could not determine module path", ::GetLastError());
+    if (GetModuleFileName((HINSTANCE)&__ImageBase, path, sizeof(path)) == 0) {
+        DISTRHO_LOG_STDERR_INT("Could not determine module path", GetLastError());
         path[0] = '\0';
     }
     return String(path);
@@ -68,7 +70,7 @@ String platform::getTemporaryPath()
 {
     // Get temp path inside user files folder: C:\Users\< USERNAME >\AppData\Local\DPF_Temp
     char tempPath[MAX_PATH];
-    HRESULT result = ::SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_DEFAULT, tempPath);
+    HRESULT result = SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_DEFAULT, tempPath);
     if (FAILED(result)) {
         DISTRHO_LOG_STDERR_INT("Could not determine user app data folder", result);
         return String();
@@ -78,19 +80,19 @@ String platform::getTemporaryPath()
     // fails with HRESULT 0x8007139f when trying to load plugin into more than a single host
     // simultaneously due to permissions. C:\Users\< USERNAME >\AppData\Local\DPF_Temp\< HOST_BIN >
     char exePath[MAX_PATH];
-    if (::GetModuleFileName(0, exePath, sizeof(exePath)) == 0) {
-        DISTRHO_LOG_STDERR_INT("Could not determine host executable path", ::GetLastError());
+    if (GetModuleFileName(0, exePath, sizeof(exePath)) == 0) {
+        DISTRHO_LOG_STDERR_INT("Could not determine host executable path", GetLastError());
         return String();
     }
-    LPSTR exeFilename = ::PathFindFileName(exePath);
+    LPSTR exeFilename = PathFindFileName(exePath);
 
     // The following call relies on a further Windows library called Pathcch, which is implemented
     // in api-ms-win-core-path-l1-1-0.dll and requires Windows 8.
     // Since the minimum plugin target is Windows 7 it is acceptable to use a deprecated function.
-    //::PathCchRemoveExtension(exeFilename, sizeof(exeFilename));
-    ::PathRemoveExtension(exeFilename);
-    ::strcat(tempPath, "\\DPF_Temp\\");
-    ::strcat(tempPath, exeFilename);
+    //PathCchRemoveExtension(exeFilename, sizeof(exeFilename));
+    PathRemoveExtension(exeFilename);
+    strcat(tempPath, "\\DPF_Temp\\");
+    strcat(tempPath, exeFilename);
 
     return String(tempPath);
 }
@@ -102,7 +104,7 @@ float platform::getSystemDisplayScaleFactor()
 
     if (SUCCEEDED(stub::GetProcessDpiAwareness(0, &dpiAware))) {
         if (dpiAware != PROCESS_DPI_UNAWARE) {
-            HMONITOR hMon = ::MonitorFromWindow(::GetConsoleWindow(), MONITOR_DEFAULTTOPRIMARY);
+            HMONITOR hMon = MonitorFromWindow(GetConsoleWindow(), MONITOR_DEFAULTTOPRIMARY);
             DEVICE_SCALE_FACTOR scaleFactor = DEVICE_SCALE_FACTOR_INVALID;
 
             if (SUCCEEDED(stub::GetScaleFactorForMonitor(hMon, &scaleFactor))) {
@@ -117,9 +119,33 @@ float platform::getSystemDisplayScaleFactor()
     return k;
 }
 
-void platform::sendKeyboardEventToHost(int arg0, int arg1, void* data)
+void platform::sendKeyboardEventToHost(void* event)
 {
-    (void)data;
+    EnumWindows(EnumWindowsProc, (LPARAM)event);
+}
+
+BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lParam)
+{
+    MSG* msg = (MSG *)lParam;
     
-    printf("FIXME sendKeyboardEventToHost %d %d\n", arg0, arg1);
+    DWORD winProcId;
+    GetWindowThreadProcessId(hWnd, &winProcId);
+
+    if (winProcId == GetCurrentProcessId()) {
+        char text[256];
+        GetWindowText(hWnd, (LPSTR)text, sizeof(text));
+
+        // XXX This works but it is suboptimal because:
+        //   - Host main window is determined using an unreliable method
+        //   - Focus is moved from the plugin window to the host window
+        //   - JUCE based soft synth OBx-d does it flawlessly
+
+        if (strstr(text, "Ableton Live") != 0) {
+            SetFocus(hWnd);
+            PostMessage(hWnd, msg->lParam, msg->wParam, 0);
+            return FALSE;
+        }
+    }
+
+    return TRUE;
 }
