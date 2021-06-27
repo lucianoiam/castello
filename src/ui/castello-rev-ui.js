@@ -36,6 +36,9 @@ class CastelloRevUI extends DISTRHO_WebUI {
         // Setting up resize handle needs calling async getWidth()/getHeight()
         this._createResizeHandle();
 
+        // Just for fun -- currently only working on Mac
+        this.forwardKeyboardInputToHost(true);
+
         // Showtime
         document.body.style.visibility = 'visible';
     }
@@ -50,7 +53,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
                 this.setSize(width, height);
 
-                 // DPF issue on Windows? see also ProxyWebUI constructor
+                 // WINSIZEBUG: see also ProxyWebUI constructor
                 if (/win/i.test(window.navigator.platform)) {
                     this.setSize(width, height);
                 }
