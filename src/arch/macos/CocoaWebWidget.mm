@@ -60,7 +60,6 @@ CocoaWebWidget::CocoaWebWidget(Window& windowToMapTo)
     // windowId is either a PuglCairoView* or PuglOpenGLViewDGL* depending
     // on the value of UI_TYPE in the Makefile. Both are NSView subclasses.
     NSView *parentView = (NSView *)windowToMapTo.getNativeWindowHandle();
-    [fWebView removeFromSuperview];
     [parentView addSubview:fWebView];
 
     String js = String(JS_POST_MESSAGE_SHIM);
@@ -133,12 +132,14 @@ void CocoaWebWidget::injectScript(String& source)
 
 @implementation DistrhoWebView
 
-- (void)keyDown:(NSEvent *)event {
+- (void)keyDown:(NSEvent *)event
+{
     [super keyDown:event];
     ((DistrhoWebViewDelegate *)self.navigationDelegate).cppWidget->didReceiveKeyboardEvent(event);
 }
 
-- (void)keyUp:(NSEvent *)event {
+- (void)keyUp:(NSEvent *)event
+{
     [super keyUp:event];
     ((DistrhoWebViewDelegate *)self.navigationDelegate).cppWidget->didReceiveKeyboardEvent(event);
 }
@@ -149,7 +150,14 @@ void CocoaWebWidget::injectScript(String& source)
     ((DistrhoWebViewDelegate *)self.navigationDelegate).cppWidget->didReceiveKeyboardEvent(event);
 }
 
-- (BOOL)acceptsFirstMouse:(NSEvent *)event {
+- (BOOL)performKeyEquivalent:(NSEvent *)event
+{
+    // Ignore key shortcuts like Cmd+Q and Cmd+H
+    return NO;
+}
+
+- (BOOL)acceptsFirstMouse:(NSEvent *)event
+{
     // Allow the web view to immediately process clicks when the plugin window
     // is unfocused, otherwise the first click is swallowed to focus web view.
     return YES;
