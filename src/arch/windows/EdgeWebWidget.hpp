@@ -59,6 +59,8 @@ public:
     void runScript(String& source) override;
     void injectScript(String& source) override;
 
+    void setGrabKeyboardInput(bool grabKeyboardInput) override;
+
     // WebView2EventHandler
 
     HRESULT handleWebView2EnvironmentCompleted(HRESULT result,
@@ -69,10 +71,6 @@ public:
                                     ICoreWebView2NavigationCompletedEventArgs *eventArgs) override;
     HRESULT handleWebView2WebMessageReceived(ICoreWebView2 *sender,
                                     ICoreWebView2WebMessageReceivedEventArgs *eventArgs) override;
-
-    // Allow calling some protected methods from static functions
-    
-    void keyboardHookEvent(void* event) { handleKeyboardEvent(event); }
 
 private:
     void initWebView();
