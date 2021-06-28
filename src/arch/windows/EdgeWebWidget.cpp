@@ -38,9 +38,9 @@
 
 USE_NAMESPACE_DISTRHO
 
-// TODO: is using these globals safe?
 static int     gNumInstances;
 static HHOOK   gKeyboardHook;
+static void    handleKeyboardLowLevelHookEvent(EdgeWebWidget *lpWebWidget, UINT message, KBDLLHOOKSTRUCT* lpData);
 static LRESULT CALLBACK KeyboardProc (int nCode, WPARAM wParam, LPARAM lParam);
 static BOOL    CALLBACK EnumChildProc(HWND hWnd, LPARAM lParam);
 
@@ -67,7 +67,7 @@ EdgeWebWidget::EdgeWebWidget(Window& windowToMapTo)
     fHelperHwnd = CreateWindowEx(
         WS_EX_TOOLWINDOW,
         fHelperClass.lpszClassName,
-        L"WebView2 Init Helper",
+        L"EdgeWebWidget Helper",
         WS_POPUPWINDOW | WS_CAPTION,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         0, 0, 0, 0
@@ -325,18 +325,17 @@ static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
     // HC_ACTION means wParam & lParam contain info about keystroke message
 
     if (nCode == HC_ACTION) {
-        MSG msg;
-        ZeroMemory(&msg, sizeof(MSG));
-        msg.wParam = wParam;
-        msg.lParam = lParam;
-
+        // Traverse focused window ancestors until finding the one holding widget instance
         HWND hWnd = GetFocus();
         int level = 0;
 
         while (level++ < 5) {
-            EnumChildWindows(hWnd, EnumChildProc, (LPARAM)&msg);
+            HWND hWndWithWebWidgetPtr = 0;
+            EnumChildWindows(hWnd, EnumChildProc, (LPARAM)&hWndWithWebWidgetPtr);
 
-            if ((msg.wParam == 0) && (msg.lParam == 0)) {
+            if (hWndWithWebWidgetPtr != 0) {
+                ULONG_PTR ptr = GetClassLongPtr(hWndWithWebWidgetPtr, 0);
+                handleKeyboardLowLevelHookEvent((EdgeWebWidget *)ptr, (UINT)wParam, (KBDLLHOOKSTRUCT *)lParam);
                 break;
             }
 
@@ -355,16 +354,43 @@ BOOL CALLBACK EnumChildProc(HWND hWnd, LPARAM lParam)
     GetClassName(hWnd, (LPWSTR)className, sizeof(className));
 
     if (wcswcs(className, L"EdgeWebWidget") && wcswcs(className, L"" XSTR(PROJECT_ID_HASH))) {
-        EdgeWebWidget* lpWebWidget = (EdgeWebWidget *)GetClassLongPtr(hWnd, 0);
-        MSG* msg = (MSG *)lParam; 
-        
-        lpWebWidget->keyboardProcEvent(msg);
-
-        msg->wParam = 0;
-        msg->lParam = 0;
-
+        *((HWND *)lParam) = hWnd;
         return FALSE;
     }
 
     return TRUE;
+}
+
+void handleKeyboardLowLevelHookEvent(EdgeWebWidget *lpWebWidget, UINT message, KBDLLHOOKSTRUCT* lpData)
+{    
+    // Translate low level keyboard events into a format suitable for SendMessage()
+    MSG msg;
+    ZeroMemory(&msg, sizeof(MSG));
+    msg.wParam = lpData->vkCode;
+    msg.lParam = /* scan code */ lpData->scanCode << 16 | /* repeat count */ 0x1;
+
+    switch (message) {
+        case WM_KEYDOWN:
+            // Just forward a-z to allow playing with Live's virtual keyboard.
+            // For everything else converting keyboard events is a complex task.
+            msg.message = WM_KEYDOWN;
+            lpWebWidget->keyboardHookEvent(&msg);
+
+            if ((lpData->vkCode >= 'A') && (lpData->vkCode <= 'Z')) {
+                msg.message = WM_CHAR;
+                msg.wParam = lpData->vkCode | 0x20; // to lowercase
+                lpWebWidget->keyboardHookEvent(&msg);
+            }
+
+            break;
+        case WM_KEYUP:
+            // bit 30: The previous key state. The value is always 1 for a WM_KEYUP message.
+            // bit 31: The transition state. The value is always 1 for a WM_KEYUP message.
+            msg.lParam |= 0xC0000000; 
+            msg.message = WM_KEYUP;
+
+            lpWebWidget->keyboardHookEvent(&msg);
+
+            break;
+    }
 }
