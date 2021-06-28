@@ -33,8 +33,7 @@ class Widget extends HTMLElement {
         //   elem.opt.minValue = 1;
 
         if (!this._opt) {
-            // Trick for returning a reference
-            this._opt = function() {};
+            this._opt = function() {}; // trick for returning a reference
         }
 
         return this._opt;
