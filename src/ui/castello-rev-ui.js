@@ -67,14 +67,14 @@ class CastelloRevUI extends DISTRHO_WebUI {
         const feedback = document.createElement('a-knob');
         feedback.opt.minValue = 0;
         feedback.opt.maxValue = 1;
-        feedback.addEventListener('input', (ev) => { this.setParameterValue(0, ev.target.value); });
+        feedback.addEventListener('input', (ev) => this.setParameterValue(0, ev.target.value));
         feedback.replaceTemplateById('p-feedback');
 
         // LPF cutoff frequency knob
         const lpfreq = document.createElement('a-knob');
         lpfreq.opt.minValue = 100;
         lpfreq.opt.maxValue = 10000;
-        lpfreq.addEventListener('input', (ev) => { this.setParameterValue(1, ev.target.value); });
+        lpfreq.addEventListener('input', (ev) => this.setParameterValue(1, ev.target.value));
         lpfreq.replaceTemplateById('p-lpfreq');
     }
 

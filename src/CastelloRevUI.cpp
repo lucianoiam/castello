@@ -33,5 +33,5 @@ UI* DISTRHO::createUI()
 CastelloRevUI::CastelloRevUI()
     : ProxyWebUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA)
 {
-    //webWidget().setPrintTraffic(true);
+    webWidget().setPrintTraffic(true);
 }
