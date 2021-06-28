@@ -29,9 +29,6 @@ class CastelloRevUI extends DISTRHO_WebUI {
         // Setting up resize handle needs calling async getWidth()/getHeight()
         this._createResizeHandle();
 
-        // Just for fun -- works on Mac and Windows
-        this.forwardKeyboardInputToHost(true);
-
         // Always unhide because stateChanged() is not called for standalone
         document.body.style.visibility = 'visible';
     }
