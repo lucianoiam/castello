@@ -19,13 +19,6 @@ class CastelloRevUI extends DISTRHO_WebUI {
     constructor() {
         super();
 
-        // Disable pinch zoom, CSS touch-action:none appears to be broken on WebKitGTK.
-        if (/linux/i.test(window.navigator.platform)) {
-             document.getElementById('main').addEventListener('touchstart', (ev) => {
-                ev.preventDefault();
-            });
-        }
-
         // Create widgets inserting them at the places specified in the HTML
         this._createInputWidgets();
 
@@ -38,6 +31,9 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
         // Just for fun -- works on Mac and Windows
         this.forwardKeyboardInputToHost(true);
+
+        // Always unhide because stateChanged() is not called for standalone
+        document.body.style.visibility = 'visible';
     }
 
     stateChanged(key, value) {
@@ -49,7 +45,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
             }
 
             // Do not unhide UI until window size is restored
-            document.body.style.visibility = 'visible';
+            //document.body.style.visibility = 'visible';
         }
     }
 
