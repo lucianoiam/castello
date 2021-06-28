@@ -45,15 +45,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
             const wh = value.split('x');
 
             if (wh.length == 2) {
-                const width = parseInt(wh[0]);
-                const height = parseInt(wh[1]);
-
-                this.setSize(width, height);
-
-                 // WINSIZEBUG: see also ProxyWebUI constructor
-                if (/win/i.test(window.navigator.platform)) {
-                    this.setSize(width, height);
-                }
+                this.setSize(parseInt(wh[0]), parseInt(wh[1]));
             }
 
             // Do not unhide UI until window size is restored

@@ -66,6 +66,11 @@ class DISTRHO_WebUI {
     // UI::setSize(uint width, uint height)
     setSize(width, height) {
         this._call('setSize', width, height);
+
+        // WINSIZEBUG: need to repeat call 2x, see also ProxyWebUI constructor.
+        if (/win/i.test(window.navigator.platform)) {
+            this._call('setSize', width, height);
+        }
     }
 
     // UI::editParameter(uint32_t index, bool started)
