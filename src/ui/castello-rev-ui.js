@@ -38,9 +38,6 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
         // Just for fun -- works on Mac and Windows
         this.forwardKeyboardInputToHost(true);
-
-        // Showtime
-        document.body.style.visibility = 'visible';
     }
 
     stateChanged(key, value) {
@@ -58,6 +55,9 @@ class CastelloRevUI extends DISTRHO_WebUI {
                     this.setSize(width, height);
                 }
             }
+
+            // Do not unhide UI until window size is restored
+            document.body.style.visibility = 'visible';
         }
     }
 
