@@ -25,8 +25,8 @@ class Widget extends HTMLElement {
      */
 
     get opt() {
-        // Allow to set options without requiring to first create the options
-        // object itself, like this:
+        // Allow to set options without requiring the caller to first create the
+        // options object itself, like this:
         //   const elem = document.createElement('a-elem');
         //   elem.opt.minValue = 1;
 
