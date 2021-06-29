@@ -27,26 +27,11 @@ class Widget extends HTMLElement {
      */
 
     get opt() {
-        // Allow to set options without requiring the caller to first create the
-        // options object itself, like this:
-        //   const elem = document.createElement('a-elem');
-        //   elem.opt.minValue = 1;
-
-        if (!this._opt) {
-            this._opt = function() {}; // trick for returning a reference
-        }
-
         return this._opt;
     }
 
-    set opt(optObj) {
-        // Also allow to set options using an object, like this:
-        //   const elem = document.createElement('a-elem');
-        //   elem.opt = {minValue: 1};
-
-        for (const key in optObj) {
-            this.opt[key] = optObj[key];
-        }
+    set opt(opt) {
+        this._opt = opt;
     }
 
     replaceTemplateById(id) {
@@ -62,7 +47,7 @@ class Widget extends HTMLElement {
     /**
      *  Internal
      */
-    
+
     static get _unqualifiedNodeName() {
         throw new TypeError(`_unqualifiedNodeName not implemented for ${this.name}`);
     }
@@ -71,8 +56,9 @@ class Widget extends HTMLElement {
         window.customElements.define(`a-${this._unqualifiedNodeName}`, this);
     }
     
-    _instanceInit() {
-        // no-op
+    constructor() {
+        super();
+        this._opt = {};
     }
 
     connectedCallback() {
@@ -82,6 +68,25 @@ class Widget extends HTMLElement {
         }
     }
 
+    _instanceInit() {
+        //
+        // [NotSupportedError: A newly constructed custom element must not have attributes
+        //
+        // To avoid the error a custom _instanceInit() is implemented that gets
+        // called when the runtime calls this.connectedCallback(), because
+        // concrete classes [ the ones whose instances are ultimately created by
+        // calling document.createElementById() ] must not set attributes in the
+        // constructor body, like this:
+        //
+        // constructor() {
+        //    super();
+        //    this._foo = {};
+        // }
+        //
+        // There is no problem in setting attributes during super() though.
+        // This is a silly limitation to the otherwise nice looking HTML5/ES6.
+        //
+    }
 }
 
 /**
@@ -96,8 +101,8 @@ class TouchAndMouseControllableWidget extends Widget {
      *  Internal
      */
 
-    _instanceInit() {
-        super._instanceInit();
+    constructor() {
+        super();
 
         // Handle touch events preventing subsequent simulated mouse events
 
@@ -231,8 +236,8 @@ class InputWidget extends TouchAndMouseControllableWidget {
      *  Internal
      */
 
-    _instanceInit() {
-        super._instanceInit();
+    constructor() {
+        super();
         this._value = 0;
     }
 
@@ -268,8 +273,8 @@ class RangeInputWidget extends InputWidget {
      *  Internal
      */
 
-    _instanceInit() {
-        super._instanceInit();
+    constructor() {
+        super();
 
         this._opt.minValue = this._opt.minValue || 0.0;
         this._opt.maxValue = this._opt.maxValue || 1.0;
