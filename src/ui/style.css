@@ -13,7 +13,6 @@ body {
     background-color: #000;
     color: #fff;
     font-family: sans-serif;
-    touch-action: none; /* Broken on WebKitGTK, but used to work in the past? */
 }
 
 a-knob {
