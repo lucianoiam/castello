@@ -10,6 +10,8 @@ fi
 cp -r $DPF_WEBUI/src/arch src/
 cp -r $DPF_WEBUI/src/base src/
 
+cp $DPF_WEBUI/src/ui/stub-webui.js src/ui/
+
 cp $DPF_WEBUI/Makefile.base.mk .
 cp $DPF_WEBUI/Makefile.plugins.mk .
 cp $DPF_WEBUI/Makefile.support.mk .
