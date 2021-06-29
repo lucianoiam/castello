@@ -161,8 +161,6 @@ class TouchAndMouseControllableWidget extends Widget {
         this._prevClientY = clientY;
 
         this.dispatchEvent(ev);
-
-        this._onControlEventStart(ev);
     }
 
     _handleInputContinue(originalEvent, clientX, clientY) {
@@ -179,14 +177,11 @@ class TouchAndMouseControllableWidget extends Widget {
         this._prevClientY = clientY;
 
         this.dispatchEvent(ev);
-
-        this._onControlEventContinue(ev);
     }
 
     _handleInputEnd(originalEvent) {
         const ev = this._createControlEvent('controlend', originalEvent);
         this.dispatchEvent(ev);
-        this._onControlEventEnd(ev);
     }
 
     _createControlEvent(name, originalEvent) {
@@ -198,18 +193,6 @@ class TouchAndMouseControllableWidget extends Widget {
         ev.ctrlKey = originalEvent.ctrlKey;
 
         return ev;
-    }
-
-    _onControlEventStart(ev) {
-        // no-op
-    }
-
-    _onControlEventContinue(ev) {
-        // no-op
-    }
-
-    _onControlEventEnd(ev) {
-        // no-op
     }
 
 }
@@ -423,14 +406,17 @@ class ResizeHandle extends InputWidget {
             default:
                 break;
         }
+
+        this.addEventListener('controlstart', this._onGrab);
+        this.addEventListener('controlcontinue', this._onDrag);
     }
 
-    _onControlEventStart(ev) {
+    _onGrab(ev) {
         this._width = document.body.clientWidth;
         this._height = document.body.clientHeight;
     }
 
-    _onControlEventContinue(ev) {
+    _onDrag(ev) {
         // FIXME: On Windows, touchmove events stop triggering after calling callback,
         //        which in turn calls DistrhoUI::setSize(). Mouse resizing works OK.
         let newWidth = this._width + ev.movementX;
@@ -490,6 +476,9 @@ class Knob extends RangeInputWidget {
 
         const d = SvgUtil.describeArc(150, 150, 100, This._trackStartAngle, This._trackEndAngle);
         this.querySelector('.knob-track').setAttribute('d', d);
+
+        this.addEventListener('controlstart', this._onGrab);
+        this.addEventListener('controlcontinue', this._onMove);
     }
 
     _onSetValue(value) {
@@ -499,13 +488,13 @@ class Knob extends RangeInputWidget {
         this.querySelector('.knob-value').setAttribute('d', d);
     }
 
-    _onControlEventStart(ev) {
+    _onGrab(ev) {
         this._startValue = this._value;
         this._axisTracker = [];
         this._dragDistance = 0;
     }
 
-    _onControlEventContinue(ev) {
+    _onMove(ev) {
         const dir = Math.abs(ev.movementX) - Math.abs(ev.movementY);
 
         if (this._axisTracker.length < 3) {
