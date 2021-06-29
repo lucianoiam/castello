@@ -107,7 +107,7 @@ class TouchAndMouseControllableWidget extends Widget {
         // Handle touch events preventing subsequent simulated mouse events
 
         this.addEventListener('touchstart', (ev) => {
-            this._handleInputStart(ev, ev.touches[0].clientX, ev.touches[0].clientY);
+            this._dispatchControlStart(ev, ev.touches[0].clientX, ev.touches[0].clientY);
 
             if (ev.cancelable) {
                 ev.preventDefault();
@@ -115,7 +115,7 @@ class TouchAndMouseControllableWidget extends Widget {
         });
 
         this.addEventListener('touchmove', (ev) => {
-            this._handleInputContinue(ev, ev.touches[0].clientX, ev.touches[0].clientY);
+            this._dispatchControlContinue(ev, ev.touches[0].clientX, ev.touches[0].clientY);
 
             if (ev.cancelable) {
                 ev.preventDefault();
@@ -123,7 +123,7 @@ class TouchAndMouseControllableWidget extends Widget {
         });
         
         this.addEventListener('touchend', (ev) => {
-            this._handleInputEnd(ev);
+            this._dispatchControlEnd(ev);
 
             if (ev.cancelable) {
                 ev.preventDefault();
@@ -133,25 +133,25 @@ class TouchAndMouseControllableWidget extends Widget {
         // Simulate touch behavior for mouse, for example react to move events outside element
 
         const mouseMoveListener = (ev) => {
-            this._handleInputContinue(ev, ev.clientX, ev.clientY);
+            this._dispatchControlContinue(ev, ev.clientX, ev.clientY);
         };
 
         const mouseUpListener = (ev) => {
             window.removeEventListener('mouseup', mouseUpListener);
             window.removeEventListener('mousemove', mouseMoveListener);
 
-            this._handleInputEnd(ev);
+            this._dispatchControlEnd(ev);
         }
     
         this.addEventListener('mousedown', (ev) => {
             window.addEventListener('mousemove', mouseMoveListener);
             window.addEventListener('mouseup', mouseUpListener);
 
-            this._handleInputStart(ev, ev.clientX, ev.clientY);
+            this._dispatchControlStart(ev, ev.clientX, ev.clientY);
         });
     }
 
-    _handleInputStart(originalEvent, clientX, clientY) {
+    _dispatchControlStart(originalEvent, clientX, clientY) {
         const ev = this._createControlEvent('controlstart', originalEvent);
 
         ev.clientX = clientX;
@@ -163,7 +163,7 @@ class TouchAndMouseControllableWidget extends Widget {
         this.dispatchEvent(ev);
     }
 
-    _handleInputContinue(originalEvent, clientX, clientY) {
+    _dispatchControlContinue(originalEvent, clientX, clientY) {
         const ev = this._createControlEvent('controlcontinue', originalEvent);
 
         // movementX/Y is not available in TouchEvent instances
@@ -179,7 +179,7 @@ class TouchAndMouseControllableWidget extends Widget {
         this.dispatchEvent(ev);
     }
 
-    _handleInputEnd(originalEvent) {
+    _dispatchControlEnd(originalEvent) {
         const ev = this._createControlEvent('controlend', originalEvent);
         this.dispatchEvent(ev);
     }
@@ -521,6 +521,8 @@ class Knob extends RangeInputWidget {
     }
 
 }
+
+// Initialize all concrete widget classes
 
 {
     [ResizeHandle, Knob].forEach((cls) => cls._staticInit());
