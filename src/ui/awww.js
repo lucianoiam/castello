@@ -285,7 +285,7 @@ class RangeInputWidget extends InputWidget {
  * Support
  */
 
-class SvgUtil {
+class SvgMath {
 
     // http://jsbin.com/quhujowota
 
@@ -473,7 +473,7 @@ class Knob extends RangeInputWidget {
         this.innerHTML = This._svgData;
         this.style.display = 'block';
 
-        const d = SvgUtil.describeArc(150, 150, 100, This._trackStartAngle, This._trackEndAngle);
+        const d = SvgMath.describeArc(150, 150, 100, This._trackStartAngle, This._trackEndAngle);
         this.querySelector('.knob-track').setAttribute('d', d);
 
         this.addEventListener('controlstart', this._onGrab);
@@ -482,9 +482,9 @@ class Knob extends RangeInputWidget {
 
     _onSetValue(value) {
         const This = this.constructor;
-        const range = Math.abs(this._trackStartAngle) + Math.abs(this._trackEndAngle);
-        const endAngle = range + This._trackAngleRange * this._normalize(value);
-        const d = SvgUtil.describeArc(150, 150, 100, This._trackStartAngle, endAngle);
+        const range = Math.abs(This._trackStartAngle) + Math.abs(This._trackEndAngle);
+        const endAngle = This._trackStartAngle + range * this._normalize(value);
+        const d = SvgMath.describeArc(150, 150, 100, This._trackStartAngle, endAngle);
         this.querySelector('.knob-value').setAttribute('d', d);
     }
 
