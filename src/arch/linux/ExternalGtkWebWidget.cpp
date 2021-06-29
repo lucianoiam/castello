@@ -19,9 +19,11 @@
 #include "ExternalGtkWebWidget.hpp"
 
 #include <cstdio>
+#include <libgen.h>
 #include <signal.h>
 #include <spawn.h>
 #include <unistd.h>
+#include <linux/limits.h>
 #include <sys/select.h>
 #include <sys/wait.h>
 
@@ -73,7 +75,10 @@ ExternalGtkWebWidget::ExternalGtkWebWidget(Window& windowToMapTo)
     sprintf(rfd, "%d", fPipeFd[0][0]);
     char wfd[10];
     sprintf(wfd, "%d", fPipeFd[1][1]);
-    String helperPath = platform::getBinaryDirectoryPath() + String("/" XSTR(BIN_BASENAME) "_ui");
+    
+    char binPath[PATH_MAX];
+    strcpy(binPath, platform::getBinaryPath());
+    String helperPath = String(dirname(binPath)) + "/" XSTR(BIN_BASENAME) "_ui";
     const char *argv[] = {helperPath, rfd, wfd, 0};
 
     int status = posix_spawn(&fPid, helperPath, 0, 0, (char* const*)argv, environ);
@@ -128,6 +133,16 @@ void ExternalGtkWebWidget::onResize(const ResizeEvent& ev)
 {
     helper_size_t sizePkt = {ev.size.getWidth(), ev.size.getHeight()};
     ipcWrite(OPC_SET_SIZE, &sizePkt, sizeof(sizePkt));
+}
+
+bool ExternalGtkWebWidget::onKeyboard(const KeyboardEvent& ev)
+{
+    // TODO: route keys to webview, necessary for Bitwig
+    //       REAPER keyboard input seems to be broken for every plugin.
+    //       also consider onCharacterInput()
+    String js = String("if(typeof(window.count)=='undefined') window.count=0;document.getElementById('temp').innerText=window.count++;");
+    runScript(js);
+    return isGrabKeyboardInput(); // true = stop propagation
 }
 
 void ExternalGtkWebWidget::setBackgroundColor(uint32_t rgba)
