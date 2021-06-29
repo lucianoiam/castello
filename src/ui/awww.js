@@ -457,8 +457,7 @@ class Knob extends RangeInputWidget {
         super._staticInit();
 
         this._trackStartAngle = -135;
-        this._trackEndAngle = 135;
-        this._trackAngleRange = Math.abs(this._trackStartAngle) + Math.abs(this._trackEndAngle);
+        this._trackEndAngle   =  135;
 
         this._svgData = `<svg viewBox="40 40 220 220">
                             <path class="knob-track" fill="none" stroke="#404040" stroke-width="20"/>
@@ -483,7 +482,8 @@ class Knob extends RangeInputWidget {
 
     _onSetValue(value) {
         const This = this.constructor;
-        const endAngle = This._trackStartAngle + This._trackAngleRange * this._normalize(value);
+        const range = Math.abs(this._trackStartAngle) + Math.abs(this._trackEndAngle);
+        const endAngle = range + This._trackAngleRange * this._normalize(value);
         const d = SvgUtil.describeArc(150, 150, 100, This._trackStartAngle, endAngle);
         this.querySelector('.knob-value').setAttribute('d', d);
     }
