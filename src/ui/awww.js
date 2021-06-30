@@ -84,7 +84,6 @@ class Widget extends HTMLElement {
         // }
         //
         // There is no problem in setting attributes during super() though.
-        // This is a silly limitation to the otherwise nice looking HTML5/ES6.
         //
     }
 }
@@ -151,6 +150,10 @@ class TouchAndMouseControllableWidget extends Widget {
         });
     }
 
+    /**
+     *  Private
+     */
+
     _dispatchControlStart(originalEvent, clientX, clientY) {
         const ev = this._createControlEvent('controlstart', originalEvent);
 
@@ -212,9 +215,19 @@ class InputWidget extends TouchAndMouseControllableWidget {
     }
 
     set value(value) {
+        if (this._value == value) {
+            return;
+        }
+
+        this._value = value;
+        
         // Unlike a regular range HTMLInputElement, externally updating the
         // value will result in an input event being dispatched.
-        this._setValue(value);
+        // HTMLInputElement type=range triggers Event, type=text -> InputEvent.
+
+        const ev = new Event('input');
+        ev.value = this._value;
+        this.dispatchEvent(ev);
     }
 
     /**
@@ -224,19 +237,6 @@ class InputWidget extends TouchAndMouseControllableWidget {
     constructor() {
         super();
         this._value = 0;
-    }
-
-    _setValue(value) {
-        if (this._value == value) {
-            return;
-        }
-
-        this._value = value;
-
-        // Range type HTMLInputElement triggers an Event, text type InputEvent.
-        const ev = new Event('input');
-        ev.value = this._value;
-        this.dispatchEvent(ev);
     }
 
 }
@@ -406,6 +406,10 @@ class ResizeHandle extends InputWidget {
         this.addEventListener('controlcontinue', this._onDrag);
     }
 
+    /**
+     *  Private
+     */
+
     _onGrab(ev) {
         this._width = document.body.clientWidth;
         this._height = document.body.clientHeight;
@@ -432,7 +436,7 @@ class ResizeHandle extends InputWidget {
             this._width = newWidth;
             this._height = newHeight;
             const k = window.devicePixelRatio;
-            this._setValue({width: k * this._width, height: k * this._height});
+            this.value = {width: k * this._width, height: k * this._height};
         }
     }
 
@@ -477,6 +481,10 @@ class Knob extends RangeInputWidget {
         this.addEventListener('controlcontinue', this._onMove);
     }
 
+    /**
+     *  Private
+     */
+
     _redraw() {
         const This = this.constructor;
         const range = Math.abs(This._trackStartAngle) + Math.abs(This._trackEndAngle);
@@ -514,7 +522,7 @@ class Knob extends RangeInputWidget {
             dv = this._range() * this._dragDistance / this.clientHeight;
         }
 
-        this._setValue(this._clamp(this._startValue + dv));
+        this.value = this._clamp(this._startValue + dv);
     }
 
 }
