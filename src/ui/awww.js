@@ -212,6 +212,8 @@ class InputWidget extends TouchAndMouseControllableWidget {
     }
 
     set value(value) {
+        // Unlike a regular range HTMLInputElement, externally updating the
+        // value will result in an input event being dispatched.
         this._setValue(value);
     }
 
@@ -224,24 +226,17 @@ class InputWidget extends TouchAndMouseControllableWidget {
         this._value = 0;
     }
 
-    _setValue(value, runInternalCallback) {
+    _setValue(value) {
         if (this._value == value) {
             return;
         }
 
         this._value = value;
 
-        if (runInternalCallback !== false) {
-            this._onSetValue(this._value);
-        }
-
-        const ev = new InputEvent('input');
+        // Range type HTMLInputElement triggers an Event, text type InputEvent.
+        const ev = new Event('input');
         ev.value = this._value;
         this.dispatchEvent(ev);
-    }
-
-    _onSetValue(value) {
-        // no-op
     }
 
 }
@@ -476,14 +471,16 @@ class Knob extends RangeInputWidget {
         const d = SvgMath.describeArc(150, 150, 100, This._trackStartAngle, This._trackEndAngle);
         this.querySelector('.knob-track').setAttribute('d', d);
 
+        this.addEventListener('input', this._redraw);
+
         this.addEventListener('controlstart', this._onGrab);
         this.addEventListener('controlcontinue', this._onMove);
     }
 
-    _onSetValue(value) {
+    _redraw() {
         const This = this.constructor;
         const range = Math.abs(This._trackStartAngle) + Math.abs(This._trackEndAngle);
-        const endAngle = This._trackStartAngle + range * this._normalize(value);
+        const endAngle = This._trackStartAngle + range * this._normalize(this.value);
         const d = SvgMath.describeArc(150, 150, 100, This._trackStartAngle, endAngle);
         this.querySelector('.knob-value').setAttribute('d', d);
     }
