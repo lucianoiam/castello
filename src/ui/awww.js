@@ -27,7 +27,7 @@ class Widget extends HTMLElement {
      */
 
     static define() {
-        this._staticInit();
+        this._init();
         window.customElements.define(`a-${this._unqualifiedNodeName}`, this);
     }
 
@@ -56,22 +56,22 @@ class Widget extends HTMLElement {
         throw new TypeError(`_unqualifiedNodeName not implemented for ${this.name}`);
     }
 
-    static _staticInit() {
+    static _init() {
         // default empty implementation
     }
 
     connectedCallback() {
-        if (!this._instanceInitialized) {
-            this._instanceInitialized = true;
-            this._instanceInit();
+        if (!this._initialized) {
+            this._initialized = true;
+            this._init();
         }
     }
 
-    _instanceInit() {
+    _init() {
         //
         // [NotSupportedError: A newly constructed custom element must not have attributes
         //
-        // To avoid the error a custom _instanceInit() is implemented that gets
+        // To avoid the error a custom _init() is implemented that gets
         // called when the runtime calls this.connectedCallback(), because
         // concrete classes [ the ones whose instances are ultimately created by
         // calling document.createElementById() ] must not set attributes in the
@@ -351,7 +351,7 @@ class ResizeHandle extends InputWidget {
         return 'resize';
     }
 
-    static _staticInit() {
+    static _init() {
         this._svgData = Object.freeze({
             DOTS:
                `<svg viewBox="0 0 100 100">
@@ -373,8 +373,8 @@ class ResizeHandle extends InputWidget {
         });
     }
 
-    _instanceInit() {
-        super._instanceInit();
+    _init() {
+        super._init();
 
         // Default minimum and maximum size is the parent element size
         const defWidth = this.parentNode.clientWidth;
@@ -472,7 +472,7 @@ class Knob extends InputWidget {
         return 'knob';
     }
 
-    static _staticInit() {
+    static _init() {
         this._trackStartAngle = -135;
         this._trackEndAngle   =  135;
 
@@ -482,8 +482,8 @@ class Knob extends InputWidget {
                          </svg>`;
     }
 
-    _instanceInit() {
-        super._instanceInit();
+    _init() {
+        super._init();
 
         RangeTrait.apply(this);
 

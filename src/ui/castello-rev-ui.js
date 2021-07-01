@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Helper function
-const widget = (id) => document.getElementById(id);
-
 class CastelloRevUI extends DISTRHO_WebUI {
+
+    static init() {
+        window.widget = (id) => document.getElementById(id); // helper
+    }
 
     constructor() {
         super();
@@ -65,7 +66,8 @@ class CastelloRevUI extends DISTRHO_WebUI {
         }
     }
 
-    // FIXME: Allow to set widget options at any time
+    // FIXME: Allow to set widget options updating widget.opt at any time
+    //        Allow to set widget options updating node attributes at any time
 
     _createInputWidgets() {
         // Feedback knob
@@ -97,3 +99,5 @@ class CastelloRevUI extends DISTRHO_WebUI {
     }
 
 }
+
+CastelloRevUI.init();
