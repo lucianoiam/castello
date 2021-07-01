@@ -26,22 +26,26 @@ class Widget extends HTMLElement {
      *  Public
      */
 
+    static define() {
+        this._staticInit();
+        window.customElements.define(`a-${this._unqualifiedNodeName}`, this);
+    }
+
     get opt() {
+        // Allow to set options without requiring to first create the options
+        // object itself, like this:
+        //   const elem = document.createElement('a-elem');
+        //   elem.opt.some = 1;
+
+        if (!this._opt) {
+            this._opt = function() {}; // return a reference
+        }
+
         return this._opt;
     }
 
     set opt(opt) {
-        this._opt = opt;
-    }
-
-    replaceTemplateById(id) {
-        const old = document.querySelector(`template[id=${id}]`);
-        old.parentNode.insertBefore(this, old);
-        old.parentNode.removeChild(old);
-        
-        this.id = id;
-        
-        return this;
+        Object.assign(this._opt, opt); // merge
     }
 
     /**
@@ -53,18 +57,13 @@ class Widget extends HTMLElement {
     }
 
     static _staticInit() {
-        window.customElements.define(`a-${this._unqualifiedNodeName}`, this);
-    }
-    
-    constructor() {
-        super();
-        this.opt = {};
+        // default empty implementation
     }
 
     connectedCallback() {
         if (!this._instanceInitialized) {
-            this._instanceInit();
             this._instanceInitialized = true;
+            this._instanceInit();
         }
     }
 
@@ -86,11 +85,54 @@ class Widget extends HTMLElement {
         // There is no problem in setting attributes during super() though.
         //
     }
+
+    _styleProp(name, def) {
+        const prop = getComputedStyle(this).getPropertyValue(name).trim();
+        return prop.length > 0 ? prop : def;
+    }
+
+    // Already existing opt values always take precedence over attributes
+
+    _optAttrBool(key, def, attrName) {
+        if ((this.opt[key] !== false) && (this.opt[key] !== true)) {
+            this.opt[key] = this._optAttr(key, 'false', attrName) == 'true';
+        }
+    }
+
+    _optAttrInt(key, def, attrName) {
+        if (!isFinite(this.opt[key])) {
+            const val = parseInt(this._optAttr(key, def, attrName));
+            this.opt[key] = !isNaN(val) ? val : def;
+        }
+    }
+
+    _optAttrFloat(key, def, attrName) {
+        if (!isFinite(this.opt[key])) {
+            const val = parseFloat(this._optAttr(key, def, attrName));
+            this.opt[key] = !isNaN(val) ? val : def;
+       }
+    }
+
+    _optAttrString(key, def, attrName) {
+        if (!(this.opt[key] instanceof String)) {
+            this.opt[key] = this._optAttr(key, def, attrName);
+        }
+    }
+
+    /**
+     * Private
+     */
+
+    _optAttr(key, def, attrName) {
+        const attr = this.attributes.getNamedItem(attrName ?? key.toLowerCase());
+        return attr ? attr.value : def;
+    }
+
 }
 
 
 /**
- *  Base class for stateful input widgets
+ *  Base class for widgets that accept and store a value
  */
 
 class InputWidget extends Widget {
@@ -125,9 +167,8 @@ class InputWidget extends Widget {
 
     constructor() {
         super();
-        this._value = 0;
-        
-        UnifiedTouchAndMouseControlTrait.apply(this);
+        this._value = null;  
+        ControlTrait.apply(this);
     }
 
 }
@@ -139,7 +180,9 @@ class InputWidget extends Widget {
 
 class ControlEvent extends UIEvent {}
 
-function UnifiedTouchAndMouseControlTrait() {
+// Merges touch and mouse input events into a single basic set of custom events
+
+function ControlTrait() {
 
     // Handle touch events preventing subsequent simulated mouse events
 
@@ -236,8 +279,8 @@ function UnifiedTouchAndMouseControlTrait() {
 
 function RangeTrait() {
 
-    this.opt.minValue = this.opt.minValue || 0.0;
-    this.opt.maxValue = this.opt.maxValue || 1.0;
+    this._optAttrFloat('minValue', 0, 'min');
+    this._optAttrFloat('maxValue', 1.0, 'max');
 
     const proto = this.constructor.prototype;
 
@@ -301,25 +344,15 @@ class SvgMath {
 class ResizeHandle extends InputWidget {
 
     /**
-     *  Public
-     */
-
-    appendToBody() {
-        document.body.appendChild(this);
-    }
-    
-    /**
      *  Internal
      */
 
     static get _unqualifiedNodeName() {
-        return 'resize-handle';
+        return 'resize';
     }
 
     static _staticInit() {
-        super._staticInit();
-
-        this._themeSvgData = Object.freeze({
+        this._svgData = Object.freeze({
             DOTS:
                `<svg viewBox="0 0 100 100">
                     <path d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
@@ -343,22 +376,26 @@ class ResizeHandle extends InputWidget {
     _instanceInit() {
         super._instanceInit();
 
-        // Default minimum size is the current document size
-        this.opt.minWidth = this.opt.minWidth || document.body.clientWidth;
-        this.opt.minHeight = this.opt.minHeight || document.body.clientHeight;
+        // Default minimum and maximum size is the parent element size
+        const defWidth = this.parentNode.clientWidth;
+        const defHeight = this.parentNode.clientHeight;
 
-        if (this.opt.maxScale) {
-            // Set the maximum size to maxScale times the minimum size 
+        this._optAttrInt('minWidth', defWidth);
+        this._optAttrInt('minHeight', defHeight);
+
+        this._optAttrFloat('maxScale', 0);
+
+        // Setting maxScale overrides maxWidth and maxHeight
+        if (this.opt.maxScale > 0) {
             this.opt.maxWidth = this.opt.maxScale * this.opt.minWidth;
             this.opt.maxHeight = this.opt.maxScale * this.opt.minHeight;
         } else {
-            // Default maximum size is the device screen size
-            this.opt.maxWidth = this.opt.maxWidth || window.screen.width;
-            this.opt.maxHeight = this.opt.maxHeight || window.screen.height;
+            this._optAttrInt('maxWidth', defWidth);
+            this._optAttrInt('maxHeight', defHeight);
         }
 
-        // Keep aspect ratio while resizing, default to yes
-        this.opt.keepAspectRatio = this.opt.keepAspectRatio === false ? false : true;
+        // Keep aspect ratio while resizing, default to no
+        this._optAttrBool('keepAspectRatio', false);
 
         // Initialize state
         this._aspectRatio = this.opt.minWidth / this.opt.minHeight;
@@ -366,17 +403,16 @@ class ResizeHandle extends InputWidget {
         this._height = 0;
         
         // No point in allowing CSS customizations for these
-        this.style.position = 'fixed';
-        this.style.zIndex = '1000';
+        this.style.position = 'absolute';
+        this.style.zIndex = '100';
         this.style.right = '0px';
         this.style.bottom = '0px';
-        this.style.width = '24px';
-        this.style.height = '24px';
-
-        const svgData = this.constructor._themeSvgData;
 
         // Configure graphic
-        switch (this.opt.theme || 'dots') {
+
+        const svgData = this.constructor._svgData;
+
+        switch (this._styleProp('--graphic', 'dots').toLowerCase()) {
             case 'dots':
                 this.innerHTML = svgData.DOTS;
                 break;
@@ -396,13 +432,13 @@ class ResizeHandle extends InputWidget {
      */
 
     _onGrab(ev) {
-        this._width = document.body.clientWidth;
-        this._height = document.body.clientHeight;
+        this._width = this.parentNode.clientWidth;
+        this._height = this.parentNode.clientHeight;
     }
 
     _onDrag(ev) {
-        // FIXME: On Windows, touchmove events stop triggering after calling callback,
-        //        which in turn calls DistrhoUI::setSize(). Mouse resizing works OK.
+        // Note: On Windows touchmove events stop triggering if the window size is
+        //       modified while the listener runs. Does not happen with mousemove.
         let newWidth = this._width + ev.movementX;
         newWidth = Math.max(this.opt.minWidth, Math.min(this.opt.maxWidth, newWidth));
 
@@ -420,8 +456,7 @@ class ResizeHandle extends InputWidget {
         if ((this._width != newWidth) || (this._height != newHeight)) {
             this._width = newWidth;
             this._height = newHeight;
-            const k = window.devicePixelRatio;
-            this.value = {width: k * this._width, height: k * this._height};
+            this.value = {width: this._width, height: this._height};
         }
     }
 
@@ -438,8 +473,6 @@ class Knob extends InputWidget {
     }
 
     static _staticInit() {
-        super._staticInit();
-
         this._trackStartAngle = -135;
         this._trackEndAngle   =  135;
 
@@ -520,5 +553,5 @@ class Knob extends InputWidget {
  */
 
 {
-    [ResizeHandle, Knob].forEach((cls) => cls._staticInit());
+    [ResizeHandle, Knob].forEach((cls) => cls.define());
 }
