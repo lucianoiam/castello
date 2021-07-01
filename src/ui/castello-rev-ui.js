@@ -14,6 +14,9 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Helper function
+const widget = (id) => document.getElementById(id);
+
 class CastelloRevUI extends DISTRHO_WebUI {
 
     constructor() {
@@ -49,8 +52,6 @@ class CastelloRevUI extends DISTRHO_WebUI {
     parameterChanged(index, value) {
         // Host informs a parameter has changed, update its associated widget.
 
-        const widget = (id) => document.getElementById(id);
-
         switch (index) {
             case 0:
                 widget('p-feedback').value = value;
@@ -62,31 +63,30 @@ class CastelloRevUI extends DISTRHO_WebUI {
         }
     }
 
+    // FIXME: Allow to set widget options at any time
+
     _createInputWidgets() {
         // Feedback knob
-        const feedback = document.createElement('a-knob');
+        const feedback = widget('p-feedback');
         feedback.opt.minValue = 0;
         feedback.opt.maxValue = 1;
         feedback.addEventListener('input', (ev) => this.setParameterValue(0, ev.target.value));
-        feedback.replaceTemplateById('p-feedback');
 
         // LPF cutoff frequency knob
-        const lpfreq = document.createElement('a-knob');
+        const lpfreq = widget('p-lpfreq');
         lpfreq.opt.minValue = 100;
         lpfreq.opt.maxValue = 10000;
         lpfreq.addEventListener('input', (ev) => this.setParameterValue(1, ev.target.value));
-        lpfreq.replaceTemplateById('p-lpfreq');
     }
 
     async _createResizeHandle() {
         // Like any other widget the resize handle can be styled using CSS.
-        const handle = document.createElement('a-resize-handle');
+        const handle = document.querySelector('a-resize');
 
         handle.opt.minWidth = await this.getInitWidth() / window.devicePixelRatio;
         handle.opt.minHeight = await this.getInitHeight() / window.devicePixelRatio;
         handle.opt.keepAspectRatio = true;
         handle.opt.maxScale = 2;
-        handle.appendToBody();
 
         handle.addEventListener('input', (ev) => {
             this.setSize(ev.value.width, ev.value.height);
