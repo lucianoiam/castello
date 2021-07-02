@@ -16,22 +16,33 @@
 
 class CastelloRevUI extends DISTRHO_WebUI {
 
-    static init() {
-        window.widget = (id) => document.getElementById(id); // helper
-    }
-
     constructor() {
         super();
 
-        // Create widgets inserting them at the places specified in the HTML
-        this._createInputWidgets();
+        // Define some helper functions
+        window.widget = id => document.getElementById(id);
 
-        // Flush queue after creating widgets to set their initial values,
+        const ui = this;
+
+        InputWidget.prototype.connect = function(paramIndex) {
+            this.addEventListener('input', ev => {
+                ui.setParameterValue(paramIndex, ev.target.value);
+            });
+        };
+
+        // Connect widgets to parameters and other targets
+        this._connectWidgets();
+
+        // Flush queue after connecting widgets to set their initial values,
         // and before calling any async methods otherwise those never complete.
         this.flushInitMessageQueue();
 
-        // Setting up resize handle needs calling async getWidth()/getHeight()
-        this._createResizeHandle();
+        // Setting up resize handle needs calling async methods
+        (async () => {
+            const k = window.devicePixelRatio;
+            widget('resize').opt.minWidth = await this.getInitWidth() / k;
+            widget('resize').opt.minHeight = await this.getInitHeight() / k;
+        }) ();
 
         // Always unhide because stateChanged() is not called for standalone
         document.body.style.visibility = 'visible';
@@ -64,38 +75,21 @@ class CastelloRevUI extends DISTRHO_WebUI {
         }
     }
 
-    // FIXME: Allow to set widget options updating widget.opt at any time
-    //        Allow to set widget options updating node attributes at any time
-
-    _createInputWidgets() {
+    _connectWidgets() {
         // Feedback knob
-        const feedback = widget('p-feedback');
-        feedback.opt.minValue = 0;
-        feedback.opt.maxValue = 1;
-        feedback.addEventListener('input', (ev) => this.setParameterValue(0, ev.target.value));
+        widget('p-feedback').connect(0);
 
         // LPF cutoff frequency knob
-        const lpfreq = widget('p-lpfreq');
-        lpfreq.opt.minValue = 100;
-        lpfreq.opt.maxValue = 10000;
-        lpfreq.addEventListener('input', (ev) => this.setParameterValue(1, ev.target.value));
-    }
+        widget('p-lpfreq').connect(1);
 
-    async _createResizeHandle() {
-        // Like any other widget the resize handle can be styled using CSS.
-        const handle = document.querySelector('a-resize');
-
-        handle.opt.minWidth = await this.getInitWidth() / window.devicePixelRatio;
-        handle.opt.minHeight = await this.getInitHeight() / window.devicePixelRatio;
-        handle.opt.keepAspectRatio = true;
-        handle.opt.maxScale = 2;
-
-        handle.addEventListener('input', (ev) => {
-            this.setSize(ev.value.width, ev.value.height);
-            this.setState('ui_size', `${ev.value.width}x${ev.value.height}`);
+        // Resize handle
+        widget('resize').addEventListener('input', ev => {
+            const k = window.devicePixelRatio;
+            const width = ev.value.width * k;
+            const height = ev.value.height * k; 
+            this.setSize(width, height);
+            this.setState('ui_size', `${width}x${height}`);
         });
     }
 
 }
-
-CastelloRevUI.init();
