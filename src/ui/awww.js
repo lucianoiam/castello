@@ -238,10 +238,10 @@ class RangeInputWidget extends InputWidget {
      */
 
     static get _attrOptDescriptor() {
-        return [
+        return Object.freeze([
             { key: 'minValue', attrName: 'min', parser: AttrParser.float, def: 0 },
             { key: 'maxValue', attrName: 'max', parser: AttrParser.float, def: 1 }
-        ];
+        ]);
     }
 
     _init() {
@@ -457,14 +457,14 @@ class ResizeHandle extends InputWidget {
     }
 
     static get _attrOptDescriptor() {
-        return [
+        return Object.freeze([
             { key: 'minWidth'       , parser: AttrParser.int  , def: 100   },
             { key: 'minHeight'      , parser: AttrParser.int  , def: 100   },
             { key: 'maxWidth'       , parser: AttrParser.int  , def: 0     },
             { key: 'maxHeight'      , parser: AttrParser.int  , def: 0     },
             { key: 'maxScale'       , parser: AttrParser.float, def: 2     },
             { key: 'keepAspectRatio', parser: AttrParser.bool , def: false },
-        ];
+        ]);
     }
 
     static _init() {
