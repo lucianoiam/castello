@@ -34,7 +34,7 @@ class Widget extends HTMLElement {
     constructor(opt) {
         super();
 
-        // Options passed to the constructor can be overwritten by matching
+        // Options passed to the constructor will be overwritten by matching
         // attributes before connectedCallback() is called.
 
         let updating = false; // avoid recursion below
@@ -54,15 +54,6 @@ class Widget extends HTMLElement {
                 return true;
             }
         });
-
-        // Listen to style changes. Unfortunately this does not work for custom
-        // style properties. Leaving commented code as a reminder.
-
-        /*const observer = new MutationObserver((mutations) => {
-            this._styleUpdated();
-        });
-
-        observer.observe(this, {attributes: true, attributeOldValue: true, attributeFilter: ['style']});*/
 
         // Set defaults
 
@@ -120,7 +111,7 @@ class Widget extends HTMLElement {
     }
 
     static _init() {
-        // default empty implementation
+        // Default empty implementation
     }
 
     _init() {
@@ -248,8 +239,8 @@ class RangeInputWidget extends InputWidget {
 
     static get _attrOptDescriptor() {
         return [
-            { parser: AttrParser.float, attrName: 'min', key: 'minValue', def: 0 },
-            { parser: AttrParser.float, attrName: 'max', key: 'maxValue', def: 1 }
+            { key: 'minValue', attrName: 'min', parser: AttrParser.float, def: 0 },
+            { key: 'maxValue', attrName: 'max', parser: AttrParser.float, def: 1 }
         ];
     }
 
@@ -467,12 +458,12 @@ class ResizeHandle extends InputWidget {
 
     static get _attrOptDescriptor() {
         return [
-            { parser: AttrParser.int,   key: 'minWidth'       , def: 100   },
-            { parser: AttrParser.int,   key: 'minHeight'      , def: 100   },
-            { parser: AttrParser.int,   key: 'maxWidth'       , def: 0     },
-            { parser: AttrParser.int,   key: 'maxHeight'      , def: 0     },
-            { parser: AttrParser.float, key: 'maxScale'       , def: 2     },
-            { parser: AttrParser.bool,  key: 'keepAspectRatio', def: false },
+            { key: 'minWidth'       , parser: AttrParser.int  , def: 100   },
+            { key: 'minHeight'      , parser: AttrParser.int  , def: 100   },
+            { key: 'maxWidth'       , parser: AttrParser.int  , def: 0     },
+            { key: 'maxHeight'      , parser: AttrParser.int  , def: 0     },
+            { key: 'maxScale'       , parser: AttrParser.float, def: 2     },
+            { key: 'keepAspectRatio', parser: AttrParser.bool , def: false },
         ];
     }
 
