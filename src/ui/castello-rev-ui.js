@@ -26,9 +26,9 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
         const ui = this;
 
-        InputWidget.prototype.connect = function(paramIndex) {
-            this.addEventListener('input', ev => {
-                ui.setParameterValue(paramIndex, ev.target.value);
+        InputWidget.prototype.connectToParameter = function(index) {
+            this.addEventListener('input', (ev) => {
+                ui.setParameterValue(index, ev.target.value);
             });
         };
 
@@ -79,13 +79,13 @@ class CastelloRevUI extends DISTRHO_WebUI {
 
     _connectWidgets() {
         // Feedback knob
-        widget('p-feedback').connect(0);
+        widget('p-feedback').connectToParameter(0);
 
         // LPF cutoff frequency knob
-        widget('p-lpfreq').connect(1);
+        widget('p-lpfreq').connectToParameter(1);
 
         // Resize handle
-        widget('resize').addEventListener('input', ev => {
+        widget('resize').addEventListener('input', (ev) => {
             const k = window.devicePixelRatio;
             const width = ev.value.width * k;
             const height = ev.value.height * k; 
