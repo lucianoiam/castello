@@ -10,14 +10,14 @@
     <div id="main">
       <div class="parameter">
           <label>Feedback</label>
-          <a-knob id="p-feedback"></a-knob>
+          <a-knob id="p-feedback" min="0" max="1.0"></a-knob>
       </div>
       <div class="parameter">
           <label>LPF frequency</label>
-          <a-knob id="p-lpfreq"></a-knob>
+          <a-knob id="p-lpfreq" min="100" max="10000"></a-knob>
       </div>
     </div>
-    <a-resize></a-resize>
+    <a-resize id="resize" maxscale="2" keepaspectratio="true"></a-resize>
     <script src="awww.js"></script>
     <script src="stub-webui.js"></script>
     <script src="castello-rev-ui.js"></script>

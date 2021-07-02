@@ -20,7 +20,7 @@ a-knob {
     height: 100px;
 }
 
-a-resize-handle > svg > path {
+a-resize path {
     fill: #fff;
     opacity: 0.25;
 }
