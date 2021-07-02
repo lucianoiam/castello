@@ -238,10 +238,10 @@ class RangeInputWidget extends InputWidget {
      */
 
     static get _attrOptDescriptor() {
-        return Object.freeze([
+        return [
             { key: 'minValue', attrName: 'min', parser: AttrParser.float, def: 0 },
             { key: 'maxValue', attrName: 'max', parser: AttrParser.float, def: 1 }
-        ]);
+        ];
     }
 
     _init() {
@@ -457,18 +457,18 @@ class ResizeHandle extends InputWidget {
     }
 
     static get _attrOptDescriptor() {
-        return Object.freeze([
+        return [
             { key: 'minWidth'       , parser: AttrParser.int  , def: 100   },
             { key: 'minHeight'      , parser: AttrParser.int  , def: 100   },
             { key: 'maxWidth'       , parser: AttrParser.int  , def: 0     },
             { key: 'maxHeight'      , parser: AttrParser.int  , def: 0     },
             { key: 'maxScale'       , parser: AttrParser.float, def: 2     },
             { key: 'keepAspectRatio', parser: AttrParser.bool , def: false },
-        ]);
+        ];
     }
 
     static _init() {
-        this._svgData = Object.freeze({
+        this._svgData = {
             DOTS:
                `<svg viewBox="0 0 100 100">
                     <path d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
@@ -486,7 +486,7 @@ class ResizeHandle extends InputWidget {
                     <line x1="50" y1="100" x2="100" y2="50"/>
                     <line x1="75" y1="100" x2="100" y2="75"/>
                 </svg>`
-        });
+        };
     }
 
     _init() {
