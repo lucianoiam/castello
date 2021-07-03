@@ -54,7 +54,7 @@ class Widget extends HTMLElement {
             }
         });
 
-        // Set any missing option values using defaults
+        // Fill in any missing option values using defaults
 
         for (const desc of this.constructor._attrOptDescriptor) {
             if (!(desc.key in this.opt) && (typeof(desc.default) !== 'undefined')) {
@@ -84,9 +84,9 @@ class Widget extends HTMLElement {
 
         if (desc) {
             const valStr = this._attr(desc.key.toLowerCase());
-            const val = desc.parser(valStr);
+            const val = desc.parser(valStr, null);
 
-            if (typeof(val) !== 'undefined') {
+            if (val !== null) {
                 this.opt[desc.key] = val;
             }
         }
@@ -487,6 +487,11 @@ class ResizeHandle extends InputWidget {
         if (parseInt(this._styleProp('height')) == 0) {
             this.style.height = '37px';
         }
+
+        // Ideally the --graphic style property should be observed for changes
+        // so the graphic can be updated at any time. A known method is by
+        // implementing a MutableObserver but as of Jul '21 the observer seems
+        // to only notify changes in built-in style properties and not custom.
 
         const svgData = this.constructor._svgData;
 
