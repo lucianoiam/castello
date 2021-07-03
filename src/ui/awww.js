@@ -627,13 +627,11 @@ class Knob extends RangeInputWidget {
     _onMove(ev) {
         const dir = Math.abs(ev.movementX) - Math.abs(ev.movementY);
 
-        if (this._axisTracker.length < 3) {
-            this._axisTracker.push(dir);
-            return;
-        }
-
-        this._axisTracker.shift();
         this._axisTracker.push(dir);
+
+        if (this._axisTracker.length > 3) {
+            this._axisTracker.shift();
+        }
 
         const axis = this._axisTracker.reduce((n0, n1) => n0 + n1);
 
