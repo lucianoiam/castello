@@ -19,16 +19,8 @@ class CastelloRevUI extends DISTRHO_WebUI {
     constructor() {
         super();
 
-        // Define some helper functions
-        window.widget = id => document.getElementById(id);
-
-        const ui = this;
-
-        InputWidget.prototype.connectToParameter = function(index) {
-            this.addEventListener('input', (ev) => {
-                ui.setParameterValue(index, ev.target.value);
-            });
-        };
+        // Add a connectToParameter() method to widgets, see definition below.
+        ParameterControlTrait.apply(RangeInputWidget, [this]);
 
         // Connect widgets to parameters and other targets
         this._connectWidgets();
@@ -92,4 +84,21 @@ class CastelloRevUI extends DISTRHO_WebUI {
         });
     }
 
+}
+
+
+/**
+ * Support code for writing less widget handling code
+ */
+
+function widget(id) {
+    return document.getElementById(id);
+}
+
+function ParameterControlTrait(ui) {
+    this.prototype.connectToParameter = function(index) {
+        this.addEventListener('input', (ev) => {
+            ui.setParameterValue(index, ev.target.value);
+        });
+    }
 }
