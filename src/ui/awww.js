@@ -59,8 +59,8 @@ class Widget extends HTMLElement {
         // Set any missing option values using defaults
 
         for (const desc of this.constructor._attrOptDescriptor) {
-            if (!(desc.key in this.opt) && (typeof(desc.def) !== 'undefined')) {
-                this.opt[desc.key] = desc.def;
+            if (!(desc.key in this.opt) && (typeof(desc.default) !== 'undefined')) {
+                this.opt[desc.key] = desc.default;
             }
         }
     }
@@ -77,15 +77,15 @@ class Widget extends HTMLElement {
 
     static get observedAttributes() {
         const This = this.prototype.constructor;
-        return This._attrOptDescriptor.map(This._optAttrName);
+        return This._attrOptDescriptor.map(d => d.key.toLowerCase());
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         const This = this.constructor;
-        const desc = This._attrOptDescriptor.find(d => name == This._optAttrName(d));
+        const desc = This._attrOptDescriptor.find(d => name == d.key.toLowerCase());
 
         if (desc) {
-            const valStr = this._attr(This._optAttrName(desc));
+            const valStr = this._attr(desc.key.toLowerCase());
             const val = desc.parser(valStr);
 
             if (typeof(val) !== 'undefined') {
@@ -128,14 +128,6 @@ class Widget extends HTMLElement {
         // Default empty implementation
     }
 
-    /**
-     * Private
-     */
-
-    static _optAttrName(descriptor) {
-        return descriptor.attrName ?? descriptor.key.toLowerCase();
-    }
-
 }
 
 
@@ -172,7 +164,7 @@ class InputWidget extends Widget {
      *  Internal
      */
 
-    _setValueAndDispatch(newValue) {
+    _setValueIfNeededAndDispatch(newValue) {
         if (this._value == newValue) {
             return;
         }
@@ -230,25 +222,25 @@ class RangeInputWidget extends InputWidget {
 
     static get _attrOptDescriptor() {
         return [
-            { key: 'minValue', attrName: 'min', parser: ValueParser.float, def: 0 },
-            { key: 'maxValue', attrName: 'max', parser: ValueParser.float, def: 1 }
+            { key: 'min', parser: ValueParser.float, default: 0 },
+            { key: 'max', parser: ValueParser.float, default: 1 }
         ];
     }
 
     _range() {
-        return this.opt.maxValue - this.opt.minValue;
+        return this.opt.max - this.opt.min;
     }
 
     _clamp(value) {
-        return Math.max(this.opt.minValue, Math.min(this.opt.maxValue, value));
+        return Math.max(this.opt.min, Math.min(this.opt.max, value));
     }
 
     _normalize(value) {
-        return (value - this.opt.minValue) / this._range();
+        return (value - this.opt.min) / this._range();
     }
 
     _denormalize(value) {
-        return this.opt.minValue + value * this._range();
+        return this.opt.min + value * this._range();
     }
 
     _optionUpdated(key, value) {
@@ -261,7 +253,7 @@ class RangeInputWidget extends InputWidget {
 
     _readAttrValue() {
         const val = ValueParser.float(this._attr('value'));
-        this.value = !isNaN(val) ? val : this.opt.minValue;
+        this.value = !isNaN(val) ? val : this.opt.min;
     }
 
 }
@@ -444,12 +436,12 @@ class ResizeHandle extends InputWidget {
 
     static get _attrOptDescriptor() {
         return [
-            { key: 'minWidth'       , parser: ValueParser.int  , def: 100   },
-            { key: 'minHeight'      , parser: ValueParser.int  , def: 100   },
-            { key: 'maxWidth'       , parser: ValueParser.int  , def: 0     },
-            { key: 'maxHeight'      , parser: ValueParser.int  , def: 0     },
-            { key: 'maxScale'       , parser: ValueParser.float, def: 2     },
-            { key: 'keepAspectRatio', parser: ValueParser.bool , def: false },
+            { key: 'minWidth'       , parser: ValueParser.int  , default: 100   },
+            { key: 'minHeight'      , parser: ValueParser.int  , default: 100   },
+            { key: 'maxWidth'       , parser: ValueParser.int  , default: 0     },
+            { key: 'maxHeight'      , parser: ValueParser.int  , default: 0     },
+            { key: 'maxScale'       , parser: ValueParser.float, default: 2     },
+            { key: 'keepAspectRatio', parser: ValueParser.bool , default: false },
         ];
     }
 
@@ -551,7 +543,7 @@ class ResizeHandle extends InputWidget {
             this._width = newWidth;
             this._height = newHeight;
 
-            this._setValueAndDispatch({
+            this._setValueIfNeededAndDispatch({
                 width: this._width,
                 height: this._height
             });
@@ -650,7 +642,7 @@ class Knob extends RangeInputWidget {
             dv = this._range() * this._dragDistance / this.clientHeight;
         }
 
-        this._setValueAndDispatch(this._clamp(this._startValue + dv));
+        this._setValueIfNeededAndDispatch(this._clamp(this._startValue + dv));
     }
 
 }
