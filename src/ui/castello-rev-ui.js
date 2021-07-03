@@ -21,11 +21,23 @@ class CastelloRevUI extends DISTRHO_WebUI {
     constructor() {
         super();
 
-        // Add a connectToParameter() method to widgets, see definition below.
+        // Add a connectToParameter() method to some widgets, definition below.
         ParameterControlTrait.apply(RangeInputWidget, [this]);
 
-        // Connect widgets to parameters and other targets
-        this._connectWidgets();
+        // Connect feedback knob
+        widget('p-feedback').connectToParameter(0);
+
+        // Connect LPF cutoff frequency knob
+        widget('p-lpfreq').connectToParameter(1);
+
+        // Connect resize handle
+        widget('resize').addEventListener('input', (ev) => {
+            const k = window.devicePixelRatio;
+            const width = ev.value.width * k;
+            const height = ev.value.height * k; 
+            this.setSize(width, height);
+            this.setState('ui_size', `${width}x${height}`);
+        });
 
         // Flush queue after connecting widgets to set their initial values,
         // and before calling any async methods otherwise those never complete.
@@ -67,23 +79,6 @@ class CastelloRevUI extends DISTRHO_WebUI {
                 widget('p-lpfreq').value = value;
                 break;
         }
-    }
-
-    _connectWidgets() {
-        // Feedback knob
-        widget('p-feedback').connectToParameter(0);
-
-        // LPF cutoff frequency knob
-        widget('p-lpfreq').connectToParameter(1);
-
-        // Resize handle
-        widget('resize').addEventListener('input', (ev) => {
-            const k = window.devicePixelRatio;
-            const width = ev.value.width * k;
-            const height = ev.value.height * k; 
-            this.setSize(width, height);
-            this.setState('ui_size', `${width}x${height}`);
-        });
     }
 
 }
