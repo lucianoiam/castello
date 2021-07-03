@@ -25,19 +25,18 @@ class Widget extends HTMLElement {
      */
 
     static define() {
-        this._init();
+        this._initialize();
         window.customElements.define(`a-${this._unqualifiedNodeName}`, this);
     }
 
     constructor(opt) {
         super();
 
-        // Options passed to the constructor will be overwritten by matching
-        // attributes before connectedCallback() is called.
+        // Set options and start observing changes. Options passed to the
+        // constructor will be overwritten by matching HTML attributes before
+        // connectedCallback() is called.
 
-        let updating = false; // avoid recursion below
-
-        // Listen to opt changes
+        let updating = false;
 
         this._opt = new Proxy(opt || {}, {
             set: (obj, prop, value) => {
@@ -47,13 +46,15 @@ class Widget extends HTMLElement {
                     updating = true;
                     this._optionUpdated(prop, value);
                     updating = false;
+                } else {
+                    // Avoid recursion
                 }
 
                 return true;
             }
         });
 
-        // Set defaults
+        // Set any missing option values using defaults
 
         for (const desc of this.constructor._attrOptDescriptor) {
             if (!(desc.key in this.opt) && (typeof(desc.def) !== 'undefined')) {
@@ -74,16 +75,16 @@ class Widget extends HTMLElement {
 
     static get observedAttributes() {
         const This = this.prototype.constructor;
-        return This._attrOptDescriptor.map(d => d.attrName ?? d.key.toLowerCase());
+        return This._attrOptDescriptor.map(This._optAttrName);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         const This = this.constructor;
-        const desc = This._attrOptDescriptor.find(d => name == (d.attrName ?? d.key.toLowerCase()));
+        const desc = This._attrOptDescriptor.find(d => name == This._optAttrName(d));
 
         if (desc) {
-            const attrVal = this._attr(desc.attrName ?? desc.key.toLowerCase());
-            const val = desc.parser(attrVal);
+            const valStr = this._attr(This._optAttrName(desc));
+            const val = desc.parser(valStr);
 
             if (typeof(val) !== 'undefined') {
                 this.opt[desc.key] = val;
@@ -92,8 +93,7 @@ class Widget extends HTMLElement {
     }
 
     connectedCallback() {
-        // At this point all options have been parsed from attributes
-        this._init();
+        // Default empty implementation
     }
 
     /**
@@ -108,30 +108,8 @@ class Widget extends HTMLElement {
         return [];
     }
 
-    static _init() {
+    static _initialize() {
         // Default empty implementation
-    }
-
-    _init() {
-        //
-        // Concrete classes, ie. the ones that are ultimately instantiated by
-        // calling document.createElement() or using the new operator, cannot
-        // set properties within their constructor bodies like in this example:
-        //
-        // constructor() {
-        //    super();
-        //    this._foo = {};
-        // }
-        // 
-        // Doing so results in a runtime error by design:
-        // [NotSupportedError: A newly constructed custom element must not have attributes
-        //
-        // To avoid the above arror and still enable concrete classes to perform
-        // instance initialization, a custom _init() is implemented that gets
-        // called whenever the runtime calls this.connectedCallback() on the
-        // instance. Setting properties during super(), ie. within the abstract
-        // classes constructors is permitted though.
-        //
     }
 
     _attr(name, def) {
@@ -146,6 +124,14 @@ class Widget extends HTMLElement {
 
     _optionUpdated(key, value) {
         // Default empty implementation
+    }
+
+    /**
+     * Private
+     */
+
+    static _optAttrName(descriptor) {
+        return descriptor.attrName ?? descriptor.key.toLowerCase();
     }
 
 }
@@ -212,6 +198,19 @@ class RangeInputWidget extends InputWidget {
     /**
      * Public
      */
+    
+    get value() {
+        return super.value; // overriding setter requires overriding getter
+    }
+
+    set value(newValue) {
+        super.value = this._clamp(newValue);
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this._readAttrValue();
+    }
 
     attributeChangedCallback(name, oldValue, newValue) {
         super.attributeChangedCallback(name, oldValue, newValue);
@@ -223,28 +222,15 @@ class RangeInputWidget extends InputWidget {
         }
     }
 
-    get value() {
-        return super.value; // overriding setter requires overriding getter
-    }
-
-    set value(newValue) {
-        super.value = this._clamp(newValue);
-    }
-
     /**
      * Internal
      */
 
     static get _attrOptDescriptor() {
         return [
-            { key: 'minValue', attrName: 'min', parser: AttrParser.float, def: 0 },
-            { key: 'maxValue', attrName: 'max', parser: AttrParser.float, def: 1 }
+            { key: 'minValue', attrName: 'min', parser: ValueParser.float, def: 0 },
+            { key: 'maxValue', attrName: 'max', parser: ValueParser.float, def: 1 }
         ];
-    }
-
-    _init() {
-        super._init();
-        this._readAttrValue();
     }
 
     _range() {
@@ -272,7 +258,7 @@ class RangeInputWidget extends InputWidget {
      */
 
     _readAttrValue() {
-        const val = AttrParser.float(this._attr('value'));
+        const val = ValueParser.float(this._attr('value'));
         this.value = !isNaN(val) ? val : this.opt.minValue;
     }
 
@@ -387,7 +373,7 @@ function ControlTrait() {
  * Support
  */
 
-class AttrParser {
+class ValueParser {
 
     static bool(s, def) {
         return ((s === 'true') || (s == 'false')) ? (s == 'true') : def;
@@ -456,42 +442,46 @@ class ResizeHandle extends InputWidget {
 
     static get _attrOptDescriptor() {
         return [
-            { key: 'minWidth'       , parser: AttrParser.int  , def: 100   },
-            { key: 'minHeight'      , parser: AttrParser.int  , def: 100   },
-            { key: 'maxWidth'       , parser: AttrParser.int  , def: 0     },
-            { key: 'maxHeight'      , parser: AttrParser.int  , def: 0     },
-            { key: 'maxScale'       , parser: AttrParser.float, def: 2     },
-            { key: 'keepAspectRatio', parser: AttrParser.bool , def: false },
+            { key: 'minWidth'       , parser: ValueParser.int  , def: 100   },
+            { key: 'minHeight'      , parser: ValueParser.int  , def: 100   },
+            { key: 'maxWidth'       , parser: ValueParser.int  , def: 0     },
+            { key: 'maxHeight'      , parser: ValueParser.int  , def: 0     },
+            { key: 'maxScale'       , parser: ValueParser.float, def: 2     },
+            { key: 'keepAspectRatio', parser: ValueParser.bool , def: false },
         ];
     }
 
-    static _init() {
+    static _initialize() {
         this._svgData = {
-            DOTS:
-               `<svg viewBox="0 0 100 100">
-                    <path d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
-                        C78.262,70.5,80.5,72.74,80.5,75.499z"/>
-                    <path d="M50.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
-                        C48.262,70.5,50.5,72.74,50.5,75.499z"/>
-                    <path d="M80.5,45.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
-                        C78.262,40.5,80.5,42.74,80.5,45.499z"/>
-                </svg>`
-            ,
-            LINES:
-               `<svg viewBox="0 0 100 100">
-                    <line x1="0" y1="100" x2="100" y2="0"/>
-                    <line x1="100" y1="25" x2="25" y2="100"/>
-                    <line x1="50" y1="100" x2="100" y2="50"/>
-                    <line x1="75" y1="100" x2="100" y2="75"/>
-                </svg>`
+            DOTS: `<svg viewBox="0 0 100 100">
+                      <path d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                          C78.262,70.5,80.5,72.74,80.5,75.499z"/>
+                      <path d="M50.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                          C48.262,70.5,50.5,72.74,50.5,75.499z"/>
+                      <path d="M80.5,45.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                          C78.262,40.5,80.5,42.74,80.5,45.499z"/>
+                   </svg>`,
+            LINES: `<svg viewBox="0 0 100 100">
+                       <line x1="0" y1="100" x2="100" y2="0"/>
+                       <line x1="100" y1="25" x2="25" y2="100"/>
+                       <line x1="50" y1="100" x2="100" y2="50"/>
+                       <line x1="75" y1="100" x2="100" y2="75"/>
+                   </svg>`
         };
     }
 
-    _init() {
-        super._init();
-
+    constructor() {
+        super();
+        
         this._width = 0;
         this._height = 0;
+
+        this.addEventListener('controlstart', this._onGrab);
+        this.addEventListener('controlcontinue', this._onDrag);
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
 
         this.style.position = 'absolute';
         this.style.zIndex = '100';
@@ -518,9 +508,6 @@ class ResizeHandle extends InputWidget {
             default:
                 break;
         }
-
-        this.addEventListener('controlstart', this._onGrab);
-        this.addEventListener('controlcontinue', this._onDrag);
     }
 
     _optionUpdated(key, value) {
@@ -582,7 +569,7 @@ class Knob extends RangeInputWidget {
         return 'knob';
     }
 
-    static _init() {
+    static _initialize() {
         this._trackStartAngle = -135;
         this._trackEndAngle   =  135;
 
@@ -592,19 +579,25 @@ class Knob extends RangeInputWidget {
                          </svg>`;
     }
 
-    _init() {
+    constructor() {
+        super();
+
+        this.addEventListener('controlstart', this._onGrab);
+        this.addEventListener('controlcontinue', this._onMove);
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+
         const This = this.constructor;
 
         this.innerHTML = This._svgData;
         this.style.display = 'block';
-
-        super._init(); // widget html is now ready
-
+ 
         const d = SvgMath.describeArc(150, 150, 100, This._trackStartAngle, This._trackEndAngle);
         this.querySelector('.knob-track').setAttribute('d', d);
 
-        this.addEventListener('controlstart', this._onGrab);
-        this.addEventListener('controlcontinue', this._onMove);
+        this._readAttrValue();
     }
     
     _valueUpdated() {
