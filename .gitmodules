@@ -1,3 +1,5 @@
 [submodule "dpf-webui"]
 	path = dpf-webui
 	url = https://github.com/lucianoiam/dpf-webui
+	branch = master
+
