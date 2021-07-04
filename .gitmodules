@@ -1,4 +1,3 @@
-[submodule "lib/DPF"]
-	path = lib/DPF
-	url = https://github.com/DISTRHO/DPF.git
-	branch = develop
+[submodule "dpf-webui"]
+	path = dpf-webui
+	url = https://github.com/lucianoiam/dpf-webui
