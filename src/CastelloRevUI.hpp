@@ -17,7 +17,7 @@
 #ifndef CASTELLOREVUI_HPP
 #define CASTELLOREVUI_HPP
 
-#include "base/ProxyWebUI.hpp"
+#include "ProxyWebUI.hpp"
 
 START_NAMESPACE_DISTRHO
 
