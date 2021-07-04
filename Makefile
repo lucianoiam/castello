@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 # Makefile for DISTRHO Plugins #
 # ---------------------------- #
-# Created by lucianoiam
+# Created by falkTX
 #
 
 # --------------------------------------------------------------
@@ -9,23 +9,23 @@
 
 NAME = castello-rev
 
+WEBUI_PROJECT_VERSION = 1
+
 # --------------------------------------------------------------
 # Files to build
 
 SRC_FILES_DSP = \
-    CastelloRevPlugin.cpp \
-    dsp/base.c \
-    dsp/revsc.c
+    src/CastelloRevPlugin.cpp \
+    src/dsp/base.c \
+    src/dsp/revsc.c
 
 SRC_FILES_UI  = \
-    CastelloRevUI.cpp
+    src/CastelloRevUI.cpp
 
 # --------------------------------------------------------------
-# Note this is not the DPF version of Makefile.plugins.mk
+# Do some magic
 
-SKIP_STRIPPING = true
-VERBOSE = true
-include Makefile.plugins.mk
+include dpf-webui/Makefile.plugins.mk
 
 # --------------------------------------------------------------
 # Enable all possible plugin types
@@ -47,8 +47,6 @@ TARGETS += vst
 # Required for soundpipe.h
 BASE_FLAGS += -DNO_LIBSNDFILE -DSNDFILE=FILE -DSF_INFO=char
 
-include Makefile.support.mk
-
-all: $(DEP_TARGETS) $(TARGETS)
+all: $(TARGETS) $(WEBUI_TARGET)
 
 # --------------------------------------------------------------
