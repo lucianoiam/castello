@@ -221,10 +221,10 @@ class RangeInputWidget extends InputWidget {
      */
 
     static get _attrOptDescriptor() {
-        return [
+        return super._attrOptDescriptor.concat([
             { key: 'min', parser: ValueParser.float, default: 0 },
             { key: 'max', parser: ValueParser.float, default: 1 }
-        ];
+        ]);
     }
 
     _range() {
@@ -435,14 +435,14 @@ class ResizeHandle extends InputWidget {
     }
 
     static get _attrOptDescriptor() {
-        return [
+        return super._attrOptDescriptor.concat([
             { key: 'minWidth'       , parser: ValueParser.int  , default: 100   },
             { key: 'minHeight'      , parser: ValueParser.int  , default: 100   },
             { key: 'maxWidth'       , parser: ValueParser.int  , default: 0     },
             { key: 'maxHeight'      , parser: ValueParser.int  , default: 0     },
             { key: 'maxScale'       , parser: ValueParser.float, default: 2     },
             { key: 'keepAspectRatio', parser: ValueParser.bool , default: false },
-        ];
+        ]);
     }
 
     static _initialize() {
@@ -583,6 +583,7 @@ class Knob extends RangeInputWidget {
 
         this.addEventListener('controlstart', this._onGrab);
         this.addEventListener('controlcontinue', this._onMove);
+        this.addEventListener('controlend', this._onRelease);
     }
 
     connectedCallback() {
@@ -622,6 +623,7 @@ class Knob extends RangeInputWidget {
         this._startValue = this.value;
         this._axisTracker = [];
         this._dragDistance = 0;
+        this._prevCursor = document.body.style.cursor;
     }
 
     _onMove(ev) {
@@ -629,23 +631,26 @@ class Knob extends RangeInputWidget {
 
         this._axisTracker.push(dir);
 
-        if (this._axisTracker.length > 3) {
-            this._axisTracker.shift();
-        }
-
         const axis = this._axisTracker.reduce((n0, n1) => n0 + n1);
 
-        let dv;
-
-        if (axis > 0) {
-            this._dragDistance += ev.movementX;
-            dv = this._range() * this._dragDistance / this.clientWidth;
-        } else {
-            this._dragDistance -= ev.movementY;
-            dv = this._range() * this._dragDistance / this.clientHeight;
+        if (this._axisTracker.length > 10) {
+            this._axisTracker.shift();
+            document.body.style.cursor = axis > 0 ? 'ew-resize' : 'ns-resize';
         }
 
-        this._setValueIfNeededAndDispatch(this._clamp(this._startValue + dv));
+        const dmov = axis > 0 ? ev.movementX : -ev.movementY;
+        const k0 = 0.1;
+        const k1 = 0.05 * (dmov < 0 ? -1 : 1);
+        const k2 = 0.025;
+
+        this._dragDistance += k0 * dmov + k1 * Math.pow(dmov, 2) + k2 * Math.pow(dmov, 3);
+        const dval = this._range() * this._dragDistance / this.clientWidth;
+
+        this._setValueIfNeededAndDispatch(this._clamp(this._startValue + dval));
+    }
+
+    _onRelease(ev) {
+        document.body.style.cursor = this._prevCursor;
     }
 
 }
