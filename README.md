@@ -1,6 +1,6 @@
 VST/LV2 reverb plugin featuring HTML UI and DSP algorithm from Csound
 ---------------------------------------------------------------------
 
-Based on [Apices](https://github.com/lucianoiam/apices)
+Based on [Apices](https://github.com/lucianoiam/apices) library for creating audio plugins.
 
-This is work in progress...
+![](http://textfiles.com/underconstruction/AtAthensOracle1388imagesconstruct.gif) This project is work in progress ![](http://textfiles.com/underconstruction/AtAthensOracle1388imagesconstruct.gif)
