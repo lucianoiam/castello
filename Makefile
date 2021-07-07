@@ -37,7 +37,7 @@ FILES_UI  = \
 # --------------------------------------------------------------
 # Do some magic
 
-include dpf-webui/Makefile.plugins.mk
+include apices/Makefile.plugins.mk
 
 # --------------------------------------------------------------
 # Enable all possible plugin types
