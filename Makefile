@@ -5,6 +5,9 @@
 # Web UI by lucianoiam
 #
 
+## DEBUG
+WEBUI_PRINT_TRAFFIC = true
+
 # --------------------------------------------------------------
 # Project name, used for binaries
 
