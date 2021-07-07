@@ -18,20 +18,9 @@
 
 #include "CastelloRevUI.hpp"
 
-#define BASE_WIDTH_PX  600
-#define BASE_HEIGHT_PX 300
-
-#define INIT_BACKGROUND_RGBA 0x000000ff
-
 USE_NAMESPACE_DISTRHO
 
 UI* DISTRHO::createUI()
 {
     return new CastelloRevUI;
-}
-
-CastelloRevUI::CastelloRevUI()
-    : ProxyWebUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA)
-{
-    webWidget().setPrintTraffic(true);
 }
