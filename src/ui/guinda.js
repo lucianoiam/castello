@@ -28,7 +28,7 @@ class Widget extends HTMLElement {
 
     static define() {
         this._initialize();
-        window.customElements.define(`a-${this._unqualifiedNodeName}`, this);
+        window.customElements.define(`g-${this._unqualifiedNodeName}`, this);
     }
 
     constructor(opt) {
@@ -636,7 +636,7 @@ class Knob extends RangeInputWidget {
         if (this._axisTracker.length > 5) {
             this._axisTracker.shift();
         }
-
+            
         document.body.style.cursor = axis > 0 ? 'ew-resize' : 'ns-resize';
 
         const dmov = axis > 0 ? ev.movementX : -ev.movementY;

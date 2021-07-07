@@ -15,12 +15,12 @@ body {
     font-family: sans-serif;
 }
 
-a-knob {
+g-knob {
     width: 72px;
     height: 72px;
 }
 
-a-resize path {
+g-resize path {
     fill: #fff;
     opacity: 0.25;
 }
