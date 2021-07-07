@@ -1,5 +1,4 @@
-[submodule "dpf-webui"]
-	path = dpf-webui
-	url = https://github.com/lucianoiam/dpf-webui
-	branch = master
 
+[submodule "apices"]
+	path = apices
+	url = https://github.com/lucianoiam/apices
