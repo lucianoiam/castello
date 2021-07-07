@@ -18,8 +18,6 @@
 
 #include "CastelloRevUI.hpp"
 
-#include <string>
-
 #define BASE_WIDTH_PX  600
 #define BASE_HEIGHT_PX 300
 
