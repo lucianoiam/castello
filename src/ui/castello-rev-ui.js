@@ -20,7 +20,7 @@ class CastelloRevUI extends DISTRHO_WebUI {
         super();
 
         // Add a connectToParameter() method to some widgets, definition below.
-        ParameterControlTrait.apply(RangeInputWidget, [this]);
+        ParameterControlTrait.call(RangeInputWidget, this);
 
         // Connect feedback knob
         widget('p-feedback').connectToParameter(0);
