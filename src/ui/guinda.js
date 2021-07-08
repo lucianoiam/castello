@@ -498,6 +498,7 @@ class ResizeHandle extends InputWidget {
 
         this.addEventListener('controlstart', this._onGrab);
         this.addEventListener('controlcontinue', this._onDrag);
+        this.addEventListener('controlend', this._onRelease);
     }
 
     connectedCallback() {
@@ -551,6 +552,8 @@ class ResizeHandle extends InputWidget {
     _onGrab(ev) {
         this._width = this.parentNode.clientWidth;
         this._height = this.parentNode.clientHeight;
+
+        document.body.style.cursor = 'nwse-resize';
     }
 
     _onDrag(ev) {
@@ -579,6 +582,10 @@ class ResizeHandle extends InputWidget {
                 height: this._height
             });
         }
+    }
+
+    _onRelease(ev) {
+        document.body.style.cursor = null;
     }
 
 }
