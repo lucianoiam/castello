@@ -1,9 +1,6 @@
 #!/bin/sh
 
-APICES=../apices
-GUINDA=../guinda
+git submodule update --recursive --remote
 
-git -C $APICES pull
-cp $APICES/example/ui/stub-webui.js src/ui/
-
-cp $GUINDA/guinda.js src/ui/
+cp apices/example/ui/stub-webui.js src/ui/
+cp guinda/guinda.js src/ui/

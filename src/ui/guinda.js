@@ -269,6 +269,9 @@ class ControlEvent extends UIEvent {}
 
 function ControlTrait() {
 
+    this._controlStarted = false;
+    this._controlTimeout = null;
+
     // Handle touch events preventing subsequent simulated mouse events
 
     this.addEventListener('touchstart', (ev) => {
@@ -304,6 +307,28 @@ function ControlTrait() {
         dispatchControlStart(ev, ev.clientX, ev.clientY);
     });
 
+    // Special treatment for wheel: synthesize start, continue and end events
+
+    this.addEventListener('wheel', (ev) => {
+        if (!this._controlStarted) {
+            dispatchControlStart(ev, ev.clientX, ev.clientY);
+        }
+
+        dispatchControlContinue(ev, this._prevClientX - ev.deltaX,
+                                    this._prevClientY - ev.deltaY);
+
+        if (this._controlTimeout) {
+            clearTimeout(this._controlTimeout);
+        }
+
+        this._controlTimeout = setTimeout(() => {
+            this._controlTimeout = null;
+            dispatchControlEnd(ev);
+        }, 100);
+
+        ev.preventDefault();
+    });
+
     const mouseMoveListener = (ev) => {
         dispatchControlContinue(ev, ev.clientX, ev.clientY);
     };
@@ -316,6 +341,8 @@ function ControlTrait() {
     };
 
     const dispatchControlStart = (originalEvent, clientX, clientY) => {
+        this._controlStarted = true;
+
         const ev = createControlEvent('controlstart', originalEvent);
 
         ev.clientX = clientX;
@@ -346,6 +373,7 @@ function ControlTrait() {
     const dispatchControlEnd = (originalEvent) => {
         const ev = createControlEvent('controlend', originalEvent);
         this.dispatchEvent(ev);
+        this._controlStarted = false;
     };
 
     // This works as a static function so function() can be used instead of =>
@@ -623,7 +651,6 @@ class Knob extends RangeInputWidget {
         this._startValue = this.value;
         this._axisTracker = [];
         this._dragDistance = 0;
-        this._prevCursor = document.body.style.cursor;
     }
 
     _onMove(ev) {
@@ -633,7 +660,7 @@ class Knob extends RangeInputWidget {
 
         const axis = this._axisTracker.reduce((n0, n1) => n0 + n1);
 
-        if (this._axisTracker.length > 5) {
+        if (this._axisTracker.length > 20) {
             this._axisTracker.shift();
         }
             
@@ -651,7 +678,7 @@ class Knob extends RangeInputWidget {
     }
 
     _onRelease(ev) {
-        document.body.style.cursor = this._prevCursor;
+        document.body.style.cursor = null;
     }
 
 }
