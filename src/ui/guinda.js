@@ -514,11 +514,11 @@ class ResizeHandle extends InputWidget {
         this.style.bottom = '0px';
 
         if (parseInt(this._styleProp('width')) == 0) {
-            this.style.width = '37px';
+            this.style.width = '24px';
         }
 
         if (parseInt(this._styleProp('height')) == 0) {
-            this.style.height = '37px';
+            this.style.height = '24px';
         }
 
         // Ideally the --graphic style property should be observed for changes
