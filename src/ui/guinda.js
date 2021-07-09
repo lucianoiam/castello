@@ -387,6 +387,8 @@ function ControlTrait() {
         ev.originalEvent = originalEvent;
 
         // Copy some standard properties
+        ev.clientX = originalEvent.clientY;
+        ev.clientY = originalEvent.clientY;
         ev.shiftKey = originalEvent.shiftKey;
         ev.ctrlKey = originalEvent.ctrlKey;
 
@@ -506,16 +508,21 @@ class ResizeHandle extends InputWidget {
         this.addEventListener('controlstart', this._onGrab);
         this.addEventListener('controlcontinue', this._onDrag);
 
-        const unsetCursor = () => {
-            if (!this.isControlStarted) {
+        const unsetCursor = (ev) => {
+            if (!this.isControlStarted && !this._isMouseIn) {
                 document.body.style.cursor = null;
             }
         };
 
         this.addEventListener('controlend', unsetCursor);
-        this.addEventListener('mouseleave', unsetCursor);
+
+        this.addEventListener('mouseleave', () => {
+            this._isMouseIn = false;
+            unsetCursor();
+        });
 
         this.addEventListener('mouseenter', (ev) => {
+            this._isMouseIn = true;
             document.body.style.cursor = 'nwse-resize';
         });
     }
