@@ -272,6 +272,10 @@ function ControlTrait() {
     this._controlStarted = false;
     this._controlTimeout = null;
 
+    // Synthesize a getter to keep this._controlStarted effectively private
+
+    Object.defineProperty(this, 'isControlStarted', { get: () => this._controlStarted });
+
     // Handle touch events preventing subsequent simulated mouse events
 
     this.addEventListener('touchstart', (ev) => {
@@ -371,12 +375,13 @@ function ControlTrait() {
     };
 
     const dispatchControlEnd = (originalEvent) => {
+        this._controlStarted = false;
         const ev = createControlEvent('controlend', originalEvent);
         this.dispatchEvent(ev);
-        this._controlStarted = false;
     };
 
-    // This works as a static function so function() can be used instead of =>
+    // This works as a static function. Because 'this' is not needed,
+    // function() can be used instead of =>
     function createControlEvent(name, originalEvent) {
         const ev = new ControlEvent(name);
         ev.originalEvent = originalEvent;
@@ -501,8 +506,18 @@ class ResizeHandle extends InputWidget {
         this.addEventListener('controlstart', this._onGrab);
         this.addEventListener('controlcontinue', this._onDrag);
 
-        this.addEventListener('mouseenter', ev => document.body.style.cursor = 'nwse-resize');
-        this.addEventListener('mouseleave', ev => document.body.style.cursor = null);
+        const unsetCursor = () => {
+            if (!this.isControlStarted) {
+                document.body.style.cursor = null;
+            }
+        };
+
+        this.addEventListener('controlend', unsetCursor);
+        this.addEventListener('mouseleave', unsetCursor);
+
+        this.addEventListener('mouseenter', (ev) => {
+            document.body.style.cursor = 'nwse-resize';
+        });
     }
 
     connectedCallback() {
