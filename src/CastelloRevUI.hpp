@@ -19,7 +19,7 @@
 #ifndef CASTELLOREVUI_HPP
 #define CASTELLOREVUI_HPP
 
-#include "ProxyWebUI.hpp"
+#include "WebHostUI.hpp"
 
 #define BASE_WIDTH_PX  600
 #define BASE_HEIGHT_PX 300
@@ -28,10 +28,10 @@
 
 START_NAMESPACE_DISTRHO
 
-class CastelloRevUI : public ProxyWebUI
+class CastelloRevUI : public WebHostUI
 {
 public:
-    CastelloRevUI() : ProxyWebUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA) {}
+    CastelloRevUI() : WebHostUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA) {}
     ~CastelloRevUI() {};
 
 };
