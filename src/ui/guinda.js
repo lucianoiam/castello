@@ -506,22 +506,22 @@ class ResizeHandle extends InputWidget {
         this.addEventListener('controlstart', this._onGrab);
         this.addEventListener('controlcontinue', this._onDrag);
 
-        const unsetCursor = (ev) => {
+        const unserCursorIfNeeded = (ev) => {
             if (!this.isControlStarted && !this._isMouseIn) {
                 document.body.style.cursor = null;
             }
         };
 
-        this.addEventListener('controlend', unsetCursor);
-
-        this.addEventListener('mouseleave', () => {
-            this._isMouseIn = false;
-            unsetCursor();
-        });
+        this.addEventListener('controlend', unserCursorIfNeeded);
 
         this.addEventListener('mouseenter', (ev) => {
             this._isMouseIn = true;
             document.body.style.cursor = 'nwse-resize';
+        });
+
+        this.addEventListener('mouseleave', () => {
+            this._isMouseIn = false;
+            unserCursorIfNeeded();
         });
     }
 
