@@ -316,8 +316,10 @@ function ControlTrait() {
             dispatchControlStart(ev, ev.clientX, ev.clientY);
         }
 
-        dispatchControlContinue(ev, this._prevClientX - ev.deltaX,
-                                    this._prevClientY - ev.deltaY);
+        const k = ev.shiftKey ? 2 : 1;
+
+        dispatchControlContinue(ev, this._prevClientX + k * Math.sign(ev.deltaX),
+                                    this._prevClientY + k * Math.sign(ev.deltaY));
 
         if (this._controlTimeout) {
             clearTimeout(this._controlTimeout);
