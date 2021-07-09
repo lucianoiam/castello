@@ -691,8 +691,10 @@ class Knob extends RangeInputWidget {
         if (this._axisTracker.length > 20) {
             this._axisTracker.shift();
         }
-            
-        document.body.style.cursor = axis > 0 ? 'ew-resize' : 'ns-resize';
+
+        if (!(ev.originalEvent instanceof WheelEvent)) {
+            document.body.style.cursor = axis > 0 ? 'ew-resize' : 'ns-resize';
+        }
 
         const dmov = axis > 0 ? ev.movementX : -ev.movementY;
         const k0 = 0.1;
