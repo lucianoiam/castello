@@ -5,9 +5,6 @@
 # Web UI by lucianoiam
 #
 
-## DEBUG
-APX_PRINT_TRAFFIC = true
-
 # --------------------------------------------------------------
 # Project name, used for binaries
 
@@ -19,9 +16,9 @@ NAME = castello-rev
 APX_PROJECT_VERSION = 1
 
 # --------------------------------------------------------------
-# Web files location
+# Web UI files location
 
-APX_RESOURCES_DIR = src/ui
+APX_WEB_UI_PATH = src/ui
 
 # --------------------------------------------------------------
 # Files to build
