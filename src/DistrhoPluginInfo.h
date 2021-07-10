@@ -14,8 +14,6 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// lib/DPF/distrho/DistrhoInfo.hpp
-
 /**
    The plugin name.@n
    This is used to identify your plugin before a Plugin instance can be created.
