@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-class CastelloRevUI extends DISTRHO_WebUI {
+class CastelloRevUI extends DISTRHO_UI {
 
     constructor() {
         super();
