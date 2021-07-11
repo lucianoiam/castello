@@ -1,5 +1,6 @@
 #!/bin/sh
 
+git submodule init
 git submodule update --recursive --remote
 
 git -C apices checkout master && git -C apices pull
