@@ -95,7 +95,7 @@ class Widget extends HTMLElement {
     }
 
     connectedCallback() {
-        // Default empty implementation
+        this._root = this.attachShadow({mode: 'open'});
     }
 
     /**
@@ -125,6 +125,10 @@ class Widget extends HTMLElement {
     }
 
     _optionUpdated(key, value) {
+        // Default empty implementation
+    }
+
+    _redraw() {
         // Default empty implementation
     }
 
@@ -177,7 +181,9 @@ class InputWidget extends Widget {
     }
 
     _valueUpdated(value) {
-        // Default empty implementation
+        if (this._root) {
+            this._redraw();
+        }
     }
 
 }
@@ -546,19 +552,24 @@ class ResizeHandle extends InputWidget {
             this.style.height = '24px';
         }
 
-        // Ideally the --graphic style property should be observed for changes
-        // so the graphic can be updated at any time. A known method is by
-        // implementing a MutableObserver but as of Jul '21 the observer seems
-        // to only notify changes in built-in style properties and not custom.
+        // Style property changes can be observed implementing MutableObserver
+        // but that only works for built-in style properties and not custom.
+
+        const color = this._styleProp('--color', '#000');
+
+        this._root.innerHTML = `<style>
+            path { fill: ${color}; }
+            line { stroke: ${color}; }
+        </style>`;
 
         const svgData = this.constructor._svgData;
 
         switch (this._styleProp('--graphic', 'dots').toLowerCase()) {
             case 'dots':
-                this.innerHTML = svgData.DOTS;
+                this._root.innerHTML += svgData.DOTS;
                 break;
             case 'lines':
-                this.innerHTML = svgData.LINES;
+                this._root.innerHTML += svgData.LINES;
                 break;
             default:
                 break;
@@ -629,8 +640,8 @@ class Knob extends RangeInputWidget {
         this._trackEndAngle   =  135;
 
         this._svgData = `<svg viewBox="40 40 220 220">
-                            <path class="knob-track" fill="none" stroke="#404040" stroke-width="20"/>
-                            <path class="knob-value" fill="none" stroke="#ffffff" stroke-width="20"/>
+                            <path class="track" fill="none" stroke-width="20"/>
+                            <path class="value" fill="none" stroke-width="20"/>
                          </svg>`;
     }
 
@@ -645,19 +656,24 @@ class Knob extends RangeInputWidget {
     connectedCallback() {
         super.connectedCallback();
 
+        this._root.innerHTML = `<style>
+            path.track { stroke: ${this._styleProp('--track-color', '#404040')}; }
+            path.value { stroke: ${this._styleProp('--value-color', '#ffffff')}; }
+        </style>`;
+
         const This = this.constructor;
 
-        this.innerHTML = This._svgData;
+        this._root.innerHTML += This._svgData;
         this.style.display = 'block';
  
         const d = SvgMath.describeArc(150, 150, 100, This._trackStartAngle, This._trackEndAngle);
-        this.querySelector('.knob-track').setAttribute('d', d);
+        this._root.querySelector('.track').setAttribute('d', d);
 
         this._readAttrValue();
     }
     
-    _valueUpdated() {
-        const knobValue = this.querySelector('.knob-value');
+    _redraw() {
+        const knobValue = this._root.querySelector('.value');
 
         if (!knobValue) {
             return;
@@ -699,9 +715,8 @@ class Knob extends RangeInputWidget {
         const dmov = axis > 0 ? ev.movementX : -ev.movementY;
         const k0 = 0.1;
         const k1 = 0.05 * (dmov < 0 ? -1 : 1);
-        const k2 = 0.005;
 
-        this._dragDistance += k0 * dmov + k1 * Math.pow(dmov, 2) + k2 * Math.pow(dmov, 3);
+        this._dragDistance += k0 * dmov + k1 * Math.pow(dmov, 2);
         const dval = this._range() * this._dragDistance / this.clientWidth;
 
         this._setValueIfNeededAndDispatch(this._clamp(this._startValue + dval));
