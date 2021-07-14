@@ -20,9 +20,8 @@ g-knob {
     height: 72px;
 }
 
-g-resize path {
-    fill: #fff;
-    opacity: 0.25;
+g-resize {
+    --color: #404040;
 }
 
 #main {
