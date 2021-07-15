@@ -48,10 +48,12 @@ class CastelloRevUI extends DISTRHO_UI {
             const k = window.devicePixelRatio;
             widget('resize').opt.minWidth = await this.getInitWidth() / k;
             widget('resize').opt.minHeight = await this.getInitHeight() / k;
-        }) ();
 
-        // Always unhide because stateChanged() is not called for standalone
-        document.body.style.visibility = 'visible';
+            if (await this.isStandalone()) {
+                // stateChanged() will not be called for standalone
+                document.body.style.visibility = 'visible';
+            }
+        }) ();
     }
 
     stateChanged(key, value) {
@@ -63,7 +65,7 @@ class CastelloRevUI extends DISTRHO_UI {
             }
 
             // Do not unhide UI until window size is restored
-            //document.body.style.visibility = 'visible';
+            document.body.style.visibility = 'visible';
         }
     }
 
