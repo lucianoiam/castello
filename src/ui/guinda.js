@@ -691,8 +691,8 @@ class Knob extends RangeInputWidget {
         const endAngle = This._trackStartAngle + range * this._normalize(this.value);
 
         knob.setAttribute('transform', `rotate(${endAngle}, 150, 150)`);
-        knobDot.style.fill = this.value == 0 ? this._styleProp('--dot-off-color', '#000') 
-                                             : this._styleProp('--dot-on-color', window.getComputedStyle(knobValue).stroke);
+        knobDot.style.fill = endAngle == This._trackStartAngle ? this._styleProp('--dot-off-color', '#000') 
+                             : this._styleProp('--dot-on-color', window.getComputedStyle(knobValue).stroke);
         knobValue.setAttribute('d', SvgMath.describeArc(150, 150, 100, This._trackStartAngle, endAngle));
     }
 
