@@ -640,8 +640,12 @@ class Knob extends RangeInputWidget {
         this._trackEndAngle   =  135;
 
         this._svgData = `<svg viewBox="40 40 220 220">
-                            <path class="track" fill="none" stroke-width="20"/>
-                            <path class="value" fill="none" stroke-width="20"/>
+                            <g id="knob">
+                                <circle id="circle" cx="150" cy="150" r="80"/>
+                                <circle id="dot" cx="150" cy="90" r="7.5"/>
+                            </g>
+                            <path id="track" fill="none" stroke-width="20"/>
+                            <path id="value" fill="none" stroke-width="20"/>
                          </svg>`;
     }
 
@@ -657,8 +661,9 @@ class Knob extends RangeInputWidget {
         super.connectedCallback();
 
         this._root.innerHTML = `<style>
-            path.track { stroke: ${this._styleProp('--track-color', '#404040')}; }
-            path.value { stroke: ${this._styleProp('--value-color', '#ffffff')}; }
+            #circle { fill: ${this._styleProp('--circle-color', '#404040')}; }
+            #track { stroke: ${this._styleProp('--track-color', '#404040')}; }
+            #value { stroke: ${this._styleProp('--value-color', '#ffffff')}; }
         </style>`;
 
         const This = this.constructor;
@@ -667,24 +672,28 @@ class Knob extends RangeInputWidget {
         this.style.display = 'block';
  
         const d = SvgMath.describeArc(150, 150, 100, This._trackStartAngle, This._trackEndAngle);
-        this._root.querySelector('.track').setAttribute('d', d);
+        this._root.getElementById('track').setAttribute('d', d);
 
         this._readAttrValue();
     }
     
     _redraw() {
-        const knobValue = this._root.querySelector('.value');
+        const knob = this._root.getElementById('knob');
+        const knobDot = this._root.getElementById('dot');
+        const knobValue = this._root.getElementById('value');
 
-        if (!knobValue) {
+        if (!knob) {
             return;
         }
 
         const This = this.constructor;
         const range = Math.abs(This._trackStartAngle) + Math.abs(This._trackEndAngle);
         const endAngle = This._trackStartAngle + range * this._normalize(this.value);
-        const d = SvgMath.describeArc(150, 150, 100, This._trackStartAngle, endAngle);
-        
-        knobValue.setAttribute('d', d);
+
+        knob.setAttribute('transform', `rotate(${endAngle}, 150, 150)`);
+        knobDot.style.fill = this.value == 0 ? this._styleProp('--dot-off-color', '#000') 
+                                             : this._styleProp('--dot-on-color', window.getComputedStyle(knobValue).stroke);
+        knobValue.setAttribute('d', SvgMath.describeArc(150, 150, 100, This._trackStartAngle, endAngle));
     }
 
     /**
