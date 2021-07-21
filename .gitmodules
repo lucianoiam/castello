@@ -1,7 +1,4 @@
 
-[submodule "apices"]
-	path = apices
-	url = https://github.com/lucianoiam/apices
 [submodule "guinda"]
 	path = guinda
 	url = https://github.com/lucianoiam/guinda
