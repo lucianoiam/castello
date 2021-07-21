@@ -2,3 +2,6 @@
 [submodule "guinda"]
 	path = guinda
 	url = https://github.com/lucianoiam/guinda
+[submodule "hiphap"]
+	path = hiphap
+	url = https://github.com/lucianoiam/hiphap
