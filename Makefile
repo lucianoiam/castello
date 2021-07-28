@@ -13,12 +13,12 @@ NAME = castello-rev
 # --------------------------------------------------------------
 # Project version, used for generating unique symbol names
 
-HIPHAP_PROJECT_VERSION = 1
+HIPHOP_PROJECT_VERSION = 1
 
 # --------------------------------------------------------------
 # Web UI files location
 
-HIPHAP_WEB_UI_PATH = src/ui
+HIPHOP_WEB_UI_PATH = src/ui
 
 # --------------------------------------------------------------
 # Files to build
@@ -34,7 +34,7 @@ FILES_UI  = \
 # --------------------------------------------------------------
 # Do some magic
 
-include hiphap/Makefile.plugins.mk
+include hiphop/Makefile.plugins.mk
 
 # --------------------------------------------------------------
 # Enable all possible plugin types
@@ -58,6 +58,6 @@ BASE_FLAGS += -Isrc
 # Required for soundpipe.h
 BASE_FLAGS += -DNO_LIBSNDFILE -DSNDFILE=FILE -DSF_INFO=char
 
-all: $(TARGETS) $(HIPHAP_TARGET)
+all: $(TARGETS) $(HIPHOP_TARGET)
 
 # --------------------------------------------------------------
