@@ -13,6 +13,7 @@ body {
     background-color: #000;
     color: #fff;
     font-family: sans-serif;
+    position: relative; /* for the resize handle */
 }
 
 g-knob {
