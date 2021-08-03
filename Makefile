@@ -2,13 +2,12 @@
 # Makefile for DISTRHO Plugins #
 # ---------------------------- #
 # Created by falkTX
-# Web UI by lucianoiam
 #
 
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = castello-rev
+NAME = castello-reverb
 
 # --------------------------------------------------------------
 # Project version, used for generating unique symbol names
@@ -24,12 +23,12 @@ HIPHOP_WEB_UI_PATH = src/ui
 # Files to build
 
 FILES_DSP = \
-    src/CastelloRevPlugin.cpp \
+    src/CastelloReverbPlugin.cpp \
     src/dsp/base.c \
     src/dsp/revsc.c
 
 FILES_UI  = \
-    src/CastelloRevUI.cpp
+    src/CastelloReverbUI.cpp
 
 # --------------------------------------------------------------
 # Do some magic

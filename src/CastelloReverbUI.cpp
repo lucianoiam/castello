@@ -16,26 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CASTELLOREVUI_HPP
-#define CASTELLOREVUI_HPP
+#include "CastelloReverbUI.hpp"
 
-#include "WebHostUI.hpp"
+USE_NAMESPACE_DISTRHO
 
-#define BASE_WIDTH_PX  600
-#define BASE_HEIGHT_PX 300
-
-#define INIT_BACKGROUND_RGBA 0x000000ff
-
-START_NAMESPACE_DISTRHO
-
-class CastelloRevUI : public WebHostUI
+UI* DISTRHO::createUI()
 {
-public:
-    CastelloRevUI() : WebHostUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA) {}
-    ~CastelloRevUI() {};
-
-};
-
-END_NAMESPACE_DISTRHO
-
-#endif  // CASTELLOREVUI_HPP
+    return new CastelloRevUI;
+}

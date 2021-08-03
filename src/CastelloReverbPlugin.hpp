@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CASTELLOREVPLUGIN_HPP
-#define CASTELLOREVPLUGIN_HPP
+#ifndef CASTELLO_REVERB_PLUGIN_HPP
+#define CASTELLO_REVERB_PLUGIN_HPP
 
 #include <string>
 #include <unordered_map>
@@ -84,4 +84,4 @@ private:
 
 END_NAMESPACE_DISTRHO
 
-#endif  // CASTELLOREVPLUGIN_HPP
+#endif  // CASTELLO_REVERB_PLUGIN_HPP
