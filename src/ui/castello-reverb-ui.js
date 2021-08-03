@@ -14,7 +14,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-class CastelloRevUI extends DISTRHO_UI {
+class CastelloReverbUI extends DISTRHO_UI {
 
     constructor() {
         super();

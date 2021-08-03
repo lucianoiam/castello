@@ -14,7 +14,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "CastelloRevPlugin.hpp"
+#include "CastelloReverbPlugin.hpp"
 
 USE_NAMESPACE_DISTRHO
 

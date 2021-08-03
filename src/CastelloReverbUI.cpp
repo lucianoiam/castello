@@ -14,7 +14,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "CastelloRevUI.hpp"
+#include "CastelloReverbUI.hpp"
 
 USE_NAMESPACE_DISTRHO
 
