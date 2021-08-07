@@ -25,13 +25,13 @@ class CastelloReverbUI extends DISTRHO_UI {
         ParameterControlTrait.apply(RangeInputWidget, [this]);
 
         // Connect feedback knob
-        widget('p-feedback').connectToParameter(0);
+        widget('#p-feedback g-knob').connectToParameter(0);
 
         // Connect LPF cutoff frequency knob
-        widget('p-lpfreq').connectToParameter(1);
+        widget('#p-lpfreq g-knob').connectToParameter(1);
 
         // Connect resize handle
-        widget('resize').addEventListener('input', (ev) => {
+        widget('g-resize').addEventListener('input', (ev) => {
             const k = window.devicePixelRatio;
             const width = ev.value.width * k;
             const height = ev.value.height * k; 
@@ -46,8 +46,8 @@ class CastelloReverbUI extends DISTRHO_UI {
         // Setting up resize handle needs calling async methods
         (async () => {
             const k = window.devicePixelRatio;
-            widget('resize').opt.minWidth = await this.getInitWidth() / k;
-            widget('resize').opt.minHeight = await this.getInitHeight() / k;
+            widget('g-resize').opt.minWidth = await this.getInitWidth() / k;
+            widget('g-resize').opt.minHeight = await this.getInitHeight() / k;
 
             if (await this.isStandalone()) {
                 // stateChanged() will not be called for standalone
@@ -74,11 +74,11 @@ class CastelloReverbUI extends DISTRHO_UI {
 
         switch (index) {
             case 0:
-                widget('p-feedback').value = value;
+                widget('#p-feedback g-knob').value = value;
                 break;
 
             case 1:
-                widget('p-lpfreq').value = value;
+                widget('#p-lpfreq g-knob').value = value;
                 break;
         }
     }
@@ -87,11 +87,11 @@ class CastelloReverbUI extends DISTRHO_UI {
 
 
 /**
- * Support code for writing less widget handling code
+ * Support code
  */
 
-function widget(id) {
-    return document.getElementById(id);
+function widget(sel) {
+    return document.querySelector(sel);
 }
 
 function ParameterControlTrait(ui) {

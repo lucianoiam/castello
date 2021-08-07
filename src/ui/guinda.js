@@ -641,7 +641,7 @@ class Knob extends RangeInputWidget {
 
         this._svgData = `<svg viewBox="40 40 220 220">
                             <g id="knob">
-                                <circle id="circle" cx="150" cy="150" r="80"/>
+                                <circle id="circle" cx="150" cy="150" r="85"/>
                                 <circle id="dot" cx="150" cy="90" r="7.5"/>
                             </g>
                             <path id="track" fill="none" stroke-width="20"/>
