@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = castello-reverb
+NAME = castello-rev
 
 # --------------------------------------------------------------
 # Project version, used for generating unique symbol names
