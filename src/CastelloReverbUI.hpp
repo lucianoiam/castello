@@ -19,8 +19,8 @@
 
 #include "WebHostUI.hpp"
 
-#define BASE_WIDTH_PX  480
-#define BASE_HEIGHT_PX 240
+#define BASE_WIDTH_PX  460
+#define BASE_HEIGHT_PX 200
 #define INIT_BACKGROUND_RGBA 0x2c3863ff
 
 START_NAMESPACE_DISTRHO

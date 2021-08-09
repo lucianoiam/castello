@@ -26,8 +26,8 @@ body {
 }
 
 g-knob {
-    width: 72px;
-    height: 72px;
+    width: 30vh;
+    height: 30vh;
     --circle-color: #ffffff3f;
     --dot-off-color: #ffffff;
     --dot-on-color: #ffffff;
