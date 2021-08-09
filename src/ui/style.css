@@ -28,8 +28,8 @@ body {
 /* It is not currently possible to use vh/vw/vmin/vmax units due to the way the
    webview works on Linux where screen dimensions are fixed, see LXRESIZEBUG */
 g-knob {
-    /*width: 30vh;
-    height: 30vh;*/
+    width: 30vh;
+    height: 30vh;
     --circle-color: #ffffff3f;
     --dot-off-color: #ffffff;
     --dot-on-color: #ffffff;
