@@ -83,6 +83,7 @@ class CastelloReverbUI extends DISTRHO_UI {
         }
     }
 
+    // LXRESIZEBUG
     uiReshape(width, height) {
         document.querySelectorAll('g-knob').forEach((el => {
             el.style.height = (0.3 * height) + 'px';
