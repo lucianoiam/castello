@@ -25,9 +25,11 @@ body {
     position: relative; /* for the resize handle */
 }
 
+/* It is not currently possible to use vh/vw/vmin/vmax units due to the way the
+   webview works on Linux where screen dimensions are fixed to large values */
 g-knob {
-    width: 30vh;
-    height: 30vh;
+    /*width: 30vh;
+    height: 30vh;*/
     --circle-color: #ffffff3f;
     --dot-off-color: #ffffff;
     --dot-on-color: #ffffff;
@@ -54,7 +56,7 @@ g-resize {
 
 #knobs {
     width: 100%;
-    height: 70%;
+    height: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
