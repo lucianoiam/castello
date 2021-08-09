@@ -51,6 +51,10 @@ class StubUI {
         console.log(`setSize(${width}, ${height})`);
     }
 
+    sendNote(channel, note, velocity) {
+        console.log(`sendNote(${channel}, ${note}, ${velocity})`);
+    }
+
     editParameter(index, started) {
         console.log(`editParameter(${index}, ${started})`);
     }
@@ -67,8 +71,8 @@ class StubUI {
         console.log('flushInitMessageQueue()');
     }
 
-    setGrabKeyboardInput(forward) {
-        console.log(`setGrabKeyboardInput(${forward}`);
+    setKeyboardFocus(focus) {
+        console.log(`setKeyboardFocus(${focus}`);
     }
 
     async getInitWidth() {
