@@ -285,13 +285,7 @@ function ControlTrait() {
     // Handle touch events preventing subsequent simulated mouse events
 
     this.addEventListener('touchstart', (ev) => {
-        const clientX = ev.touches[0].clientX;
-        const clientY = ev.touches[0].clientY;
-
-        this._prevClientX = clientX;
-        this._prevClientY = clientY;
-
-        dispatchControlStart(ev, clientX, clientY);
+        dispatchControlStart(ev, ev.touches[0].clientX, ev.touches[0].clientY);
 
         if (ev.cancelable) {
             ev.preventDefault();
@@ -299,15 +293,7 @@ function ControlTrait() {
     });
 
     this.addEventListener('touchmove', (ev) => {
-        const clientX = ev.touches[0].clientX;
-        const clientY = ev.touches[0].clientY;
-        const deltaX = clientX - this._prevClientX;
-        const deltaY = clientY - this._prevClientY;
-
-        this._prevClientX = clientX;
-        this._prevClientY = clientY;
-
-        dispatchControlContinue(ev, clientX, clientY, deltaX, deltaY);
+        dispatchControlContinue(ev, ev.touches[0].clientX, ev.touches[0].clientY);
 
         if (ev.cancelable) {
             ev.preventDefault();
@@ -315,7 +301,7 @@ function ControlTrait() {
     });
     
     this.addEventListener('touchend', (ev) => {
-        dispatchControlEnd(ev, this._prevClientX, this._prevClientY);
+        dispatchControlEnd(ev);
 
         if (ev.cancelable) {
             ev.preventDefault();
@@ -335,23 +321,15 @@ function ControlTrait() {
 
     this.addEventListener('wheel', (ev) => {
         if (!this._controlStarted) {
-            this._prevClientX = 0;
-            this._prevClientY = 0;
-
             dispatchControlStart(ev, ev.clientX, ev.clientY);
         }
 
         const k = ev.shiftKey ? 2 : 1
         const inv = ev.webkitDirectionInvertedFromDevice ? -1 : 1;
-        const deltaX = k * inv * Math.sign(ev.deltaX);
-        const deltaY = k * inv * Math.sign(ev.deltaY);
-        const clientX = this._prevClientX + deltaX;
-        const clientY = this._prevClientY + deltaY;
-
-        this._prevClientX = clientX;
-        this._prevClientY = clientY;
+        const clientX = this._prevClientX + k * inv * Math.sign(ev.deltaX);
+        const clientY = this._prevClientY + k * inv * Math.sign(ev.deltaY);
         
-        dispatchControlContinue(ev, clientX, clientY, deltaX, deltaY);
+        dispatchControlContinue(ev, clientX, clientY);
 
         if (this._controlTimeout) {
             clearTimeout(this._controlTimeout);
@@ -378,20 +356,38 @@ function ControlTrait() {
 
     const dispatchControlStart = (originalEvent, clientX, clientY) => {
         this._controlStarted = true;
+
+        this._prevClientX = clientX;
+        this._prevClientY = clientY;
+
         const ev = createControlEvent('controlstart', originalEvent, clientX, clientY);
+
         this.dispatchEvent(ev);
     };
 
-    const dispatchControlContinue = (originalEvent, clientX, clientY, deltaX, deltaY) => {
+    const dispatchControlContinue = (originalEvent, clientX, clientY, sourceDeltaX, sourceDeltaY) => {
         const ev = createControlEvent('controlcontinue', originalEvent, clientX, clientY);
-        ev.deltaX = deltaX;
-        ev.deltaY = deltaY;
+        
+        ev.hasSourceDelta = (typeof sourceDeltaX !== 'undefined')
+                                && (typeof sourceDeltaY !== 'undefined');
+        if (ev.hasSourceDelta) {
+            ev.sourceDeltaX = sourceDeltaX;
+            ev.sourceDeltaY = sourceDeltaY;
+        }
+
+        ev.deltaX = clientX - this._prevClientX;
+        ev.deltaY = clientY - this._prevClientY;
+
+        this._prevClientX = clientX;
+        this._prevClientY = clientY;
+
         this.dispatchEvent(ev);
     };
 
-    const dispatchControlEnd = (originalEvent, clientX, clientY) => {
+    const dispatchControlEnd = (originalEvent) => {
         this._controlStarted = false;
-        const ev = createControlEvent('controlend', originalEvent, clientX, clientY);
+        const ev = createControlEvent('controlend', originalEvent,
+                                        this._prevClientX, this._prevClientY);
         this.dispatchEvent(ev);
     };
 
@@ -609,16 +605,22 @@ class ResizeHandle extends InputWidget {
     }
 
     _onDrag(ev) {
-        // Note: On Windows touchmove events stop triggering if the window size is
-        //       modified while the listener runs. Does not happen with mousemove.
-        let newWidth = this._width + ev.deltaX;
+        // Note 1: Relying on MouseEvent movementX/Y results in a smoother movement
+        //         though it will be slower on REAPER due to the UI refresh rate.
+        // Note 2: On Windows touchmove events stop triggering if the window size is
+        //         modified while the listener runs. Does not happen with mousemove.
+
+        const deltaX = ev.hasSourceDelta ? ev.sourceDeltaX : ev.deltaX;
+        const deltaY = ev.hasSourceDelta ? ev.sourceDeltaY : ev.deltaY;
+        
+        let newWidth = this._width + deltaX;
         newWidth = Math.max(this.opt.minWidth, Math.min(this.opt.maxWidth, newWidth));
 
-        let newHeight = this._height + ev.deltaY;
+        let newHeight = this._height + deltaY;
         newHeight = Math.max(this.opt.minHeight, Math.min(this.opt.maxHeight, newHeight));
 
         if (this.opt.keepAspectRatio) {
-            if (ev.deltaX > ev.deltaY) {
+            if (deltaX > deltaY) {
                 newHeight = newWidth / this._aspectRatio;
             } else {
                 newWidth = newHeight * this._aspectRatio;
@@ -721,6 +723,9 @@ class Knob extends RangeInputWidget {
     }
 
     _onMove(ev) {
+        // Note: REAPER throttles down UI refresh rate so relying on MouseEvent
+        //       movementX/Y results in slow response. Use synthetic deltaX/deltaY.
+
         const dir = Math.abs(ev.deltaX) - Math.abs(ev.deltaY);
 
         this._axisTracker.push(dir);
