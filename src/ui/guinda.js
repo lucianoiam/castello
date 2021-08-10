@@ -606,12 +606,13 @@ class ResizeHandle extends InputWidget {
 
     _onDrag(ev) {
         // Note 1: Relying on MouseEvent movementX/Y results in a smoother movement
-        //         though it will be slower on REAPER due to the UI refresh rate.
+        //         on Mac though it will be slower on REAPER due to UI refresh rate.
         // Note 2: On Windows touchmove events stop triggering if the window size is
         //         modified while the listener runs. Does not happen with mousemove.
 
-        const deltaX = ev.hasSourceDelta ? ev.sourceDeltaX : ev.deltaX;
-        const deltaY = ev.hasSourceDelta ? ev.sourceDeltaY : ev.deltaY;
+        const isMac = /mac/i.test(window.navigator.platform);
+        const deltaX = isMac && ev.hasSourceDelta ? ev.sourceDeltaX : ev.deltaX;
+        const deltaY = isMac && ev.hasSourceDelta ? ev.sourceDeltaY : ev.deltaY;
         
         let newWidth = this._width + deltaX;
         newWidth = Math.max(this.opt.minWidth, Math.min(this.opt.maxWidth, newWidth));
