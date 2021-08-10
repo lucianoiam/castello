@@ -491,19 +491,23 @@ class ResizeHandle extends InputWidget {
 
     static _initialize() {
         this._svgData = {
+            LINES_1: `<svg viewBox="10 10 100 100">
+                        <line x1="100" y1="50" x2="50" y2="100" stroke-width="5"/>
+                        <line x1="75" y1="100" x2="100" y2="75" stroke-width="5"/>
+                      </svg>`,
+            LINES_2: `<svg viewBox="0 0 100 100">
+                        <line x1="0" y1="100" x2="100" y2="0"/>
+                        <line x1="100" y1="25" x2="25" y2="100"/>
+                        <line x1="50" y1="100" x2="100" y2="50"/>
+                        <line x1="75" y1="100" x2="100" y2="75"/>
+                      </svg>`,
             DOTS: `<svg viewBox="0 0 100 100">
-                      <path d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
-                          C78.262,70.5,80.5,72.74,80.5,75.499z"/>
-                      <path d="M50.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
-                          C48.262,70.5,50.5,72.74,50.5,75.499z"/>
-                      <path d="M80.5,45.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
-                          C78.262,40.5,80.5,42.74,80.5,45.499z"/>
-                   </svg>`,
-            LINES: `<svg viewBox="0 0 100 100">
-                       <line x1="0" y1="100" x2="100" y2="0"/>
-                       <line x1="100" y1="25" x2="25" y2="100"/>
-                       <line x1="50" y1="100" x2="100" y2="50"/>
-                       <line x1="75" y1="100" x2="100" y2="75"/>
+                     <path d="M80.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                       C78.262,70.5,80.5,72.74,80.5,75.499z"/>
+                     <path d="M50.5,75.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                       C48.262,70.5,50.5,72.74,50.5,75.499z"/>
+                     <path d="M80.5,45.499c0,2.763-2.238,5.001-5,5.001c-2.761,0-5-2.238-5-5.001c0-2.759,2.239-4.999,5-4.999
+                       C78.262,40.5,80.5,42.74,80.5,45.499z"/>
                    </svg>`
         };
     }
@@ -564,12 +568,16 @@ class ResizeHandle extends InputWidget {
 
         const svgData = this.constructor._svgData;
 
-        switch (this._styleProp('--graphic', 'dots').toLowerCase()) {
+        switch (this._styleProp('--graphic', 'lines').toLowerCase()) {
+            case 'lines':
+            case 'lines-1':
+                this._root.innerHTML += svgData.LINES_1;
+                break;
+            case 'lines-2':
+                this._root.innerHTML += svgData.LINES_2;
+                break;
             case 'dots':
                 this._root.innerHTML += svgData.DOTS;
-                break;
-            case 'lines':
-                this._root.innerHTML += svgData.LINES;
                 break;
             default:
                 break;
