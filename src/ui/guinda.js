@@ -370,14 +370,17 @@ function ControlTrait() {
     const dispatchControlContinue = (originalEvent, clientX, clientY) => {
         const ev = createControlEvent('controlcontinue', originalEvent);
 
-        // movementX/Y is not available in TouchEvent instances
+        if (('movementX' in originalEvent) && ('movementY' in originalEvent)) {
+            ev.movementX = originalEvent.movementX;
+            ev.movementY = originalEvent.movementY;
+        } else {
+            ev.movementX = clientX - this._prevClientX;
+            ev.movementY = clientY - this._prevClientY;
+        }
 
         ev.clientX = clientX;
-        ev.movementX = clientX - this._prevClientX;
         this._prevClientX = clientX;
-
         ev.clientY = clientY;
-        ev.movementY = clientY - this._prevClientY;
         this._prevClientY = clientY;
 
         this.dispatchEvent(ev);
