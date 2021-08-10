@@ -743,7 +743,7 @@ class Knob extends RangeInputWidget {
 
         const dmov = axis > 0 ? ev.deltaX : -ev.deltaY;
         const k0 = 0.1;
-        const k1 = 0.05 * (dmov < 0 ? -1 : 1);
+        const k1 = 0.04 * (dmov < 0 ? -1 : 1);
 
         this._dragDistance += k0 * dmov + k1 * Math.pow(dmov, 2);
         const dval = this._range() * this._dragDistance / this.clientWidth;
