@@ -344,7 +344,7 @@ function ControlTrait() {
     });
 
     const mouseMoveListener = (ev) => {
-        dispatchControlContinue(ev, ev.clientX, ev.clientY, ev.movementX, ev.movementY);
+        dispatchControlContinue(ev, ev.clientX, ev.clientY);
     };
 
     const mouseUpListener = (ev) => {
@@ -365,16 +365,9 @@ function ControlTrait() {
         this.dispatchEvent(ev);
     };
 
-    const dispatchControlContinue = (originalEvent, clientX, clientY, sourceDeltaX, sourceDeltaY) => {
+    const dispatchControlContinue = (originalEvent, clientX, clientY) => {
         const ev = createControlEvent('controlcontinue', originalEvent, clientX, clientY);
         
-        ev.hasSourceDelta = (typeof sourceDeltaX !== 'undefined')
-                                && (typeof sourceDeltaY !== 'undefined');
-        if (ev.hasSourceDelta) {
-            ev.sourceDeltaX = sourceDeltaX;
-            ev.sourceDeltaY = sourceDeltaY;
-        }
-
         ev.deltaX = clientX - this._prevClientX;
         ev.deltaY = clientY - this._prevClientY;
 
@@ -396,13 +389,13 @@ function ControlTrait() {
     function createControlEvent(name, originalEvent, clientX, clientY) {
         const ev = new ControlEvent(name);
         ev.originalEvent = originalEvent;
-        ev.clientX = clientY;
-        ev.clientY = clientY;
         ev.shiftKey = originalEvent.shiftKey;
         ev.ctrlKey = originalEvent.ctrlKey;
-        ev.isMouse = originalEvent instanceof MouseEvent;
-        ev.isWheel = originalEvent instanceof WheelEvent;
-        ev.isTouch = (typeof TouchEvent !== 'undefined') && originalEvent instanceof TouchEvent;
+        ev.isInputMouse = originalEvent instanceof MouseEvent;
+        ev.isInputWheel = originalEvent instanceof WheelEvent;
+        ev.isInputTouch = (typeof TouchEvent !== 'undefined') && originalEvent instanceof TouchEvent;
+        ev.clientX = clientY;
+        ev.clientY = clientY;
         return ev;
     }
 
@@ -610,9 +603,9 @@ class ResizeHandle extends InputWidget {
         // Note 2: On Windows touchmove events stop triggering if the window size is
         //         modified while the listener runs. Does not happen with mousemove.
 
-        const isMac = /mac/i.test(window.navigator.platform);
-        const deltaX = isMac && ev.hasSourceDelta ? ev.sourceDeltaX : ev.deltaX;
-        const deltaY = isMac && ev.hasSourceDelta ? ev.sourceDeltaY : ev.deltaY;
+        const useMouseDelta = /mac/i.test(window.navigator.platform) && ev.isInputMouse;
+        const deltaX = useMouseDelta ? ev.originalEvent.movementX : ev.deltaX;
+        const deltaY = useMouseDelta ? ev.originalEvent.movementY : ev.deltaY;
         
         let newWidth = this._width + deltaX;
         newWidth = Math.max(this.opt.minWidth, Math.min(this.opt.maxWidth, newWidth));
@@ -737,7 +730,7 @@ class Knob extends RangeInputWidget {
             this._axisTracker.shift();
         }
 
-        if (ev.isWheel) {
+        if (ev.isInputWheel) {
             document.body.style.cursor = axis > 0 ? 'ew-resize' : 'ns-resize';
         }
 
