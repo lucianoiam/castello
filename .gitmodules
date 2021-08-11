@@ -1,7 +1,4 @@
 
-[submodule "guinda"]
-	path = guinda
-	url = https://github.com/lucianoiam/guinda
 [submodule "hiphop"]
 	path = hiphop
 	url = https://github.com/lucianoiam/hiphop
