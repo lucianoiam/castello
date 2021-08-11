@@ -16,119 +16,170 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "CastelloReverbPlugin.hpp"
+#include <string>
+#include <unordered_map>
 
-USE_NAMESPACE_DISTRHO
+#include "DistrhoPlugin.hpp"
+#include "DistrhoPluginInfo.h"
 
-Plugin* DISTRHO::createPlugin()
-{
-    return new CastelloRevPlugin;
+extern "C" {
+#include "dsp/soundpipe.h"
 }
+
+#define PARAMETER_COUNT 2
+#define PROGRAM_COUNT   0
+#define STATE_COUNT     1
+
+START_NAMESPACE_DISTRHO
 
 // FIXME - this is still a very naive implementation, turning on/off the plugin
 //         produces clicks, dry/wet control is lacking, lpfreq range is not
 //         very useful, parameters need better names, and so on...
 
-CastelloRevPlugin::CastelloRevPlugin()
-    : Plugin(2 /* parameterCount */, 0 /* programCount */, 1 /* stateCount */)
+class CastelloReverbPlugin : public Plugin
 {
-    sp_create(&fSoundpipe);
-    sp_revsc_create(&fReverb);
-    sp_revsc_init(fSoundpipe, fReverb);
-}
-
-CastelloRevPlugin::~CastelloRevPlugin()
-{
-    sp_revsc_destroy(&fReverb);
-    sp_destroy(&fSoundpipe);
-}
-
-void CastelloRevPlugin::initParameter(uint32_t index, Parameter& parameter)
-{
-    parameter.hints = kParameterIsAutomable;
-
-    switch (index)
+public:
+    CastelloReverbPlugin() : Plugin(PARAMETER_COUNT, PROGRAM_COUNT, STATE_COUNT)
     {
-    case 0:
-        parameter.name = "feedback";
-        parameter.ranges.min = 0.f;
-        parameter.ranges.max = 1.f;
-        parameter.ranges.def = 0.5f;
-        break;
-    case 1:
-        parameter.name = "lpfreq";
-        parameter.ranges.min = 0.f;    // TODO
-        parameter.ranges.max = 10000.f;  // TODO
-        parameter.ranges.def = 4000.f;
-        break;
+        sp_create(&fSoundpipe);
+        sp_revsc_create(&fReverb);
+        sp_revsc_init(fSoundpipe, fReverb);
     }
 
-    // TODO - are defaults set somewhere? can this be omitted by using programs?
-    setParameterValue(index, parameter.ranges.def);
-}
-
-float CastelloRevPlugin::getParameterValue(uint32_t index) const
-{
-    switch (index)
+    ~CastelloReverbPlugin()
     {
-    case 0:
-        return fReverb->feedback;
-    case 1:
-        return fReverb->lpfreq;
+        sp_revsc_destroy(&fReverb);
+        sp_destroy(&fSoundpipe);
     }
 
-    return 0;
-}
-
-void CastelloRevPlugin::setParameterValue(uint32_t index, float value)
-{
-    switch (index)
+    const char* getLabel() const override
     {
-    case 0:
-        fReverb->feedback = value;
-        break;
-    case 1:
-        fReverb->lpfreq = value;
-        break;
+        return DISTRHO_PLUGIN_NAME;
     }
-}
 
-void CastelloRevPlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
-{
-    switch (index)
+    const char* getMaker() const override
     {
-    case 0:
-        stateKey = "ui_size";
-        break;
+        return "Luciano Iam";
     }
 
-    defaultStateValue = "";
-}
-
-void CastelloRevPlugin::setState(const char* key, const char* value)
-{
-    fState[key] = value;
-}
-
-String CastelloRevPlugin::getState(const char* key) const
-{
-    StateMap::const_iterator it = fState.find(key);
-    if (it == fState.end()) {
-        return String();
+    const char* getLicense() const override
+    {
+        return "ISC";
     }
-    
-    return String(it->second.c_str());
-}
 
-void CastelloRevPlugin::run(const float** inputs, float** outputs, uint32_t frames)
-{
-    float* inpL = (float *)inputs[0];
-    float* inpR = (float *)inputs[1];
-    float* outL = outputs[0];
-    float* outR = outputs[1];
-
-    for (uint32_t offset = 0; offset < frames; offset++) {
-        sp_revsc_compute(fSoundpipe, fReverb, inpL + offset, inpR + offset,
-                                                outL + offset, outR + offset);
+    uint32_t getVersion() const override
+    {
+        return 0;
     }
+
+    int64_t getUniqueId() const override
+    {
+        return d_cconst('L', 'I', 'c', 'r');
+    }
+
+    void initParameter(uint32_t index, Parameter& parameter) override
+    {
+        parameter.hints = kParameterIsAutomable;
+
+        switch (index)
+        {
+        case 0:
+            parameter.name = "feedback";
+            parameter.ranges.min = 0.f;
+            parameter.ranges.max = 1.f;
+            parameter.ranges.def = 0.5f;
+            break;
+        case 1:
+            parameter.name = "lpfreq";
+            parameter.ranges.min = 0.f;    // TODO
+            parameter.ranges.max = 10000.f;  // TODO
+            parameter.ranges.def = 4000.f;
+            break;
+        }
+
+        // TODO - are defaults set somewhere? can this be omitted by using programs?
+        setParameterValue(index, parameter.ranges.def);
+    }
+
+    float getParameterValue(uint32_t index) const override
+    {
+        switch (index)
+        {
+        case 0:
+            return fReverb->feedback;
+        case 1:
+            return fReverb->lpfreq;
+        }
+
+        return 0;
+    }
+
+    void setParameterValue(uint32_t index, float value) override
+    {
+        switch (index)
+        {
+        case 0:
+            fReverb->feedback = value;
+            break;
+        case 1:
+            fReverb->lpfreq = value;
+            break;
+        }
+    }
+
+    void initState(uint32_t index, String& stateKey, String& defaultStateValue) override
+    {
+        switch (index)
+        {
+        case 0:
+            stateKey = "ui_size";
+            break;
+        }
+
+        defaultStateValue = "";
+    }
+
+    void setState(const char* key, const char* value) override
+    {
+        fState[key] = value;
+    }
+
+    String getState(const char* key) const override
+    {
+        StateMap::const_iterator it = fState.find(key);
+        if (it == fState.end()) {
+            return String();
+        }
+        
+        return String(it->second.c_str());
+    }
+
+    void run(const float** inputs, float** outputs, uint32_t frames) override
+    {
+        float* inpL = (float *)inputs[0];
+        float* inpR = (float *)inputs[1];
+        float* outL = outputs[0];
+        float* outR = outputs[1];
+
+        for (uint32_t offset = 0; offset < frames; offset++) {
+            sp_revsc_compute(fSoundpipe, fReverb, inpL + offset, inpR + offset,
+                                                    outL + offset, outR + offset);
+        }
+    }
+
+private:
+    sp_data*  fSoundpipe;
+    sp_revsc* fReverb;
+
+    typedef std::unordered_map<std::string,std::string> StateMap;
+
+    StateMap fState;
+
+};
+
+Plugin* createPlugin()
+{
+    return new CastelloReverbPlugin;
 }
+
+END_NAMESPACE_DISTRHO
