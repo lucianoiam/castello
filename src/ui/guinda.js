@@ -1,5 +1,5 @@
 /*
- * Guinda
+ * Guinda - Audio widgets for web views
  * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
