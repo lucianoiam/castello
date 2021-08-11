@@ -14,11 +14,15 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "CastelloReverbUI.hpp"
+#include "WebHostUI.hpp"
+
+#define BASE_WIDTH_PX        460
+#define BASE_HEIGHT_PX       200
+#define INIT_BACKGROUND_RGBA 0x2c3863ff
 
 USE_NAMESPACE_DISTRHO
 
 UI* DISTRHO::createUI()
 {
-    return new CastelloRevUI;
+    return new WebHostUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA);
 }

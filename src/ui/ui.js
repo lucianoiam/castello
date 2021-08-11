@@ -81,7 +81,10 @@ class CastelloReverbUI extends DISTRHO_UI {
         }
     }
 
-    // LXRESIZEBUG
+    /* It is not currently possible to rely on vh/vw/vmin/vmax units on Linux
+       due to the way the webview works on that platform. Viewport dimensions
+       are fixed to large values to workaround issue with tag LXRESIZEBUG. */
+
     uiReshape(width, height) {
         if (/linux/i.test(window.navigator.platform)) {
             height /= window.devicePixelRatio;
