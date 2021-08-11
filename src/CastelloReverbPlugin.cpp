@@ -24,7 +24,7 @@ extern "C" {
 #include "dsp/soundpipe.h"
 }
 
-#define PARAMETER_COUNT 2
+#define PARAMETER_COUNT 3
 #define PROGRAM_COUNT   0
 #define STATE_COUNT     1
 
@@ -37,7 +37,11 @@ START_NAMESPACE_DISTRHO
 class CastelloReverbPlugin : public Plugin
 {
 public:
-    CastelloReverbPlugin() : Plugin(PARAMETER_COUNT, PROGRAM_COUNT, STATE_COUNT)
+    CastelloReverbPlugin()
+        : Plugin(PARAMETER_COUNT, PROGRAM_COUNT, STATE_COUNT)
+        , fSoundpipe(0)
+        , fReverb(0)
+        , fMix(0)
     {
         sp_create(&fSoundpipe);
         sp_revsc_create(&fReverb);
@@ -82,13 +86,20 @@ public:
         switch (index)
         {
         case 0:
-            parameter.name = "feedback";
+            parameter.name = "Mix";
             parameter.ranges.min = 0.f;
             parameter.ranges.max = 1.f;
             parameter.ranges.def = 0.5f;
             break;
         case 1:
-            parameter.name = "lpfreq";
+            parameter.name = "Feedback";
+            parameter.ranges.min = 0.f;
+            parameter.ranges.max = 1.f;
+            parameter.ranges.def = 0.5f;
+            break;
+        case 2:
+            parameter.name = "LPF Frequency";
+            parameter.unit = "Hz";
             parameter.ranges.min = 0.f;    // TODO
             parameter.ranges.max = 10000.f;  // TODO
             parameter.ranges.def = 4000.f;
@@ -104,8 +115,10 @@ public:
         switch (index)
         {
         case 0:
-            return fReverb->feedback;
+            return fMix;
         case 1:
+            return fReverb->feedback;
+        case 2:
             return fReverb->lpfreq;
         }
 
@@ -117,9 +130,12 @@ public:
         switch (index)
         {
         case 0:
-            fReverb->feedback = value;
+            fMix = value;
             break;
         case 1:
+            fReverb->feedback = value;
+            break;
+        case 2:
             fReverb->lpfreq = value;
             break;
         }
@@ -171,6 +187,7 @@ private:
 
     sp_data*  fSoundpipe;
     sp_revsc* fReverb;
+    float     fMix;
     StateMap  fState;
 
 };
