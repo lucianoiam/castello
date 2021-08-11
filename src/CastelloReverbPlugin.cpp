@@ -69,7 +69,7 @@ public:
 
     uint32_t getVersion() const override
     {
-        return 0;
+        return d_version(1, 0, 0);
     }
 
     int64_t getUniqueId() const override
@@ -147,6 +147,7 @@ public:
     String getState(const char* key) const override
     {
         StateMap::const_iterator it = fState.find(key);
+
         if (it == fState.end()) {
             return String();
         }
@@ -168,12 +169,11 @@ public:
     }
 
 private:
-    sp_data*  fSoundpipe;
-    sp_revsc* fReverb;
-
     typedef std::unordered_map<std::string,std::string> StateMap;
 
-    StateMap fState;
+    sp_data*  fSoundpipe;
+    sp_revsc* fReverb;
+    StateMap  fState;
 
 };
 
