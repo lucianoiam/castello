@@ -21,17 +21,23 @@ class CastelloReverbUI extends DISTRHO_UI {
     constructor() {
         super();
 
-        // Add a connectToParameter() method to some widgets, definition below.
+        // Add a connect() method to some widgets, definition below.
         ParameterControlTrait.apply(RangeInputWidget, [this]);
 
-        // Connect feedback knob
-        el('#p-feedback g-knob').connectToParameter(0);
+        // Connect knobs
+        this.knobMix = el('#p-mix g-knob');
+        this.knobMix.connect(0, v => `${Math.ceil(100 * v)}%`);
 
-        // Connect LPF cutoff frequency knob
-        el('#p-lpfreq g-knob').connectToParameter(1);
+        this.knobFeedback = el('#p-feedback g-knob');
+        this.knobFeedback.connect(1, v => `${Math.ceil(100 * v)}%`);
+
+        this.knobLpfFreq = el('#p-lpfreq g-knob');
+        this.knobLpfFreq.connect(2, v => `${Math.ceil(v)} Hz`);
 
         // Connect resize handle
-        el('g-resize').addEventListener('input', (ev) => {
+        const resize = el('g-resize');
+
+        resize.addEventListener('input', (ev) => {
             const k = window.devicePixelRatio;
             const width = ev.value.width * k;
             const height = ev.value.height * k; 
@@ -46,8 +52,8 @@ class CastelloReverbUI extends DISTRHO_UI {
         // Setting up resize handle needs calling async methods
         (async () => {
             const k = window.devicePixelRatio;
-            el('g-resize').opt.minWidth = await this.getInitWidth() / k;
-            el('g-resize').opt.minHeight = await this.getInitHeight() / k;
+            resize.opt.minWidth = await this.getInitWidth() / k;
+            resize.opt.minHeight = await this.getInitHeight() / k;
 
             if (await this.isStandalone()) {
                 // stateChanged() will not be called for standalone
@@ -74,11 +80,13 @@ class CastelloReverbUI extends DISTRHO_UI {
 
         switch (index) {
             case 0:
-                el('#p-feedback g-knob').value = value;
+                this.knobMix.value = value;
                 break;
-
             case 1:
-                el('#p-lpfreq g-knob').value = value;
+                this.knobFeedback.value = value;
+                break;
+            case 2:
+                this.knobLpfFreq.value = value;
                 break;
         }
     }
@@ -110,9 +118,14 @@ function el(sel) {
 }
 
 function ParameterControlTrait(ui) {
-    this.prototype.connectToParameter = function(index) {
+    this.prototype.connect = function(index, labelFormatCallback) {
         this.addEventListener('input', (ev) => {
             ui.setParameterValue(index, ev.target.value);
+        });
+
+        this.addEventListener('setvalue', (ev) => {
+            const valueLabel = this.parentNode.children[2];
+            valueLabel.innerText = labelFormatCallback(ev.value);
         });
     }
 }

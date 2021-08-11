@@ -161,14 +161,19 @@ class InputWidget extends Widget {
 
     set value(newValue) {
         this._value = newValue;
+
         this._valueUpdated(this.value);
+
+        const ev = new Event('setvalue');
+        ev.value = this._value;
+        this.dispatchEvent(ev);
     }
 
     /**
      *  Internal
      */
 
-    _setValueIfNeededAndDispatch(newValue) {
+    _setValueAndDispatchInputEventIfNeeded(newValue) {
         if (this._value == newValue) {
             return;
         }
@@ -625,7 +630,7 @@ class ResizeHandle extends InputWidget {
             this._width = newWidth;
             this._height = newHeight;
 
-            this._setValueIfNeededAndDispatch({
+            this._setValueAndDispatchInputEventIfNeeded({
                 width: this._width,
                 height: this._height
             });
@@ -739,9 +744,11 @@ class Knob extends RangeInputWidget {
         const k1 = 0.04 * (dmov < 0 ? -1 : 1);
 
         this._dragDistance += k0 * dmov + k1 * Math.pow(dmov, 2);
-        const dval = this._range() * this._dragDistance / this.clientWidth;
 
-        this._setValueIfNeededAndDispatch(this._clamp(this._startValue + dval));
+        const dval = this._range() * this._dragDistance / this.clientWidth;
+        const val = this._clamp(this._startValue + dval);
+
+        this._setValueAndDispatchInputEventIfNeeded(val);
     }
 
     _onRelease(ev) {

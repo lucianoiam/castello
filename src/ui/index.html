@@ -6,30 +6,29 @@
     <title>Castello Reverb</title>
     <link rel="stylesheet" href="style.css">
   </head>
-  <body onload="new CastelloReverbUI">
+  <body style="visibility: hidden;" onload="new CastelloReverbUI">
     <div id="main">
         <label id="title">Castello Reverb</label>
         <div id="knobs">
-          <div class="knob" id="p-drywet">
+          <div class="knob" id="p-mix">
               <g-knob min="0" max="1.0"></g-knob>
-              <label class="p-label">Dry/Wet</label>
-              <label class="p-value">50%</label>
+              <label class="p-label">Mix</label>
+              <label class="p-value"></label>
           </div>
           <div class="knob" id="p-feedback">
               <g-knob min="0" max="1.0"></g-knob>
               <label class="p-label">Feedback</label>
-              <label class="p-value">1000ms</label>
+              <label class="p-value"></label>
           </div>
           <div class="knob" id="p-lpfreq">
               <g-knob min="100" max="10000"></g-knob>
               <label class="p-label">LPF Freq</label>
-              <label class="p-value">1000Hz</label>
+              <label class="p-value"></label>
           </div>
         </div>
     </div>
     <g-resize maxscale="1.25" keepaspectratio="true"></g-resize>
     <script src="guinda.js"></script>
-    <script src="stub-ui.js"></script>
     <script src="ui.js"></script>
   </body>
 </html>
