@@ -21,21 +21,20 @@ class CastelloReverbUI extends DISTRHO_UI {
     constructor() {
         super();
 
-        // Add a connect() method to some widgets, definition below.
-        ParameterControlTrait.apply(RangeInputWidget, [this]);
-
         // Connect knobs
-        this.knobMix = el('#p-mix g-knob');
-        this.knobMix.connect(0, v => `${Math.ceil(100 * v)}%`);
 
-        this.knobFeedback = el('#p-feedback g-knob');
-        this.knobFeedback.connect(1, v => `${Math.ceil(100 * v)}%`);
+        this._knobMix = document.querySelector('#p-mix g-knob');
+        this._connect(this._knobMix, 0, v => `${Math.ceil(100 * v)}%`);
+        
+        this._knobFeedback = document.querySelector('#p-feedback g-knob');
+        this._connect(this._knobFeedback, 1, v => `${Math.ceil(100 * v)}%`);
 
-        this.knobLpfFreq = el('#p-lpfreq g-knob');
-        this.knobLpfFreq.connect(2, v => `${Math.ceil(v)} Hz`);
+        this._knobLpfFreq = document.querySelector('#p-lpfreq g-knob');
+        this._connect(this._knobLpfFreq, 2, v => `${Math.ceil(v)} Hz`);
 
         // Connect resize handle
-        const resize = el('g-resize');
+
+        const resize = document.querySelector('g-resize');
 
         resize.addEventListener('input', (ev) => {
             const k = window.devicePixelRatio;
@@ -47,9 +46,11 @@ class CastelloReverbUI extends DISTRHO_UI {
 
         // Flush queue after connecting widgets to set their initial values,
         // and before calling any async methods otherwise those never complete.
+
         this.flushInitMessageQueue();
 
         // Setting up resize handle needs calling async methods
+
         (async () => {
             const k = window.devicePixelRatio;
             resize.opt.minWidth = await this.getInitWidth() / k;
@@ -71,6 +72,7 @@ class CastelloReverbUI extends DISTRHO_UI {
             }
 
             // Do not unhide UI until window size is restored
+
             document.body.style.visibility = 'visible';
         }
     }
@@ -80,13 +82,13 @@ class CastelloReverbUI extends DISTRHO_UI {
 
         switch (index) {
             case 0:
-                this.knobMix.value = value;
+                this._knobMix.value = value;
                 break;
             case 1:
-                this.knobFeedback.value = value;
+                this._knobFeedback.value = value;
                 break;
             case 2:
-                this.knobLpfFreq.value = value;
+                this._knobLpfFreq.value = value;
                 break;
         }
     }
@@ -99,33 +101,21 @@ class CastelloReverbUI extends DISTRHO_UI {
         if (/linux/i.test(window.navigator.platform)) {
             height /= window.devicePixelRatio;
             
-            document.querySelectorAll('g-knob').forEach((el => {
+            document.querySelectorAll('g-knob').forEach(((el) => {
                 el.style.height = (0.3 * height) + 'px';
                 el.style.width = el.style.height;
             }));
         }
     }
 
-}
-
-
-/**
- * Support code
- */
-
-function el(sel) {
-    return document.querySelector(sel);
-}
-
-function ParameterControlTrait(ui) {
-    this.prototype.connect = function(index, labelFormatCallback) {
-        this.addEventListener('input', (ev) => {
-            ui.setParameterValue(index, ev.target.value);
+    _connect(el, parameterIndex, labelFormatCallback) {
+        el.addEventListener('input', (ev) => {
+            ui.setParameterValue(parameterIndex, ev.target.value);
         });
 
-        this.addEventListener('setvalue', (ev) => {
-            const valueLabel = this.parentNode.children[2];
-            valueLabel.innerText = labelFormatCallback(ev.value);
+        el.addEventListener('setvalue', (ev) => {
+            el.parentNode.children[2].innerText = labelFormatCallback(ev.value);
         });
     }
+
 }
