@@ -87,18 +87,21 @@ public:
         {
         case 0:
             parameter.name = "Mix";
+            parameter.symbol = "mix";
             parameter.ranges.min = 0.f;
             parameter.ranges.max = 1.f;
             parameter.ranges.def = 0.5f;
             break;
         case 1:
             parameter.name = "Feedback";
+            parameter.symbol = "feedback";
             parameter.ranges.min = 0.f;
             parameter.ranges.max = 1.f;
             parameter.ranges.def = 0.5f;
             break;
         case 2:
             parameter.name = "LPF Frequency";
+            parameter.symbol = "lpfreq";
             parameter.unit = "Hz";
             parameter.ranges.min = 0.f;    // TODO
             parameter.ranges.max = 10000.f;  // TODO
@@ -106,7 +109,6 @@ public:
             break;
         }
 
-        // TODO - are defaults set somewhere? can this be omitted by using programs?
         setParameterValue(index, parameter.ranges.def);
     }
 
