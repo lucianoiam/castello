@@ -151,7 +151,7 @@ class InputWidget extends Widget {
 
     constructor(opt) {
         super(opt);
-        this._value = null;  
+        this._value = null;
         ControlTrait.apply(this);
     }
 
@@ -161,12 +161,8 @@ class InputWidget extends Widget {
 
     set value(newValue) {
         this._value = newValue;
-
-        this._valueUpdated(this.value);
-
-        const ev = new Event('setvalue');
-        ev.value = this._value;
-        this.dispatchEvent(ev);
+        this._valueUpdated();
+        this._dispatchSetValueEvent(this.value);
     }
 
     /**
@@ -179,16 +175,25 @@ class InputWidget extends Widget {
         }
 
         this.value = newValue;
-
-        const ev = new Event('input');
-        ev.value = this._value;
-        this.dispatchEvent(ev);
+        this._dispatchInputEvent(newValue);
     }
 
-    _valueUpdated(value) {
+    _valueUpdated() {
         if (this._root) {
             this._redraw();
         }
+    }
+
+    _dispatchSetValueEvent(val) {
+        const ev = new Event('setvalue');
+        ev.value = val;
+        this.dispatchEvent(ev);
+    }
+
+    _dispatchInputEvent(val) {
+        const ev = new Event('input');
+        ev.value = val;
+        this.dispatchEvent(ev);
     }
 
 }
@@ -201,15 +206,16 @@ class InputWidget extends Widget {
 class RangeInputWidget extends InputWidget {
 
     /**
-     * Public
+     *  Public
      */
     
     get value() {
-        return super.value; // overriding setter requires overriding getter
+        return this._denormalize(super.value);
     }
 
     set value(newValue) {
-        super.value = this._clamp(newValue);
+        this._denormalizedValue = newValue;
+        super.value = this._normalize(this._clamp(newValue));
     }
 
     connectedCallback() {
@@ -220,26 +226,45 @@ class RangeInputWidget extends InputWidget {
     attributeChangedCallback(name, oldValue, newValue) {
         super.attributeChangedCallback(name, oldValue, newValue);
 
-        this.value = this.value; // clamp in case range changed
-
-        if (name == 'value') {
+        if ((name == 'min') || (name == 'max') || (name == 'scale')) {
+            this.value = this._denormalizedValue;
+        } else if (name == 'value') {
             this._readAttrValue();
         }
     }
 
     /**
-     * Internal
+     *  Internal
      */
 
     static get _attrOptDescriptor() {
         return super._attrOptDescriptor.concat([
-            { key: 'min', parser: ValueParser.float, default: 0 },
-            { key: 'max', parser: ValueParser.float, default: 1 }
+            { key: 'min'  , parser: ValueParser.float , default: 0                   },
+            { key: 'max'  , parser: ValueParser.float , default: 1                   },
+            { key: 'scale', parser: ValueParser.string, default: ValueScale.identity }
         ]);
     }
 
-    _range() {
-        return this.opt.max - this.opt.min;
+    _optionUpdated(key, value) {
+        super._optionUpdated(key, value);
+
+        if ((key == 'min') || (key == 'max') || (key == 'scale')) {
+            this.value = this._denormalizedValue;
+        }
+    }
+
+    _setNormalizedValueAndDispatchInputEventIfNeeded(newValue) {
+        if (this._value == newValue) {
+            return;
+        }
+
+        // Do not use this.value since newValue is already normalized
+        this._value = newValue;
+        this._valueUpdated();
+
+        const dnval = this.value;
+        this._dispatchInputEvent(dnval);
+        this._dispatchSetValueEvent(dnval);
     }
 
     _clamp(value) {
@@ -247,19 +272,19 @@ class RangeInputWidget extends InputWidget {
     }
 
     _normalize(value) {
-        return (value - this.opt.min) / this._range();
+        return this._valueScale.normalize(value, this.opt.min, this.opt.max);
     }
 
     _denormalize(value) {
-        return this.opt.min + value * this._range();
+        return this._valueScale.denormalize(value, this.opt.min, this.opt.max);
     }
 
-    _optionUpdated(key, value) {
-        this.value = this.value; // clamp in case range was updated
+    get _valueScale() {
+        return this.opt.scale || ValueScale.identity;
     }
 
     /**
-     * Private
+     *  Private
      */
 
     _readAttrValue() {
@@ -271,7 +296,7 @@ class RangeInputWidget extends InputWidget {
 
 
 /**
- * Traits
+ *  Traits
  */
 
 class ControlEvent extends UIEvent {}
@@ -408,7 +433,56 @@ function ControlTrait() {
 
 
 /**
- * Support
+ *  Value scales
+ */
+
+const ValueScale = {
+
+    identity: {
+        normalize: (val, min, max) => {
+            return val;
+        },
+        denormalize: (val, min, max) => {
+            return val;
+        }
+    },
+
+    linear: {
+        normalize: (val, min, max) => {
+            return (val - min) / (max - min);
+        },
+        denormalize: (val, min, max) => {
+            return min + (max - min) * val;
+        }
+    },
+
+    log: {
+        normalize: (val, min, max) => {
+            min = Math.log(min);
+            max = Math.log(max);
+            return (Math.log(val) - min) / (max - min);
+        },
+        denormalize: (val, min, max) => {
+            min = Math.log(min);
+            max = Math.log(max);
+            return Math.exp(min + (max - min) * val);
+        }
+    },
+
+    db: {
+        normalize: (val, min, max) => {
+            return Math.pow(10.0, (val - max) / (max - min));
+        },
+        denormalize: (val, min, max) => {
+            return max + (max - min) * Math.log10(val);
+        }
+    }
+
+};
+
+
+/**
+ *  Support
  */
 
 class ValueParser {
@@ -427,7 +501,7 @@ class ValueParser {
         return !isNaN(val) ? val : def;
     }
 
-    static str(s, def) {
+    static string(s, def) {
         return s ?? def;
     }
 
@@ -585,7 +659,9 @@ class ResizeHandle extends InputWidget {
     }
 
     _optionUpdated(key, value) {
-       if (this.opt.maxScale > 0) {
+        super._optionUpdated(key, value);
+
+        if (this.opt.maxScale > 0) {
             this.opt.maxWidth = this.opt.maxScale * this.opt.minWidth;
             this.opt.maxHeight = this.opt.maxScale * this.opt.minHeight;
         }
@@ -703,7 +779,7 @@ class Knob extends RangeInputWidget {
 
         const This = this.constructor;
         const range = Math.abs(This._trackStartAngle) + Math.abs(This._trackEndAngle);
-        const endAngle = This._trackStartAngle + range * this._normalize(this.value);
+        const endAngle = This._trackStartAngle + range * this._value;
 
         knob.setAttribute('transform', `rotate(${endAngle}, 150, 150)`);
         knobDot.style.fill = endAngle == This._trackStartAngle ? this._styleProp('--dot-off-color', '#000') 
@@ -716,7 +792,7 @@ class Knob extends RangeInputWidget {
      */
 
     _onGrab(ev) {
-        this._startValue = this.value;
+        this._startValue = this._value;
         this._axisTracker = [];
         this._dragDistance = 0;
     }
@@ -745,10 +821,10 @@ class Knob extends RangeInputWidget {
 
         this._dragDistance += k0 * dmov + k1 * Math.pow(dmov, 2);
 
-        const dval = this._range() * this._dragDistance / this.clientWidth;
-        const val = this._clamp(this._startValue + dval);
+        const dval = this._dragDistance / this.clientWidth;
+        const val = Math.max(0, Math.min(1.0, this._startValue + dval));
 
-        this._setValueAndDispatchInputEventIfNeeded(val);
+        this._setNormalizedValueAndDispatchInputEventIfNeeded(val);
     }
 
     _onRelease(ev) {
