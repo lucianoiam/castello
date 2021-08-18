@@ -14,6 +14,10 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+const kParameterMix        = 0;
+const kParameterFeedback   = 1;
+const kParameterBrightness = 2;
+
 class CastelloReverbUI extends DISTRHO_UI {
 
     constructor() {
@@ -21,14 +25,16 @@ class CastelloReverbUI extends DISTRHO_UI {
 
         // Connect knobs
 
+        const formatAsPercentage = (value) => `${Math.ceil(100 * value)}%`;
+
         this._knobMix = document.querySelector('#p-mix g-knob');
-        this._connect(this._knobMix, 0, v => `${Math.ceil(100 * v)}%`);
+        this._connect(this._knobMix, kParameterMix, formatAsPercentage);
         
         this._knobFeedback = document.querySelector('#p-feedback g-knob');
-        this._connect(this._knobFeedback, 1, v => `${Math.ceil(100 * v)}%`);
+        this._connect(this._knobFeedback, kParameterFeedback, formatAsPercentage);
 
-        this._knobLpfFreq = document.querySelector('#p-lpfreq g-knob');
-        this._connect(this._knobLpfFreq, 2, v => `${Math.ceil(v)} Hz`);
+        this._knobBrightness = document.querySelector('#p-brightness g-knob');
+        this._connect(this._knobBrightness, kParameterBrightness, formatAsPercentage);
 
         // Connect resize handle
 
@@ -79,14 +85,14 @@ class CastelloReverbUI extends DISTRHO_UI {
         // Host informs a parameter has changed, update its associated widget.
 
         switch (index) {
-            case 0:
+            case kParameterMix:
                 this._knobMix.value = value;
                 break;
-            case 1:
+            case kParameterFeedback:
                 this._knobFeedback.value = value;
                 break;
-            case 2:
-                this._knobLpfFreq.value = value;
+            case kParameterBrightness:
+                this._knobBrightness.value = value;
                 break;
         }
     }
@@ -108,12 +114,16 @@ class CastelloReverbUI extends DISTRHO_UI {
 
     _connect(el, parameterIndex, labelFormatCallback) {
         el.addEventListener('input', (ev) => {
-            ui.setParameterValue(parameterIndex, ev.target.value);
+            this.setParameterValue(parameterIndex, ev.target.value);
         });
 
-        el.addEventListener('setvalue', (ev) => {
-            el.parentNode.children[2].innerText = labelFormatCallback(ev.value);
-        });
+        function updateLabel(value) {
+            el.parentNode.children[2].innerText = labelFormatCallback(value);
+        }
+
+        el.addEventListener('setvalue', (ev) => updateLabel(ev.value));
+
+        updateLabel(el.opt.min);
     }
 
 }

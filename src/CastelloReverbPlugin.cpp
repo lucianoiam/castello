@@ -30,9 +30,11 @@ extern "C" {
 
 START_NAMESPACE_DISTRHO
 
-// FIXME - this is still a very naive implementation, turning on/off the plugin
-//         produces clicks, dry/wet control is lacking, lpfreq range is not
-//         very useful, parameters need better names, and so on...
+enum ParameterIndex {
+    kParameterMix,
+    kParameterFeedback,
+    kParameterBrightness
+};
 
 class CastelloReverbPlugin : public Plugin
 {
@@ -85,27 +87,26 @@ public:
 
         switch (index)
         {
-        case 0:
+        case kParameterMix:
             parameter.name = "Mix";
             parameter.symbol = "mix";
             parameter.ranges.min = 0.f;
             parameter.ranges.max = 1.f;
-            parameter.ranges.def = 0.5f;
+            parameter.ranges.def = 0.25f;
             break;
-        case 1:
+        case kParameterFeedback:
             parameter.name = "Feedback";
             parameter.symbol = "feedback";
             parameter.ranges.min = 0.f;
             parameter.ranges.max = 1.f;
             parameter.ranges.def = 0.5f;
             break;
-        case 2:
-            parameter.name = "LPF Frequency";
-            parameter.symbol = "lpfreq";
-            parameter.unit = "Hz";
-            parameter.ranges.min = 0.f;    // TODO
-            parameter.ranges.max = 10000.f;  // TODO
-            parameter.ranges.def = 4000.f;
+        case kParameterBrightness:
+            parameter.name = "Brightness";
+            parameter.symbol = "brightness";
+            parameter.ranges.min = 0.f;
+            parameter.ranges.max = 1.f;
+            parameter.ranges.def = 0.75f;
             break;
         }
 
@@ -116,12 +117,12 @@ public:
     {
         switch (index)
         {
-        case 0:
+        case kParameterMix:
             return fMix;
-        case 1:
-            return fReverb->feedback;
-        case 2:
-            return fReverb->lpfreq;
+        case kParameterFeedback:
+            return (fReverb->feedback - 0.5f) * 2.f;
+        case kParameterBrightness:
+            return (fReverb->lpfreq - 400.f) / 10000.f;
         }
 
         return 0;
@@ -131,14 +132,14 @@ public:
     {
         switch (index)
         {
-        case 0:
+        case kParameterMix:
             fMix = value;
             break;
-        case 1:
-            fReverb->feedback = value;
+        case kParameterFeedback:
+            fReverb->feedback = 0.5f + value / 2.f;
             break;
-        case 2:
-            fReverb->lpfreq = value;
+        case kParameterBrightness:
+            fReverb->lpfreq = 400.f + 10000.f * value;
             break;
         }
     }
@@ -177,10 +178,17 @@ public:
         float* inpR = (float *)inputs[1];
         float* outL = outputs[0];
         float* outR = outputs[1];
+        float dry = 1.f - fMix;
 
-        for (uint32_t offset = 0; offset < frames; offset++) {
-            sp_revsc_compute(fSoundpipe, fReverb, inpL + offset, inpR + offset,
-                                                    outL + offset, outR + offset);
+        for (uint32_t i = 0; i < frames; ++i) {
+            // inpX and outX can point to the same memory address
+            float l = inpL[i];
+            float r = inpR[i];
+            
+            sp_revsc_compute(fSoundpipe, fReverb, inpL + i, inpR + i, outL + i, outR + i);
+
+            outL[i] = dry * l + fMix * outL[i];
+            outR[i] = dry * r + fMix * outR[i];
         }
     }
 
