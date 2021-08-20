@@ -1,5 +1,5 @@
-Reverb plugin based on Csound algorithm 
----------------------------------------
+Reverb plugin based on algorithm from Csound 
+--------------------------------------------
 
 <img width="460" alt="screenshot" src="https://user-images.githubusercontent.com/930494/130102475-0151bc6b-75c1-4405-b0d8-f06ea3b4702f.png">
 
