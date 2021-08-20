@@ -17,7 +17,7 @@
  */
 
 const kParameterMix        = 0;
-const kParameterFeedback   = 1;
+const kParameterSize       = 1;
 const kParameterBrightness = 2;
 
 class CastelloReverbUI extends DISTRHO_UI {
@@ -32,8 +32,8 @@ class CastelloReverbUI extends DISTRHO_UI {
         this._knobMix = document.querySelector('#p-mix g-knob');
         this._connect(this._knobMix, kParameterMix, formatAsPercentage);
         
-        this._knobFeedback = document.querySelector('#p-feedback g-knob');
-        this._connect(this._knobFeedback, kParameterFeedback, formatAsPercentage);
+        this._knobSize = document.querySelector('#p-size g-knob');
+        this._connect(this._knobSize, kParameterSize, formatAsPercentage);
 
         this._knobBrightness = document.querySelector('#p-brightness g-knob');
         this._connect(this._knobBrightness, kParameterBrightness, formatAsPercentage);
@@ -90,8 +90,8 @@ class CastelloReverbUI extends DISTRHO_UI {
             case kParameterMix:
                 this._knobMix.value = value;
                 break;
-            case kParameterFeedback:
-                this._knobFeedback.value = value;
+            case kParameterSize:
+                this._knobSize.value = value;
                 break;
             case kParameterBrightness:
                 this._knobBrightness.value = value;

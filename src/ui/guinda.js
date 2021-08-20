@@ -239,9 +239,9 @@ class RangeInputWidget extends InputWidget {
 
     static get _attrOptDescriptor() {
         return super._attrOptDescriptor.concat([
-            { key: 'min'  , parser: ValueParser.float , default: 0                   },
-            { key: 'max'  , parser: ValueParser.float , default: 1                   },
-            { key: 'scale', parser: ValueParser.string, default: ValueScale.identity }
+            { key: 'min'  , parser: ValueParser.float, default: 0                   },
+            { key: 'max'  , parser: ValueParser.float, default: 1                   },
+            { key: 'scale', parser: ValueParser.scale, default: ValueScale.identity }
         ]);
     }
 
@@ -503,6 +503,10 @@ class ValueParser {
 
     static string(s, def) {
         return s ?? def;
+    }
+
+    static scale(s, def) {
+        return ValueScale[s] ?? def;
     }
 
 }
