@@ -28,11 +28,15 @@ extern "C" {
 #define PROGRAM_COUNT   0
 #define STATE_COUNT     1
 
+#define LOG_2     0.69314718056f
+#define LOG_400   5.99146454711f
+#define LOG_10000 9.21034037198f
+
 START_NAMESPACE_DISTRHO
 
 enum ParameterIndex {
     kParameterMix,
-    kParameterFeedback,
+    kParameterSize,
     kParameterBrightness
 };
 
@@ -92,21 +96,21 @@ public:
             parameter.symbol = "mix";
             parameter.ranges.min = 0.f;
             parameter.ranges.max = 1.f;
-            parameter.ranges.def = 0.25f;
+            parameter.ranges.def = 0.5f;
             break;
-        case kParameterFeedback:
-            parameter.name = "Feedback";
-            parameter.symbol = "feedback";
+        case kParameterSize:
+            parameter.name = "Size";
+            parameter.symbol = "size";
             parameter.ranges.min = 0.f;
             parameter.ranges.max = 1.f;
-            parameter.ranges.def = 0.5f;
+            parameter.ranges.def = 0.33f;
             break;
         case kParameterBrightness:
             parameter.name = "Brightness";
             parameter.symbol = "brightness";
             parameter.ranges.min = 0.f;
             parameter.ranges.max = 1.f;
-            parameter.ranges.def = 0.75f;
+            parameter.ranges.def = 0.66f;
             break;
         }
 
@@ -119,10 +123,10 @@ public:
         {
         case kParameterMix:
             return fMix;
-        case kParameterFeedback:
+        case kParameterSize:
             return (fReverb->feedback - 0.5f) * 2.f;
         case kParameterBrightness:
-            return (fReverb->lpfreq - 400.f) / 10000.f;
+            return (log(fReverb->lpfreq) - LOG_400) / (LOG_10000 - LOG_400);
         }
 
         return 0;
@@ -134,12 +138,14 @@ public:
         {
         case kParameterMix:
             fMix = value;
+            fDry = fMix < 0.5f ? 1.f : 1.f - log(fMix / 0.5f) / LOG_2;
+            fWet = fMix > 0.5f ? 1.f : 1.f - log((1.f - fMix) / 0.5f) / LOG_2;
             break;
-        case kParameterFeedback:
+        case kParameterSize:
             fReverb->feedback = 0.5f + value / 2.f;
             break;
         case kParameterBrightness:
-            fReverb->lpfreq = 400.f + 10000.f * value;
+            fReverb->lpfreq = exp(LOG_400 + (LOG_10000 - LOG_400) * value);
             break;
         }
     }
@@ -178,17 +184,17 @@ public:
         float* inpR = (float *)inputs[1];
         float* outL = outputs[0];
         float* outR = outputs[1];
-        float dry = 1.f - fMix;
+
+        // inpX and outX can point to the same memory address
 
         for (uint32_t i = 0; i < frames; ++i) {
-            // inpX and outX can point to the same memory address
             float l = inpL[i];
             float r = inpR[i];
             
             sp_revsc_compute(fSoundpipe, fReverb, inpL + i, inpR + i, outL + i, outR + i);
 
-            outL[i] = dry * l + fMix * outL[i];
-            outR[i] = dry * r + fMix * outR[i];
+            outL[i] = fDry * l + fWet * outL[i];
+            outR[i] = fDry * r + fWet * outR[i];
         }
     }
 
@@ -198,6 +204,8 @@ private:
     sp_data*  fSoundpipe;
     sp_revsc* fReverb;
     float     fMix;
+    float     fDry;
+    float     fWet;
     StateMap  fState;
 
 };
