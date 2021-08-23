@@ -354,8 +354,8 @@ function ControlTrait() {
             dispatchControlStart(ev, ev.clientX, ev.clientY);
         }
 
-        const k = ev.shiftKey ? 2 : 1
-        const inv = ev.webkitDirectionInvertedFromDevice ? -1 : 1;
+        const inv = -1; // invert direction by default
+        const k = ev.shiftKey ? 2 : 1;
         const clientX = this._prevClientX + k * inv * Math.sign(ev.deltaX);
         const clientY = this._prevClientY + k * inv * Math.sign(ev.deltaY);
         
