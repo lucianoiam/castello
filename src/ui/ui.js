@@ -18,7 +18,7 @@ const kParameterMix        = 0;
 const kParameterSize       = 1;
 const kParameterBrightness = 2;
 
-class CastelloReverbUI extends DISTRHO_UI {
+class CastelloReverbUI extends DISTRHO.UI {
 
     constructor() {
         super();
