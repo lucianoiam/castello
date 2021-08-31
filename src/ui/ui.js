@@ -18,7 +18,7 @@ const kParameterMix        = 0;
 const kParameterSize       = 1;
 const kParameterBrightness = 2;
 
-class CastelloReverbUI extends DISTRHO_UI {
+class CastelloReverbUI extends DISTRHO.UI {
 
     constructor() {
         super();
@@ -101,7 +101,7 @@ class CastelloReverbUI extends DISTRHO_UI {
        due to the way the webview works on that platform. Viewport dimensions
        are fixed to large values to workaround issue with tag LXRESIZEBUG. */
 
-    uiReshape(width, height) {
+    sizeChanged(width, height) {
         if (/linux/i.test(window.navigator.platform)) {
             height /= window.devicePixelRatio;
             
