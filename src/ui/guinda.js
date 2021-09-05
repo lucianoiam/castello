@@ -502,11 +502,11 @@ class ValueParser {
     }
 
     static string(s, def) {
-        return s ?? def;
+        return s ? s : def;
     }
 
     static scale(s, def) {
-        return ValueScale[s] ?? def;
+        return ValueScale[s] ? ValueScale[s] : def;
     }
 
 }
