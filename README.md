@@ -5,7 +5,7 @@ Reverb plugin based on algorithm from Csound
 
 ### Features
 
-* VST2 / LV2 plugin formats
+* VST 2 plugin format
 * Linux / Mac / Windows
 * Permissive license
 
