@@ -55,7 +55,7 @@ TARGETS += vst
 BASE_FLAGS += -Isrc
 
 # Required for soundpipe.h
-BASE_FLAGS += -DNO_LIBSNDFILE -DSNDFILE=FILE -DSF_INFO=char
+BASE_FLAGS += -DNO_LIBSNDFILE -DSNDFILE=FILE -DSF_INFO=char -Wno-sign-compare -Wno-unused-parameter
 
 all: $(TARGETS) $(HIPHOP_TARGET)
 
