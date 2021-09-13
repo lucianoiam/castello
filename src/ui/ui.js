@@ -14,6 +14,8 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+const kVersion = '1.0.0';
+
 const kParameterMix        = 0;
 const kParameterSize       = 1;
 const kParameterBrightness = 2;
@@ -22,6 +24,8 @@ class CastelloReverbUI extends DISTRHO.UI {
 
     constructor() {
         super();
+
+        document.getElementById('version').innerText = kVersion;
 
         // Connect knobs
 
