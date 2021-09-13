@@ -52,6 +52,15 @@ g-resize {
     font-family: Satisfy;
 }
 
+#version {
+    position: absolute;
+    left: 3px;
+    bottom: 2px;
+    font-family: UbuntuMono;
+    font-size: 10px;
+    opacity: 0.33;
+}
+
 #knobs {
     width: 100%;
     height: 100%;
