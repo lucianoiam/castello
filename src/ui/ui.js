@@ -14,7 +14,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-const kVersion = '1.0.0';
+const kVersion = '1.0.1';
 
 const kParameterMix        = 0;
 const kParameterSize       = 1;
