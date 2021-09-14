@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const kVersion = '1.0.0';
+const kVersion = '1.0.1';
 
 const kParameterMix        = 0;
 const kParameterSize       = 1;
