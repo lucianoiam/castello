@@ -54,11 +54,6 @@ class CastelloReverbUI extends DISTRHO.UI {
             this.setState('ui_size', `${width}x${height}`);
         });
 
-        // Flush queue after connecting widgets to set their initial values,
-        // and before calling any async methods otherwise those never complete.
-
-        this.flushInitMessageQueue();
-
         // Setting up resize handle needs calling async methods
 
         (async () => {
