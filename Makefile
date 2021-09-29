@@ -50,7 +50,7 @@ else
 TARGETS += lv2_dsp
 endif
 
-TARGETS += vst
+TARGETS += vst vst3
 
 BASE_FLAGS += -Isrc
 
