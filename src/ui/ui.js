@@ -22,6 +22,10 @@ const kParameterMix        = 0;
 const kParameterSize       = 1;
 const kParameterBrightness = 2;
 
+function isLinux() {
+    return /linux/i.test(window.navigator.platform);
+}
+
 class CastelloReverbUI extends DISTRHO.UI {
 
     constructor() {
@@ -70,6 +74,11 @@ class CastelloReverbUI extends DISTRHO.UI {
             if (wh.length == 2) {
                 this.setSize(parseInt(wh[0]), parseInt(wh[1]));
             }
+
+            // Avoid flicker on Linux, indirectly due to LXRESIZEBUG
+            setTimeout(() => {
+                document.body.style.visibility = 'visible';
+            }, isLinux() ? 25 : 0);
         }
     }
 
@@ -89,12 +98,13 @@ class CastelloReverbUI extends DISTRHO.UI {
         }
     }
 
-    /* It is not currently possible to rely on vh/vw/vmin/vmax units on Linux
-       due to the way the webview works on that platform. Viewport dimensions
-       are fixed to large values to workaround issue with tag LXRESIZEBUG. */
+    /* It is not currently to rely on vh/vw/vmin/vmax units on Linux due to the
+       way the GTK web view implementation works on that platform. Viewport
+       dimensions are fixed to large values to workaround issue with tag
+       LXRESIZEBUG. Bug does not apply when opting for the CEF web view. */
 
     sizeChanged(width, height) {
-        if (/linux/i.test(window.navigator.platform)) {
+        if (isLinux()) {
             height /= window.devicePixelRatio;
             
             document.querySelectorAll('g-knob').forEach(((el) => {
@@ -102,8 +112,6 @@ class CastelloReverbUI extends DISTRHO.UI {
                 el.style.width = el.style.height;
             }));
         }
-
-        document.body.style.visibility = 'visible';
     }
 
     _connect(el, parameterIndex, labelFormatCallback) {
