@@ -38,12 +38,6 @@ include hiphop/Makefile.plugins.mk
 # --------------------------------------------------------------
 # Enable all possible plugin types
 
-ifeq ($(HAVE_JACK),true)
-ifeq ($(HAVE_OPENGL),true)
-TARGETS += jack
-endif
-endif
-
 ifeq ($(HAVE_OPENGL),true)
 TARGETS += lv2_sep
 else
