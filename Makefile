@@ -21,8 +21,8 @@ HIPHOP_WEB_UI_PATH = src/ui
 
 # -------------------------------------------------------------- 
 # Only needed for the GTK web view on Linux, ignored otherwise
-HIPHOP_PLUGIN_MAX_WIDTH = 460                                                    
-HIPHOP_PLUGIN_MAX_HEIGHT = 200
+HIPHOP_MAX_BASE_WIDTH = 690 # 1.5*460
+HIPHOP_MAX_BASE_HEIGHT = 300 # 1.5*200
 
 # --------------------------------------------------------------
 # Files to build
