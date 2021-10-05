@@ -57,9 +57,16 @@ class CastelloReverbUI extends DISTRHO.UI {
         // Setting up resize handle needs calling async methods
 
         (async () => {
-            const k = window.devicePixelRatio;
-            resize.opt.minWidth = await this.getInitWidth() / k;
-            resize.opt.minHeight = await this.getInitHeight() / k;
+            const k = window.devicePixelRatio,
+                  w = await this.getInitWidth(),
+                  h = await this.getInitHeight();
+            
+            resize.opt.minWidth = w / k;
+            resize.opt.minHeight = h / k;
+
+            this.sizeChanged(w, h); // WKGTKRESIZEBUG
+
+            document.body.style.visibility = 'visible';
         }) ();
     }
 
@@ -70,8 +77,6 @@ class CastelloReverbUI extends DISTRHO.UI {
             if (wh.length == 2) {
                 this.setSize(parseInt(wh[0]), parseInt(wh[1]));
             }
-
-            document.body.style.visibility = 'visible';
         }
     }
 
