@@ -1,5 +1,5 @@
 /*
- * Castello Reverb
+ * Guinda - Audio widgets for web views
  * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
