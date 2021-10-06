@@ -7,7 +7,6 @@ Reverb plugin based on algorithm from Csound
 
 * VST 2 plugin format
 * Linux / Mac / Windows
-* Permissive license
 
 This plugin was created using the following tools:
 
