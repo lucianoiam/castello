@@ -1,4 +1,3 @@
-
 [submodule "hiphop"]
 	path = hiphop
 	url = https://github.com/lucianoiam/hiphop
