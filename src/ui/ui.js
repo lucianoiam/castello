@@ -96,8 +96,8 @@ class CastelloReverbUI extends DISTRHO.UI {
         }
     }
 
-    /* It is not currently to rely on vh/vw/vmin/vmax units on Linux due to the
-       way the GTK web view implementation works on that platform. Viewport
+    /* It is not currently possible to rely on vh/vw/vmin/vmax units on Linux
+       due to the GTK web view implementation on such platform. Viewport
        dimensions are fixed to large values to workaround issue with tag
        WKGTKRESIZEBUG. Bug does not apply when opting for the CEF web view. */
 
