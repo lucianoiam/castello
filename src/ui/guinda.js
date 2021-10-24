@@ -152,7 +152,7 @@ class InputWidget extends Widget {
     constructor(opt) {
         super(opt);
         this._value = null;
-        ControlTrait.apply(this);
+        ControlTrait.apply(this, [opt]);
     }
 
     get value() {
@@ -303,7 +303,8 @@ class ControlEvent extends UIEvent {}
 
 // Merges touch and mouse input events into a single basic set of custom events
 
-function ControlTrait() {
+function ControlTrait(opt) {
+    opt = opt || {}; // currently unused
 
     this._controlStarted = false;
     this._controlTimeout = null;
@@ -817,6 +818,8 @@ class Knob extends RangeInputWidget {
 
         if (ev.isInputWheel) {
             document.body.style.cursor = axis > 0 ? 'ew-resize' : 'ns-resize';
+        } else {
+            document.body.style.cursor = 'none';
         }
 
         const dmov = axis > 0 ? ev.deltaX : -ev.deltaY;
