@@ -74,7 +74,7 @@ public:
 
     const char* getLicense() const override
     {
-        return "ISC";
+        return "GPLv3";
     }
 
     uint32_t getVersion() const override
