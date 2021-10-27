@@ -43,13 +43,7 @@ include hiphop/Makefile.plugins.mk
 # --------------------------------------------------------------
 # Enable all possible plugin types
 
-ifeq ($(HAVE_OPENGL),true)
-TARGETS += lv2_sep
-else
-TARGETS += lv2_dsp
-endif
-
-TARGETS += vst vst3
+TARGETS += lv2_sep vst vst3
 
 BASE_FLAGS += -Isrc
 
