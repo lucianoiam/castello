@@ -102,7 +102,7 @@ class CastelloReverbUI extends DISTRHO.UI {
        WKGTKRESIZEBUG. Bug does not apply when opting for the CEF web view. */
 
     sizeChanged(width, height) {
-        if (/linux/i.test(window.navigator.platform)) {
+        if (DISTRHO.isHostLinuxGtk) {
             height /= window.devicePixelRatio;
             
             document.querySelectorAll('g-knob').forEach(((el) => {
