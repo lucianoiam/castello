@@ -89,7 +89,7 @@ public:
 
     void initParameter(uint32_t index, Parameter& parameter) override
     {
-        parameter.hints = kParameterIsAutomable;
+        parameter.hints = kParameterIsAutomatable;
 
         switch (index)
         {
