@@ -57,12 +57,11 @@ class CastelloReverbUI extends DISTRHO.UI {
         // Setting up resize handle needs calling async methods
 
         (async () => {
-            const k = window.devicePixelRatio,
-                  w = await this.getInitialWidth(),
+            const w = await this.getInitialWidth(),
                   h = await this.getInitialHeight();
             
-            resize.opt.minWidth = w / k;
-            resize.opt.minHeight = h / k;
+            resize.opt.minWidth = w;
+            resize.opt.minHeight = h;
 
             this.sizeChanged(w, h); // WKGTKRESIZEBUG
 
