@@ -1,6 +1,6 @@
 /*
  * Castello Reverb
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,7 @@
 
 #include "WebHostUI.hpp"
 
-#define BASE_WIDTH_PX        460
-#define BASE_HEIGHT_PX       200
-#define INIT_BACKGROUND_RGBA 0x2c3863ff
-
-USE_NAMESPACE_DISTRHO
-
 UI* DISTRHO::createUI()
 {
-    return new WebHostUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA);
+    return new WebHostUI(460 /*width*/, 200 /*height*/, 0x2c3863ff /*background*/);
 }

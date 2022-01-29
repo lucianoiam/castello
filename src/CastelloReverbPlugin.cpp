@@ -1,6 +1,6 @@
 /*
  * Castello Reverb
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,6 @@ extern "C" {
 #include "dsp/soundpipe.h"
 }
 
-#define PARAMETER_COUNT 3
-#define PROGRAM_COUNT   0
-#define STATE_COUNT     1
-
 #define LOG_2     0.69314718056f
 #define LOG_400   5.99146454711f
 #define LOG_10000 9.21034037198f
@@ -46,7 +42,7 @@ class CastelloReverbPlugin : public Plugin
 {
 public:
     CastelloReverbPlugin()
-        : Plugin(PARAMETER_COUNT, PROGRAM_COUNT, STATE_COUNT)
+        : Plugin(3 /*parameters*/, 0 /*programs*/, 1 /*states*/)
         , fSoundpipe(0)
         , fReverb(0)
         , fMix(0)
