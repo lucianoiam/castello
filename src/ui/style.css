@@ -20,23 +20,23 @@ body {
     height: 100%;
     padding: 20px;
     margin: 0;
-    background-color: #2c3863;
-    color: #ffffff;
+    background-color: #8c8c8c;
+    color: #000000;
     position: relative; /* for the resize handle */
 }
 
 g-knob {
     width: 30vh;
     height: 30vh;
-    --circle-color: #ffffff3f;
+    --circle-color: #272727;
     --dot-off-color: #ffffff;
     --dot-on-color: #ffffff;
-    --track-color: #ffffff0f;
-    --value-color: #ff7f00;
+    --track-color: #777777;
+    --value-color: #ff2020;
 }
 
 g-resize {
-    --color: #ffffff50;
+    --color: #606060;
 }
 
 #main {
@@ -50,6 +50,7 @@ g-resize {
 #title {
     font-size: 21px;
     font-family: Satisfy;
+    color: #272727;
 }
 
 #version {
@@ -58,7 +59,7 @@ g-resize {
     bottom: 2px;
     font-family: UbuntuMono;
     font-size: 10px;
-    opacity: 0.33;
+    color: #606060;
 }
 
 #knobs {
@@ -82,11 +83,11 @@ g-resize {
 }
 
 .p-label {
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .p-value {
-    font-size: 12px;
+    font-size: 10px;
     margin-top: 2px;
-    opacity: 0.5;
+    color: #606060;
 }
