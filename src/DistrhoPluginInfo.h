@@ -15,6 +15,11 @@
  */
 
 /**
+   Make room for growing the UI on Linux/GTK
+ */
+#define HIPHOP_UI_USER_RESIZABLE 1
+
+/**
    The plugin name.@n
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.

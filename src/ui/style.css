@@ -22,7 +22,7 @@ body {
     margin: 0;
     background-color: #8c8c8c;
     color: #000000;
-    position: relative; /* for the resize handle */
+    position: relative;
 }
 
 g-knob {

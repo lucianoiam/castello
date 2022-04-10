@@ -50,6 +50,7 @@ include hiphop/Makefile.plugins.mk
 
 TARGETS += lv2_sep vst vst3
 
+LXHELPER_CPPFLAGS += -Isrc
 BASE_FLAGS += -Isrc
 
 # Required for soundpipe.h

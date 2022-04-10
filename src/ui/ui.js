@@ -57,13 +57,13 @@ class CastelloReverbUI extends DISTRHO.UI {
         // Setting up resize handle needs calling async methods
 
         (async () => {
-            const w = await this.getInitWidth(),
+            const w = await this.getInitWidth(),  // CSS pixels
                   h = await this.getInitHeight();
 
             resize.opt.minWidth = w;
             resize.opt.minHeight = h;
 
-            this.sizeChanged(w, h);
+            this._sizeChanged();
 
             document.body.style.visibility = 'visible';
         }) ();
@@ -95,15 +95,17 @@ class CastelloReverbUI extends DISTRHO.UI {
         }
     }
 
+    sizeChanged(width, height) {
+        this._sizeChanged();
+    }
+
     /* It is not currently possible to rely on vh/vw/vmin/vmax units on Linux
        due to the GTK web view implementation on such platform */
 
-    sizeChanged(width, height) {
+    _sizeChanged() {
         if (DISTRHO.env.noCSSViewportUnits) {
-            height /= window.devicePixelRatio;
-            
             document.querySelectorAll('g-knob').forEach(((el) => {
-                el.style.height = (0.3 * height) + 'px';
+                el.style.height = (0.3/*30vh*/ * document.body.clientHeight) + 'px';
                 el.style.width = el.style.height;
             }));
         }
@@ -114,9 +116,9 @@ class CastelloReverbUI extends DISTRHO.UI {
             this.setParameterValue(parameterIndex, ev.target.value);
         });
 
-        function updateLabel(value) {
+        const updateLabel = (value) => {
             el.parentNode.children[2].innerText = labelFormatCallback(value);
-        }
+        };
 
         el.addEventListener('setvalue', (ev) => updateLabel(ev.value));
 
