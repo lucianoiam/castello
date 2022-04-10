@@ -8,13 +8,12 @@ Reverb plugin based on algorithm from Csound
 * VST 2 and VST 3 plugin formats
 * Linux, Mac and Windows
 
-This plugin was created using the following tools:
+This plugin was created with the following tools:
 
-- [DISTRHO Plugin Framework](https://github.com/DISTRHO/DPF) (DPF), multiplatform audio plugins framework.
-- [Hip-Hop](https://github.com/lucianoiam/hiphop), web view user interface support for DPF plugins.
-- [Guinda](https://github.com/lucianoiam/guinda), audio widgets library for web views.
+- [DISTRHO Plugin Framework](https://github.com/DISTRHO/DPF) (DPF) multiplatform audio plugins framework
+- [Hip-Hop](https://github.com/lucianoiam/hiphop) web view user interface support for DPF plugins
+- [Guinda](https://github.com/lucianoiam/guinda) audio widgets library for web views
 
 Details on the DSP algorithm can be found [here](http://www.csounds.com/manual/html/reverbsc.html).
-More Csound ports to the C language can be found [here](https://github.com/PaulBatchelor/Soundpipe).
 
-If you think this plugin is worth it please consider donating a 🍺.
+If you think this plugin is worth it please consider donating 🍺.
