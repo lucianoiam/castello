@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "WebHostUI.hpp"
+#include "WebUI.hpp"
 
 UI* DISTRHO::createUI()
 {
-    return new WebHostUI(460 /*width*/, 200 /*height*/, 0x2c3863ff /*background*/);
+    return new WebUI(460 /*width*/, 200 /*height*/, 0x2c3863ff /*background*/);
 }

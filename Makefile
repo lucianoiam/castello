@@ -12,7 +12,17 @@ NAME = CastelloReverb
 # --------------------------------------------------------------
 # Project version, used for generating unique symbol names
 
-HIPHOP_PROJECT_VERSION = 1
+HIPHOP_PROJECT_VERSION = 2
+
+# --------------------------------------------------------------
+# Automatically inject dpf.js
+
+HIPHOP_INJECT_FRAMEWORK_JS = true
+
+# --------------------------------------------------------------
+# Support macOS down to High Sierra
+
+HIPHOP_MACOS_OLD = true
 
 # --------------------------------------------------------------
 # Enable Web UI by setting web files location

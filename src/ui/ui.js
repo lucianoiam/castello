@@ -1,6 +1,6 @@
 /*
  * Castello Reverb
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const kVersion = '1.0.1';
+const kVersion = '1.1.0';
 
 const kParameterMix        = 0;
 const kParameterSize       = 1;
@@ -57,13 +57,13 @@ class CastelloReverbUI extends DISTRHO.UI {
         // Setting up resize handle needs calling async methods
 
         (async () => {
-            const w = await this.getInitialWidth(),
-                  h = await this.getInitialHeight();
-            
+            const w = await this.getInitWidth(),
+                  h = await this.getInitHeight();
+
             resize.opt.minWidth = w;
             resize.opt.minHeight = h;
 
-            this.sizeChanged(w, h); // WKGTKRESIZEBUG
+            this.sizeChanged(w, h);
 
             document.body.style.visibility = 'visible';
         }) ();
@@ -96,12 +96,10 @@ class CastelloReverbUI extends DISTRHO.UI {
     }
 
     /* It is not currently possible to rely on vh/vw/vmin/vmax units on Linux
-       due to the GTK web view implementation on such platform. Viewport
-       dimensions are fixed to large values to workaround issue with tag
-       WKGTKRESIZEBUG. Bug does not apply when opting for the CEF web view. */
+       due to the GTK web view implementation on such platform */
 
     sizeChanged(width, height) {
-        if (DISTRHO.quirks.brokenCSSViewportUnits) {
+        if (DISTRHO.env.noCSSViewportUnits) {
             height /= window.devicePixelRatio;
             
             document.querySelectorAll('g-knob').forEach(((el) => {

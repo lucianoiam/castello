@@ -1,6 +1,6 @@
 /*
  * Guinda - Audio widgets for web views
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,9 +239,9 @@ class RangeInputWidget extends InputWidget {
 
     static get _attrOptDescriptor() {
         return super._attrOptDescriptor.concat([
-            { key: 'min'  , parser: ValueParser.float, default: 0                   },
-            { key: 'max'  , parser: ValueParser.float, default: 1                   },
-            { key: 'scale', parser: ValueParser.scale, default: ValueScale.identity }
+            { key: 'min'  , parser: ValueParser.float, default: 0                 },
+            { key: 'max'  , parser: ValueParser.float, default: 1                 },
+            { key: 'scale', parser: ValueParser.scale, default: ValueScale.linear }
         ]);
     }
 
@@ -280,7 +280,7 @@ class RangeInputWidget extends InputWidget {
     }
 
     get _valueScale() {
-        return this.opt.scale || ValueScale.identity;
+        return this.opt.scale || ValueScale.linear;
     }
 
     /**
@@ -438,15 +438,6 @@ function ControlTrait(opt) {
  */
 
 const ValueScale = {
-
-    identity: {
-        normalize: (val, min, max) => {
-            return val;
-        },
-        denormalize: (val, min, max) => {
-            return val;
-        }
-    },
 
     linear: {
         normalize: (val, min, max) => {
