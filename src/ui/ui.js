@@ -29,36 +29,29 @@ class CastelloReverbUI extends DISTRHO.UI {
 
         document.getElementById('version').innerText = kVersion;
 
-        // Connect knobs
-
         const formatAsPercentage = (value) => `${Math.ceil(100 * value)}%`;
 
         this._knobMix = document.querySelector('#p-mix g-knob');
-        this._connect(this._knobMix, kParameterMix, formatAsPercentage);
-        
         this._knobSize = document.querySelector('#p-size g-knob');
-        this._connect(this._knobSize, kParameterSize, formatAsPercentage);
-
         this._knobBrightness = document.querySelector('#p-brightness g-knob');
-        this._connect(this._knobBrightness, kParameterBrightness, formatAsPercentage);
 
-        // Connect resize handle
+        this._connect(this._knobMix, kParameterMix, formatAsPercentage);        
+        this._connect(this._knobSize, kParameterSize, formatAsPercentage);
+        this._connect(this._knobBrightness, kParameterBrightness, formatAsPercentage);
 
         const resize = document.querySelector('g-resize');
 
         resize.addEventListener('input', (ev) => {
             const k = window.devicePixelRatio;
-            const width = ev.value.width * k;
-            const height = ev.value.height * k; 
+            const width = k * ev.value.width;
+            const height = k * ev.value.height; 
             this.setSize(width, height);
             this.setState('ui_size', `${width}x${height}`);
         });
 
-        // Setting up resize handle needs calling async methods
-
         (async () => {
-            const w = await this.getInitWidth(),  // CSS pixels
-                  h = await this.getInitHeight();
+            const w = await this.getInitWidthCSS(),
+                  h = await this.getInitHeightCSS();
 
             resize.opt.minWidth = w;
             resize.opt.minHeight = h;
@@ -80,8 +73,6 @@ class CastelloReverbUI extends DISTRHO.UI {
     }
 
     parameterChanged(index, value) {
-        // Host informs a parameter has changed, update its associated widget.
-
         switch (index) {
             case kParameterMix:
                 this._knobMix.value = value;
@@ -99,13 +90,11 @@ class CastelloReverbUI extends DISTRHO.UI {
         this._sizeChanged();
     }
 
-    /* It is not currently possible to rely on vh/vw/vmin/vmax units on Linux
-       due to the GTK web view implementation on such platform */
-
     _sizeChanged() {
-        if (DISTRHO.env.noCSSViewportUnits) {
+        if (DISTRHO.env.noCSSViewportUnits) { // Linux GTK web view
             document.querySelectorAll('g-knob').forEach(((el) => {
-                el.style.height = (0.3/*30vh*/ * document.body.clientHeight) + 'px';
+                const _30vh = (0.3 * document.body.clientHeight) + 'px';
+                el.style.height = _30vh;
                 el.style.width = el.style.height;
             }));
         }
