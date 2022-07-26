@@ -19,6 +19,10 @@ HIPHOP_PROJECT_VERSION = 2
 
 HIPHOP_INJECT_FRAMEWORK_JS = true
 
+# Enable ARM and Intel fat binary for macOS
+
+HIPHOP_MACOS_UNIVERSAL = true
+
 # --------------------------------------------------------------
 # Support macOS down to High Sierra
 
