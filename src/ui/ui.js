@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const kVersion = '1.1.0';
+const kVersion = '1.2.0';
 
 const kParameterMix        = 0;
 const kParameterSize       = 1;
@@ -91,7 +91,7 @@ class CastelloReverbUI extends DISTRHO.UI {
     }
 
     _sizeChanged() {
-        if (DISTRHO.env.noCSSViewportUnits) { // Linux GTK web view
+        if (DISTRHO.env.fakeViewport) { // Linux GTK web view
             document.querySelectorAll('g-knob').forEach(((el) => {
                 const _30vh = (0.3 * document.body.clientHeight) + 'px';
                 el.style.height = _30vh;

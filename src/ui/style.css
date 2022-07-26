@@ -28,11 +28,11 @@ body {
 g-knob {
     width: 30vh;
     height: 30vh;
-    --circle-color: #272727;
-    --dot-off-color: #ffffff;
-    --dot-on-color: #ffffff;
-    --track-color: #777777;
+    --body-color: #272727;
+    --range-color: #777777;
     --value-color: #ff2020;
+    --pointer-off-color: #ffffff;
+    --pointer-on-color: #ffffff;
 }
 
 g-resize {
