@@ -15,9 +15,9 @@
  */
 
 /**
-   Make room for growing the UI when running on the Linux GTK web view
+   Allow to resize the UI when running on the Linux GTK web view
  */
-#define HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND 1
+#define HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT 1
 
 /**
    The plugin name.@n
