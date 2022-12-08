@@ -5,7 +5,7 @@ Reverb plugin based on algorithm from Csound
 
 ### Features
 
-* VST 2 and VST 3 plugin formats
+* CLAP, VST 3 and VST 2 plugin formats
 * Linux, Mac and Windows
 
 This plugin was created with the following tools:

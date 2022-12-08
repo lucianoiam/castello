@@ -12,7 +12,7 @@ NAME = CastelloReverb
 # --------------------------------------------------------------
 # Project version, used for generating unique symbol names
 
-HIPHOP_PROJECT_VERSION = 2
+HIPHOP_PROJECT_VERSION = 3
 
 # --------------------------------------------------------------
 # Automatically inject dpf.js
@@ -52,7 +52,11 @@ include hiphop/Makefile.plugins.mk
 # --------------------------------------------------------------
 # Enable all possible plugin types
 
-TARGETS += lv2_sep vst vst3
+ifeq ($(PLUGIN_FORMAT),)
+TARGETS += lv2_sep clap vst3 vst
+else
+TARGETS += $(PLUGIN_FORMAT)
+endif
 
 LXHELPER_CPPFLAGS += -Isrc
 BASE_FLAGS += -Isrc
