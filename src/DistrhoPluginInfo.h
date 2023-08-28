@@ -45,6 +45,21 @@
 #define DISTRHO_PLUGIN_URI "https://lucianoiam.com/castello-reverb"
 
 /**
+   Custom LV2 category for the plugin.@n
+*/
+#define DISTRHO_PLUGIN_LV2_CATEGORY "lv2:ReverbPlugin"
+
+/**
+   Custom VST3 categories for the plugin.@n
+*/
+#define DISTRHO_PLUGIN_VST3_CATEGORIES "Fx|Reverb"
+
+/**
+   Custom CLAP features for the plugin.@n
+*/
+#define DISTRHO_PLUGIN_CLAP_FEATURES "audio-effect", "reverb", "stereo"
+
+/**
    The plugin id when exporting in CLAP format, in reverse URI form.
    @note This macro is required when building CLAP plugins
 */
