@@ -17,7 +17,7 @@
 /**
    Allow to resize the UI when running on the Linux GTK web view
  */
-#define HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT 1
+#define DPF_WEBUI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT 1
 
 /**
    The plugin name.@n

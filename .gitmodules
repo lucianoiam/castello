@@ -1,3 +1,3 @@
-[submodule "hiphop"]
-	path = hiphop
-	url = https://github.com/lucianoiam/hiphop
+[submodule "dpfwebui"]
+	path = dpfwebui
+	url = https://github.com/lucianoiam/dpfwebui

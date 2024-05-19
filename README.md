@@ -11,7 +11,7 @@ Reverb plugin based on algorithm from Csound
 This plugin was created with the following tools:
 
 - [DISTRHO Plugin Framework](https://github.com/DISTRHO/DPF) (DPF) multiplatform audio plugins framework
-- [Hip-Hop](https://github.com/lucianoiam/hiphop) web view user interface support for DPF plugins
+- [Hip-Hop](https://github.com/lucianoiam/dpfwebui) web view user interface support for DPF plugins
 - [Guinda](https://github.com/lucianoiam/guinda) audio widgets library for web views
 
 Details on the DSP algorithm can be found [here](http://www.csounds.com/manual/html/reverbsc.html).
